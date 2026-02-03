@@ -1,0 +1,396 @@
+# PIP-3 Project Configuration – Snake Enchanter
+Version: 1.0 · Date: 21.01.2026 · Author: Julian
+
+> Single source of truth for the PIP-3 game project.  
+> Scope: Only information necessary to develop, document, and deliver the project.
+
+---
+
+## 1. Administrative Frame
+
+- **School / Module:** SRH Fachschulen – Praxisprojekte IT & Medien (PIP-3) [file:1]
+- **Theme:** **Thema B – Eigenständiges 2D- oder 3D-Spiel mit klarer Kernmechanik** [file:1]
+- **Student:** Julian
+- **Team:** Solo (Einzelarbeit) [file:1]
+- **Project Title:** *Snake Enchanter – Ruin Escape*
+- **Project Period:** 21.01.2026 – 27.02.2026 [file:1]
+- **Working Time:** According to timetable PIP-GME24, Mo–Fr, 8:30–15:30 [file:1]
+
+### 1.1 Theme B – Implications
+
+From the PIP-3 brief: [file:1]
+
+- Focus on **one clear core mechanic** (gameplay & feel, not content size).
+- Deliver a **playable, closed prototype** (Start → Play → End).
+- Must have **clear win and loss conditions** and understandable rules.
+- Implementation as **2D or 3D game in Unity**.
+- **Store game/round statistics** in a database, via **HTTP + JSON** API.
+- Code must be **structured and clean** (project organization is graded).
+- Implement at least **one Wahlinhalt**:
+  - Chosen: **„Verschiedene Level oder Modi – mind. 3 Level bzw. 2 Modi“** → fulfilled via **2 modes**. [file:1]
+
+---
+
+## 2. High-Level Concept
+
+### 2.1 Elevator Pitch
+
+> The player is an adventurer trapped inside a collapsed ancient ruin. Venomous snakes block the only escape – a distant window. By playing magical melodies via simple button-hold inputs, the player commands snakes to move, sleep, or attack each other, opening a safe path. Wrong tunes provoke attacks and cost hearts. Two modes (Simple and Advanced) offer increasing challenge using the same level.
+
+### 2.2 Core Fantasy & Theme
+
+- Player fantasy: **musical snake charmer / adventurer**, not a fighter.
+- Environment: **ancient ruins**, partially collapsed, with visible exit window.
+- Central tension: **“Do I dare cast this tune on this snake here, now?”**
+- Tone: mysterious, tense, but not horror; readability and clarity over gore.
+
+### 2.3 Target Audience
+
+- **USK 16** orientation, but broadly accessible. [file:1]
+- No genre-specific prior knowledge required (simple, teachable control scheme). [file:1]
+- Typical session: **5–8 minutes** per run.
+
+---
+
+## 3. Game Structure
+
+### 3.1 Modes (Wahlinhalt)
+
+Chosen Wahlinhalt: **„Verschiedene Level oder Modi – mind. 3 Level bzw. 2 Modi“ → 2 modes.** [file:1]
+
+- **Mode 1 – Simple Escape**
+  - All 3 core tunes available from start.
+  - No global timer.
+  - Snakes move and attack more slowly.
+  - Objective: Reach window exit with ≥1 heart.
+
+- **Mode 2 – Advanced Escape**
+  - Start with same 3 core tunes.
+  - Hidden scroll mid-level unlocks **4th tune** (optional, higher reward).
+  - Global collapse timer (approx. 8 minutes) **[MAY CHANGE]**.
+  - Snakes patrol faster, react quicker to mistakes.
+  - Objective:
+    - Base: Reach window exit before time runs out with ≥1 heart.
+    - Bonus: Discover and use the 4th tune at least once (extra stats/score).
+
+> Design Note: Exact timer value, snake speeds, and 4th tune behavior may change during balancing. **[MAY CHANGE]**
+
+### 3.2 Core Loop
+
+Per session (run):
+
+1. Main menu → choose **Simple** or **Advanced**.
+2. Short intro: camera shows trapped adventurer and distant window.
+3. Player explores ruins, encounters snakes blocking passages.
+4. Player uses **tunes** to command snakes:
+   - **Correct tune:** snake obeys (move/sleep/attack other).
+   - **Wrong tune:** snake counter-attacks → lose 1 heart.
+5. Player navigates multiple “puzzle pockets” of snakes.
+6. Run ends when:
+   - Window exit reached (success), OR
+   - Hearts reach 0 (death), OR
+   - Timer hits 0 in Advanced (collapse).
+7. End screen shows stats → stats sent to backend via HTTP/JSON.
+
+---
+
+## 4. Core Mechanics
+
+### 4.1 Player Abilities
+
+- **Movement:**
+  - Free 3D movement using **WASD**.
+  - **Mouse** controls camera orientation.
+- **Camera:**
+  - **Third-person follow** camera behind/above player.
+  - Uses Cinemachine or similar for smoothing **[IMPLEMENTATION DETAIL LATER]**.
+- **Interaction Radius:**
+  - Tunes only affect snakes within a defined range and line-of-sight **[MAY CHANGE]**.
+
+### 4.2 Tune System (Kernmechanik)
+
+Simplified “rhythm” as **button-hold melodies** (no full rhythm detection).
+
+- **Input model:**
+  - Tune 1: Hold `1` for ~1 second.
+  - Tune 2: Hold `2` for ~1 second.
+  - Tune 3: Hold `3` for ~1 second.
+  - Tune 4 (Advanced): Hold `4` for ~1 second (unlocked by scroll).
+
+- **Tune Effects (planned):**
+  - **Tune 1 – Move Command**
+    - Target snake moves to a safe target position (no longer blocking path).
+  - **Tune 2 – Sleep Command**
+    - Snake coils up, becomes passive, collision reduced/removed so player can pass.
+  - **Tune 3 – Attack Command**
+    - Snake lunges at nearest other snake; may remove both from play.
+  - **Tune 4 – „Freeze All“ (working name)** **[MAY CHANGE]**
+    - Temporarily freezes all snakes in an area (no movement/attacks).
+
+- **Failure Handling:**
+  - Wrong tune on a snake, or tune in wrong context:
+    - Snake plays “angry” animation, attacks, player loses 1 heart.
+    - Visual feedback: red flash, aggressive animation, distinctive SFX.
+
+> Design Note: Exact mapping of tunes to snake types/states may be simplified further for clarity. **[MAY CHANGE]**
+
+### 4.3 Health & Failure
+
+- **Hearts/Lives:**  
+  - Player has **3 hearts**.
+  - 1 hit (snake bite or relevant hazard) = lose 1 heart.
+  - At 0 hearts: immediate death → fail state.
+
+- **Damage Sources:**
+  - Wrong tune used on snake.
+  - Contact with aggressive snakes.
+  - Optional: falling debris / environmental damage **[MAY CHANGE]**.
+
+### 4.4 Win / Lose Conditions
+
+- **Win (both modes):**
+  - Reach **window exit** trigger with ≥1 heart.
+
+- **Lose:**
+  - Hearts reach 0 in any mode.
+  - Advanced mode: global timer reaches 0 (ruin collapses).
+
+---
+
+## 5. World & Level Design
+
+### 5.1 Setting
+
+- Environment: **interior of ancient stone ruin/temple**, partially collapsed.
+- Visual motifs:
+  - Broken pillars, collapsed walls, rubble piles.
+  - Narrow corridors opening into small chambers.
+  - Light shafts from above, strong light at window exit.
+
+### 5.2 Level Structure
+
+Single handcrafted level used by both modes (rules & parameters differ).
+
+Rough progression:
+
+1. **Start Area – Safe & Tutorial**
+   - Learn movement and camera.
+   - First snake with low risk introduces **Move** tune.
+
+2. **Area 1 – Basic Blockade**
+   - One or two snakes blocking linear path.
+   - Use Move or Sleep to pass.
+
+3. **Area 2 – Mixed Threats**
+   - Combination of blocking and patrolling snakes.
+   - Encourages choosing between Move/Sleep, optionally Attack.
+
+4. **Area 3 – Aggressive Corridor**
+   - Aggressive snake patrolling narrow hallway.
+   - Timing + proper tune usage required.
+
+5. **Area 4 – Hidden Alcove (Advanced Only)**
+   - Side path with mild puzzle; reward: scroll unlocking **Tune 4**.
+   - Optional for Simple Mode (may be closed off entirely) **[MAY CHANGE]**.
+
+6. **Area 5 – Finale by the Window**
+   - More complex arrangement of 3+ snakes.
+   - Requires combination of previously learned tunes.
+   - Strong visual of exit window with bright light.
+
+> Concrete positions, counts and puzzles will be defined and iterated in level blockout and reflected in GDD v2. **[MAY CHANGE]**
+
+---
+
+## 6. Controls & UX
+
+### 6.1 Input
+
+- Move: `W`, `A`, `S`, `D`
+- Camera: mouse move
+- Tunes:
+  - Tune 1: hold `1`
+  - Tune 2: hold `2`
+  - Tune 3: hold `3`
+  - Tune 4 (Advanced): hold `4` (after unlock)
+- Interact (scroll, prompts): `E` **[MAY CHANGE]**
+
+### 6.2 HUD & Feedback
+
+- **HUD Elements:**
+  - Hearts (3) at top-left.
+  - Mode indicator (Simple / Advanced) at top.
+  - Advanced: countdown timer at top-center.
+  - Optional icon row showing 3–4 tunes with names and status (locked/unlocked).
+
+- **Tune Feedback:**
+  - When holding tune key:
+    - Small progress circle/bar near player.
+    - Musical note particles.
+    - Corresponding short audio melody plays.
+
+- **Snake Feedback:**
+  - Success: colored glow, smooth behavior transition (move/sleep/attack).
+  - Failure: red flash, threatening animation, hiss SFX.
+
+- **End Screen:**
+  - Display:
+    - Mode
+    - Success/failure
+    - Completion time
+    - Number of snakes successfully commanded (or objectives count)
+    - Hearts remaining
+    - Fourth tune unlocked (yes/no)
+  - Buttons: Retry, Back to Menu.
+
+---
+
+## 7. Technical & Data
+
+### 7.1 Engine & Platform
+
+- **Engine:** Unity 3D. [file:1]
+- **Target Platform:** Windows, classroom laptops; 60 FPS at 1920×1080, ultrawide support. [file:1]
+- **Version Control:** Git + GitHub; clean commit history is graded. [file:1]
+- **Trailer:** MP4, at least 1920×1080. [file:1]
+
+### 7.2 Database & API
+
+Theme-wide mandatory requirements: database + HTTP/JSON + CRUD. [file:1]
+
+**Stats per session (game run):**
+
+- `sessionId` – UUID
+- `completionTime` – int (seconds)
+- `objectivesCompleted` – int (e.g., snakes successfully commanded / required events)
+- `attempts` – int (cumulative attempts for this player/session)
+- `modeType` – `"simple"` or `"advanced"`
+- `success` – bool
+- `timestamp` – datetime (ISO 8601)
+- `fourthTuneUnlocked` – bool (Advanced only)
+- `heartsRemaining` – int (0–3)
+
+**Planned API endpoints:**
+
+- `POST /api/game-session`  
+  - Purpose: store stats after each run.
+- `GET /api/leaderboard?mode=simple`  
+  - Purpose: retrieve top Simple-mode sessions.
+- `GET /api/leaderboard?mode=advanced`  
+  - Purpose: retrieve top Advanced-mode sessions.
+- `GET /api/player-stats`  
+  - Purpose: get aggregate stats for display.
+
+> Endpoint naming and exact parameters may be adjusted based on backend environment and teacher expectations. **[MAY CHANGE]**
+
+---
+
+## 8. Assets & Media
+
+### 8.1 Visual Assets
+
+- **Snakes:**  
+  - Toon Snakes Pack (Unity Asset Store) – 3D animated snakes used as all snake entities.
+
+- **Environment:**  
+  - Ruin/temple assets (low-poly), or ProBuilder blockout with stone materials.
+  - Props: pillars, rubble, broken walls.
+
+- **Player:**  
+  - Simple adventurer character with basic movement animations.
+  - Early prototype may use capsule placeholder.
+
+> Exact environment packs and player model may change depending on performance, budget, and time. **[MAY CHANGE]**
+
+### 8.2 Audio
+
+- **Music:**
+  - Ambient ruin background track(s), likely generated with Suno.ai or similar, license-checked. [file:1]
+  - Optional tension layer activated in Advanced mode as timer runs low.
+
+- **Sound Effects:**
+  - 3–4 distinct flute melodies (one per tune).
+  - Snake hiss and attack sounds.
+  - Environmental ambience (dripping water, distant rumble).
+  - UI feedback (success/fail, clicks).
+
+- All music and SFX must be **license-free or appropriately licensed** and **credited in documentation**. [file:1]
+
+---
+
+## 9. Management & Standards
+
+### 9.1 Milestones (from PIP-3 brief)
+
+- **21.01–26.01.2026:** Conception phase; GDD work. [file:1]
+- **27.01.2026:** Digital submission **GDD v1** (graded). [file:1]
+- **27.01–14.02.2026:** Implementation. [file:1]
+- **04.02.2026:** 5-min progress presentation (graded). [file:1]
+- **11.02.2026:** Digital submission **GDD v2** + making-of footage (graded). [file:1]
+- **17.02.2026:** Debug/Polish phase. [file:1]
+- **18.02.2026:** 5-min progress presentation (graded). [file:1]
+- **27.02.2026:** Final project submission + 15-min presentation. [file:1]
+
+### 9.2 Deliverables (per PIP-3)
+
+- GDD (as evolving document; v1 + v2 + final). [file:1]
+- Projektplan (project plan, PDF). [file:1]
+- Arbeitsprotokoll (daily log per participant, PDF). [file:1]
+- Playable prototype (Unity build) with README. [file:1]
+- Trailer (MP4, HD). [file:1]
+- ZIP package with defined folder structure (Konzeption, Arbeitsdateien, Anwendung, Website if any, Trailer, Projektplan, Arbeitsprotokolle). [file:1]
+
+### 9.3 Personal Standards (From Showroom_Tango & Communication Docs)
+
+- **Component-First methodology**:  
+  - Create/organize GameObjects and components before writing scripts. [file:3]
+- **Mechanic-First priority**:  
+  - Implement and validate core gameplay loop before polishing or additional features. [file:6]
+- **95% certainty rule**:  
+  - Designs and decisions should be made with high confidence; unclear areas explicitly marked **[MAY CHANGE]**. [file:3]
+- **Academic attribution**:  
+  - Code files must include headers stating [HUMAN-AUTHORED] vs. [AI-ASSISTED]. [file:3]
+- **Risk management**:  
+  - Use risk matrix patterns from `03.Risk_Matrix.txt` (e.g., identify snake AI, camera, backend as key risks, define mitigations). [file:4]
+
+---
+
+## 10. Change Log & Open Points
+
+### 10.1 Major Decisions (Already Changed Once)
+
+- Perspective: from initial **2D side-view** → **3D third-person** (to leverage Toon Snakes Pack and better spatial puzzle).  
+- Visual style: from **pixel art** → **low-poly 3D**.  
+- Mechanic: from potential full rhythm game → simplified **button-hold tune commands**.
+
+These are now considered **locked** unless severe feasibility issues appear.
+
+### 10.2 Expected Change Areas
+
+Marked **[MAY CHANGE]** above; main categories:
+
+- Exact tune effects and where they are allowed.
+- Exact snake types and state machine complexity.
+- Detailed level layout (number/size of areas, snake counts).
+- Timer duration and pacing of Advanced mode.
+- Additional environmental hazards (if any).
+- API endpoint naming and extended stats.
+
+Any significant change should be reflected here and in GDD v2.
+
+---
+
+## 11. Next Steps (For Any Future Session / Model)
+
+When resuming work (with Perplexity, Claude, or others):
+
+1. **Load this file** and the current GDD version.
+2. Start by:
+   - Checking which milestone is upcoming (from §9.1).
+   - Verifying current implementation state against this config.
+3. Focus initial assistance on:
+   - Unity setup & third-person controller (if not done).
+   - Core tune → snake reaction prototype.
+   - GDD updates for the next submission.
+4. Keep this config file as **stable reference**, updating only when major design or requirement changes are decided.
+

@@ -1,0 +1,477 @@
+Snake Enchanter – GDD v1.0 (Draft)
+Version: 1.0 (Grobkonzept) – This document will evolve during development. Sections marked [MAY CHANGE] are expected to be refined or adapted.
+
+1. Project Frame
+1.1 Academic Context
+Thema: B – Eigenständiges 2D- oder 3D-Spiel mit klarer Kernmechanik
+​
+
+Engine: Unity (3D)
+​
+
+Platform: Windows, school laptops, stable 60 FPS, 1920x1080 + ultrawide support
+​
+
+Team: Solo
+
+Duration: 21.01.2026 – 27.02.2026
+​
+
+Implications of Theme B:
+
+Focus on one clear core mechanic (no feature soup).
+​
+
+Deliver a playable, completed prototype with clear win and loss conditions.
+​
+
+At least one full gameplay loop: Start → Play → End.
+​
+
+Game/round statistics stored in a database via HTTP/JSON API.
+​
+
+Structured code and clean project organization expected and graded.
+​
+
+Implement one Wahlinhalt: here: “Verschiedene Modi – mind. 2 Modi” (Simple & Advanced mode).
+​
+
+2. High-Level Concept
+2.1 Elevator Pitch
+In Snake Enchanter, the player is an adventurer trapped in a collapsed ancient ruin and must use magical melodies to command snakes blocking the only escape: a distant window. Playing the correct tune makes snakes move, sleep, or attack each other, opening a path; mistakes provoke attacks and cost hearts. The player must reach the exit with limited lives – and, in Advanced mode, master an additional tune discovered mid-level.
+
+2.2 Core Fantasy
+You are not a warrior; your power is music.
+
+The ruins are unstable; snakes are both danger and tool.
+
+You rehearse melodies and then apply them tactically to survive.
+
+2.3 Target Audience
+Age 16+, casual-to-mid-core players, no specific genre experience required.
+​
+
+Should understand goal and controls within 30–60 seconds.
+
+2.4 Project Goals (Theme B Alignment)
+Deliver a clear, understandable core mechanic (snake command via melodies).
+​
+
+Provide a short, replayable experience (5–8 minutes per run).
+
+Implement two modes (Simple, Advanced) from same core level and systems.
+​
+
+Integrate database-backed stats to reflect player performance across runs.
+​
+
+Support a highly readable, trailer-friendly experience for presentation and Gamescom context.
+​
+
+3. Game Structure
+3.1 Game Loop
+Global loop:
+
+Main Menu → Mode selection (Simple / Advanced).
+
+Brief intro (camera + on-screen hints).
+
+Core gameplay: move through ruin, charm snakes, avoid damage.
+
+Reach window (win) or lose all hearts (lose) or (Advanced) time runs out.
+
+Show result screen (stats) + send stats to backend.
+
+Option: Restart same mode or return to menu.
+
+3.2 Session Length
+Target: 5–8 minutes per run (both modes).
+
+Balanced to allow several attempts in a classroom session.
+
+3.3 Modes (Wahlinhalt – 2 Modi)
+Mode 1 – Simple Escape
+
+All 3 core tunes available from start.
+
+No global timer.
+
+Snakes slower and less aggressive.
+
+Objective: Reach the window with ≥1 heart.
+
+Mode 2 – Advanced Escape
+
+All 3 core tunes from start.
+
+Hidden scroll unlocks 4th tune mid-level (optional but rewarded).
+
+Global collapse timer (e.g., 8 minutes) counts down.
+
+Snakes patrol faster and react quicker.
+
+Objective:
+
+Base: Reach the window before time runs out and with ≥1 heart.
+
+Bonus: Unlock 4th tune and use it at least once (for higher score/achievement).
+
+[MAY CHANGE]
+
+Exact timer duration and aggression values will be tuned during playtesting.
+
+4th tune effect may be simplified or changed if too complex to communicate.
+
+
+
+4. Core Gameplay & Mechanics
+4.1 Player Abilities
+Movement:
+
+Free 3D movement using WASD.
+
+Mouse controls camera orientation (third-person follow camera).
+
+View:
+
+Third-person follow camera behind/above the character.
+
+Interaction:
+
+Trigger tune casting when inside a defined “command range” of a target snake.
+
+Simple interaction prompts (e.g., “Hold 1 to cast Move Tune”).
+
+4.2 Tune System (Kernmechanik)
+Concept:
+Each tune is mapped to a single key; holding the key for ~1 second plays a short melody and triggers a specific snake behavior, if the snake is in range and receptive.
+
+Tunes (Mode 1 & 2):
+
+Tune 1 – Move Command
+
+Input: Hold Key 1.
+
+Effect: Targeted snake moves to a predefined safe position (e.g., away from path).
+
+Primary use: Clear blocking snakes to open passage.
+
+Tune 2 – Sleep Command
+
+Input: Hold Key 2.
+
+Effect: Snake coils up, becomes passive, collision reduced or removed so player can pass.
+
+Primary use: Make aggressive snakes safe to walk past.
+
+Tune 3 – Attack Command
+
+Input: Hold Key 3.
+
+Effect: Target snake lunges at the nearest other snake, potentially removing both as threats.
+
+Primary use: Manage groups of snakes without passing through them.
+
+Advanced Mode – Additional Tune:
+
+Tune 4 – [Working Name: “Freeze All”] [MAY CHANGE]
+
+Input: Hold Key 4 (unlocked by scroll).
+
+Effect: Temporarily freezes all snakes in a radius (stops movement, disables attacks).
+
+Primary use: High-impact panic button in advanced puzzles.
+
+Failure Feedback:
+
+If the wrong tune is used on a snake (or used in the wrong context):
+
+Snake attacks: Player loses 1 heart.
+
+Clear visual + audio feedback (e.g., red flash, hiss, sharp sound).
+
+[MAY CHANGE]
+
+Exact mapping of tunes to effects and required snake states may be simplified further if teaching cost is too high in early playtests.
+
+4.3 Health & Failure
+Health System:
+
+Player has 3 hearts.
+
+Taking damage (snake bite, potentially environmental hazards) removes one heart.
+
+At 0 hearts, the player dies and the run ends (lose screen).
+
+Damage Sources:
+
+Wrong tune on snake → counter-attack.
+
+Touching aggressive snakes.
+
+Optional: Environmental damage (falling debris) [MAY CHANGE].
+
+4.4 Win & Lose Conditions
+Win (both modes):
+
+Reach the window exit trigger with ≥1 heart.
+
+Advanced mode: Optionally with 4th tune unlocked for a better score/rating.
+
+Lose (both modes):
+
+Health reaches 0 hearts.
+
+Advanced mode: Timer reaches 0 (ruin collapse).
+
+5. World, Level & Progression
+5.1 Setting & Tone
+Setting:
+
+Interior of an ancient ruined temple or fortress, partially collapsed.
+
+Environment: stone corridors, broken pillars, fallen debris, dim light shafts from above.
+
+Tone:
+
+Mysterious, slightly tense but not horror.
+
+Focus on cleverness and control rather than panic.
+
+5.2 Level Structure
+Single handcrafted level reused for both modes, with variation through rules (timer, aggression, optional tune).
+
+Rough Area Flow:
+
+Start Area – Tutorial
+
+Safe entry zone.
+
+Introduces movement and camera.
+
+Teaches tune 1 (Move) with a simple, low-risk puzzle.
+
+Area 1 – Simple Blockade
+
+1–2 snakes blocking the path.
+
+Player uses Move or Sleep tunes to clear path.
+
+Area 2 – Mixed Behavior
+
+Combination of blocking and patrolling snakes.
+
+Requires decisions between Move and Sleep.
+
+Maybe one optional use of Attack to remove extra risk.
+
+Area 3 – Aggressive Encounter
+
+An aggressive snake patrolling a narrow corridor.
+
+Encourages use of Sleep or Attack tunes under pressure.
+
+Area 4 – Hidden Alcove (Advanced Only)
+
+Optional side path containing scroll unlocking Tune 4.
+
+Accessible only if player solves a small positioning puzzle.
+
+Area 5 – Finale
+
+3+ snakes in a layered layout near the window.
+
+Intended to require combined usage of all tunes.
+
+Highly visible exit with light beam.
+
+[MAY CHANGE]
+
+Number of areas and specific snake placements will be refined during level iteration.
+
+Advanced mode might adjust snake layouts slightly if necessary.
+
+6. Controls & UX
+6.1 Controls (Keyboard & Mouse)
+Movement: WASD
+
+Camera: Mouse move (third-person orbit/follow)
+
+Tunes:
+
+Tune 1: Key 1
+
+Tune 2: Key 2
+
+Tune 3: Key 3
+
+Tune 4 (Advanced): Key 4 (after unlock)
+
+Interaction / Confirm: E (if needed, e.g., to read scroll)
+
+6.2 UI Elements
+Main HUD:
+
+Hearts (3 icons) at top-left.
+
+Current mode label (“Simple Escape” / “Advanced Escape”).
+
+Advanced mode: Timer at top-center.
+
+Tune Feedback:
+
+On screen: small icons or text labels for each tune (1–4) with short description (e.g., Move, Sleep, Attack, Freeze).
+
+When holding tune key:
+
+Progress circle or bar indicating casting time.
+
+Musical note particles.
+
+Snake Feedback:
+
+Visual VFX when a tune affects a snake (color tint, glow, animation).
+
+Clear difference between success (green/blue effect) and failure (red flash).
+
+Result Screen:
+
+Show:
+
+Mode
+
+Completion time
+
+Snakes successfully commanded
+
+Hearts remaining
+
+Fourth tune unlocked? (Advanced)
+
+Success / failure
+
+"Retry" and "Main Menu" buttons.
+
+7. Technical & Data
+7.1 Engine & Performance
+Unity 3D project.
+
+Third-person character controller (custom or based on starter assets).
+
+Target: 60 FPS on school laptops, minimal overdraw and complex shaders.
+
+7.2 Data & Backend Requirements
+As required for all themes (DB + HTTP/JSON).
+​
+
+Session Data Stored per Run:
+
+sessionId (UUID)
+
+completionTime (int, seconds)
+
+objectivesCompleted (int, snakes successfully commanded or key events completed)
+
+attempts (int, total attempts by this player/session – simple counter)
+
+modeType (string: "simple" or "advanced")
+
+success (bool: true if reached exit, false otherwise)
+
+timestamp (datetime, ISO 8601)
+
+fourthTuneUnlocked (bool, advanced mode only)
+
+heartsRemaining (int, 0–3)
+
+API Expectations:
+
+POST /api/game-session – store session stats (JSON body).
+
+GET /api/leaderboard?mode=simple – top results for simple mode.
+
+GET /api/leaderboard?mode=advanced – top results for advanced mode.
+
+[MAY CHANGE]
+
+Exact endpoint naming and additional stats may be extended depending on backend constraints or teacher feedback.
+
+8. Assets & Audio
+8.1 Visual Assets
+Snakes: Toon Snakes Pack (Unity Asset Store) – 3D animated snakes used for all snake entities.
+
+Environment:
+
+Ruin/temple modular assets or ProBuilder-based geometry.
+
+Stone materials, rubble, simple props (pillars, broken walls).
+
+Player:
+
+Simple adventurer model (3D, biped), ideally with walk/run animation.
+
+Fallback: Capsule with basic animation for early prototype.
+
+[MAY CHANGE]
+
+Exact environment asset packs may be swapped based on performance and style.
+
+8.2 Audio
+Music:
+
+Ambient ruins background track (generated with Suno.ai or similar).
+
+Optional tension layer in Advanced mode (added when timer < X minutes).
+
+Sound Effects:
+
+Flute melodies for each tune (4 unique audio clips).
+
+Snake hiss/attack sounds.
+
+Stone crumble ambient SFX.
+
+UI sounds (success chime, error beep, button clicks).
+
+All audio must be free/licensed for use and properly credited.
+​
+
+9. Risks & Open Questions
+9.1 Design Risks
+Teaching cost:
+
+3–4 tunes plus health and mode differences could overwhelm players.
+
+Mitigation: Very gentle tutorial ramp and clear on-screen prompts.
+
+Complexity of snake behaviors:
+
+Multi-state snakes (idle, blocking, patrolling, aggressive, charmed) can be complex to debug.
+
+Mitigation: Start with minimal states and build up only if needed.
+
+9.2 Open Questions / [MAY CHANGE]
+Should some tunes only work on specific snake types (e.g., Attack only on aggressive snakes)?
+
+Should 4th tune be mandatory for Advanced win, or only a bonus?
+
+Do we need additional environmental hazards to create more variety, or are snakes alone enough?
+
+These will be answered during early playtests and GDD v2 iteration.
+
+10. Summary for Development
+Theme B Requirements Check:
+​
+
+✔ Eigenständiges Spiel mit klarer Kernmechanik (tune-based snake control).
+
+✔ Vollständiger Gameplay-Loop (Start → Navigate → Command → Reach window / Fail).
+
+✔ Klare Ziel- & Verlustbedingungen (window exit vs 3-heart loss / timer).
+
+✔ Speicherung von Spiel- / Runden-Statistiken in einer Datenbank (defined schema + endpoints).
+
+✔ Strukturierter Code & saubere Projektorganisation (enforced by your coding standards docs).
+
+✔ Wahlinhalt: Verschiedene Modi (2 Modi erfüllt).

@@ -1,0 +1,616 @@
+Snake Enchanter – GDD v1.1
+Version: 1.1 – Updated 27.01.2026 11:53 CET
+This document evolves during development. Sections marked [MAY CHANGE] are expected to be refined or adapted.
+[MAJOR UPDATE v1.1: Health system completely revised - see Section 4.3]
+
+====================================================================
+
+1. Project Frame
+
+1.1 Academic Context
+
+Theme: B – Eigenständiges 2D- oder 3D-Spiel mit klarer Kernmechanik
+
+Engine: Unity (3D)
+
+Platform: Windows, school laptops, stable 60 FPS, 1920×1080 + ultrawide support
+
+Team: Solo
+
+Duration: 21.01.2026 – 27.02.2026
+
+Implications of Theme B:
+• Focus on one clear core mechanic (no feature soup).
+• Deliver a playable, completed prototype with clear win and loss conditions.
+• At least one full gameplay loop: Start → Play → End.
+• Game/round statistics stored in a database via HTTP/JSON API.
+• Structured code and clean project organization expected and graded.
+• Implement one Wahlinhalt: here: "Verschiedene Modi – mind. 2 Modi" (Simple & Advanced mode).
+
+====================================================================
+
+2. High-Level Concept
+
+2.1 Elevator Pitch
+
+In Snake Enchanter, the player is a wounded adventurer trapped in a collapsed ancient ruin, racing against their own failing health to escape. Using magical melodies played through simple button-holds, the player commands snakes to move, sleep, or attack other enemies, opening a path to the only exit: a distant window. Each successful tune restores a small amount of health, rewarding skillful play, while mistakes provoke vicious bites that drain life rapidly. Time is the enemy—health depletes continuously as the player weakens, and in Advanced mode, a dynamic collapse timer adapts to health levels, creating mounting pressure.
+
+2.2 Core Fantasy
+
+You are not a warrior; your power is music.
+
+The ruins are unstable; snakes are both danger and tool.
+
+You are injured and weakening—every second counts.
+
+Skillful charm extends your survival; mistakes are costly.
+
+2.3 Target Audience
+
+Age 16+, casual-to-mid-core players, no specific genre experience required.
+
+Should understand goal and controls within 30–60 seconds.
+
+2.4 Project Goals (Theme B Alignment)
+
+• Deliver a clear, understandable core mechanic (snake command via melodies).
+• Provide a short, replayable experience (5–8 minutes per run).
+• Implement two modes (Simple, Advanced) from same core level and systems.
+• Integrate database-backed stats to reflect player performance across runs.
+• Support a highly readable, trailer-friendly experience for presentation and Gamescom context.
+
+====================================================================
+
+3. Game Structure
+
+3.1 Game Loop
+
+Global loop:
+1. Main Menu → Mode selection (Simple / Advanced).
+2. Brief intro (camera + on-screen hints).
+3. Core gameplay: move through ruin, charm snakes, manage health depletion.
+4. Health management:
+   a. Health drains passively over time (wounded MC)
+   b. Successful tune casts restore +5 HP (motivational boost)
+   c. Snake attacks deal -25 HP damage
+5. Reach window (win) or health reaches 0 (lose) or (Advanced) dynamic timer expires.
+6. Show result screen (stats) + send stats to backend.
+7. Option: Restart same mode or return to menu.
+
+3.2 Session Length
+
+Target: 5–8 minutes per run (both modes).
+
+Balanced to allow several attempts in a classroom session.
+
+Health drain rates calibrated to this target duration.
+
+3.3 Modes (Wahlinhalt – 2 Modi)
+
+Mode 1 – Simple Escape
+
+• All 3 core tunes available from start.
+• Slower passive health drain (~0.83 HP/second).
+• Snakes slower and less aggressive.
+• No additional timer pressure.
+• Objective: Reach the window with HP > 0.
+
+Mode 2 – Advanced Escape
+
+• All 3 core tunes from start.
+• Hidden scroll unlocks 4th tune mid-level (optional but rewarded).
+• Faster passive health drain (~0.95 HP/second, 15% faster than Simple).
+• Dynamic collapse timer linked to HP percentage (more health = more time).
+• Snakes patrol faster and react quicker.
+• Objective:
+  - Base: Reach the window before timer expires and with HP > 0.
+  - Bonus: Unlock 4th tune and use it at least once (for higher score/achievement).
+
+[MAY CHANGE]
+Exact drain rates, timer formula, and aggression values will be tuned during playtesting.
+4th tune effect may be simplified or changed if too complex to communicate.
+
+====================================================================
+
+4. Core Gameplay & Mechanics
+
+4.1 Player Abilities
+
+Movement:
+• Free 3D movement using WASD.
+• Mouse controls camera orientation (third-person follow camera).
+
+View:
+• Third-person follow camera behind/above the character.
+
+Interaction:
+• Trigger tune casting when inside a defined "command range" of a target snake.
+• Simple interaction prompts (e.g., "Hold 1 to cast Move Tune").
+
+4.2 Tune System (Kernmechanik)
+
+Concept:
+Each tune is mapped to a single key; holding the key for ~1 second plays a short melody and triggers a specific snake behavior, if the snake is in range and receptive.
+
+[NEW v1.1] Health Restoration Mechanic:
+• Each successful tune cast restores +5 HP (subject to balancing, may increase to +10 HP).
+• Encourages active engagement over passive waiting.
+• Balances passive health drain.
+• Provides positive feedback loop for skilled players.
+• Visual feedback: small green glow/particles on player, "+5" floating text.
+• Audio feedback: uplifting chime.
+
+Tunes (Mode 1 & 2):
+
+Tune 1 – Move Command
+• Input: Hold Key 1.
+• Effect: Targeted snake moves to a predefined safe position (e.g., away from path).
+• Primary use: Clear blocking snakes to open passage.
+• On success: Snake moves smoothly, +5 HP restored to player.
+
+Tune 2 – Sleep Command
+• Input: Hold Key 2.
+• Effect: Snake coils up, becomes passive, collision reduced or removed so player can pass.
+• Primary use: Make aggressive snakes safe to walk past.
+• On success: Snake sleeps peacefully, +5 HP restored to player.
+
+Tune 3 – Attack Command
+• Input: Hold Key 3.
+• Effect: Target snake lunges at the nearest other snake, potentially removing both as threats.
+• Primary use: Manage groups of snakes without passing through them.
+• On success: Snake attacks target, +5 HP restored to player.
+
+Advanced Mode – Additional Tune:
+
+Tune 4 – [Working Name: "Freeze All"] [MAY CHANGE]
+• Input: Hold Key 4 (unlocked by scroll).
+• Effect: Temporarily freezes all snakes in a radius (stops movement, disables attacks).
+• Primary use: High-impact panic button in advanced puzzles.
+• On success: All nearby snakes freeze, +5 HP restored to player.
+
+Failure Feedback:
+
+If the wrong tune is used on a snake (or used in the wrong context):
+• Snake plays aggressive animation and executes bite attack.
+• Player takes -25 HP instant damage.
+• Visual feedback: red flash, screen shake, "-25" floating damage text, red particle burst.
+• Audio feedback: sharp hiss, impact sound, optional pain voice clip.
+
+[MAY CHANGE]
+Exact mapping of tunes to effects and required snake states may be simplified further if teaching cost is too high in early playtests.
+Restoration amount (+5 HP vs +10 HP) subject to Week 4 balancing.
+
+--------------------------------------------------------------------
+
+4.3 Health & Failure [MAJOR UPDATE v1.1]
+
+[NEW v1.1] Health System Overview:
+
+The player character is wounded and attempting to escape. Health is a continuous value that depletes over time, representing the character's weakening condition. Successful snake charming provides brief respites (health restoration), while snake attacks and passive drain create constant pressure.
+
+Health Value:
+• Continuous HP value: 0–100 (floating-point).
+• Starting HP: 30/100 (player begins injured).
+• Display: Health bar UI with numeric value (e.g., "30/100").
+• Color gradient: Green (healthy) → Yellow (wounded) → Red (critical).
+
+Passive Health Drain:
+
+Health decreases continuously during gameplay, representing the wounded MC weakening over time.
+
+Simple Mode:
+• Drain rate: ~0.83 HP/second.
+• Allows approximately 6 minutes of survival time with perfect play (30 HP ÷ 0.083 + restoration).
+
+Advanced Mode:
+• Drain rate: ~0.95 HP/second (15% faster than Simple).
+• Creates urgency; approximately 5 minutes target completion time.
+
+[MAY CHANGE] Exact drain rates will be tuned during Week 4 playtesting to achieve desired difficulty curve.
+
+Health Restoration (Motivational Boost):
+
++5 HP per successful tune cast:
+• Triggers when player correctly charms a snake with appropriate tune.
+• Visual: small green particle burst, "+5" floating text.
+• Audio: positive chime.
+• Purpose: Rewards skillful play, extends survival time, creates skill-based time extension.
+
+Optional checkpoint bonuses:
+• +15 HP when clearing major area/checkpoint (if implemented).
+• Provides milestones and pacing for longer sections.
+
+Maximum HP cap:
+• Player cannot exceed 100 HP through restoration.
+
+[MAY CHANGE] Restoration amount may increase to +10 HP if playtesting shows +5 is insufficient to balance drain.
+
+Snake Attack Damage:
+
+Bite Attack (Primary): -25 HP instant damage
+• Triggered by:
+  1. Using wrong tune on a snake.
+  2. Collision with aggressive or patrolling snake.
+• Animation: Snake lunge/bite (supported by Toon Snakes Pack asset).
+• Visual feedback: red flash, screen shake, "-25" floating damage text, red particle burst from impact.
+• Audio feedback: hiss, bite impact sound, optional player pain sound.
+
+Poisonous Fog Attack (Optional): -5 HP/second continuous damage
+• Status: NOT included in Toon Snakes Pack; requires custom Unity Particle System + trigger collider.
+• Implementation: Area-of-effect fog zone with continuous damage while player remains inside.
+• Visual: green/purple particle fog with poison VFX.
+• Priority: OPTIONAL—implement only if time permits after core systems (Week 4+).
+
+[MAY CHANGE] Bite damage value (-25 HP) subject to balancing. Poison fog may be postponed or cut if time constraints.
+
+Death Condition:
+
+• HP ≤ 0 → immediate game over.
+• Triggers lose screen with stats.
+• Session data sent to backend.
+
+UI Feedback – Low Health Warnings:
+
+• At 50% HP (50/100): Health bar shifts to yellow.
+• At 25% HP (25/100): Health bar turns red + pulsing effect.
+• At 10% HP (10/100): Red vignette appears at screen edges + heartbeat audio loop.
+
+Purpose: Clear communication of danger state without obscuring gameplay.
+
+--------------------------------------------------------------------
+
+4.4 Win & Lose Conditions
+
+Win (both modes):
+• Reach the window exit trigger with HP > 0.
+• Advanced mode: Bonus rating/score if 4th tune unlocked and used.
+
+Lose (both modes):
+• Health reaches 0 (from passive drain + snake attacks).
+
+Advanced Mode Additional Pressure:
+• Dynamic collapse timer linked to HP percentage.
+• Formula: Time remaining = (Current HP / Max HP) × Base Time Multiplier.
+• Example scaling:
+  - At 100 HP: Full time buffer (e.g., 10 minutes).
+  - At 50 HP: Half buffer (5 minutes).
+  - At 10 HP: Critical timer (1 minute).
+• Creates escalating tension as health depletes.
+• If timer reaches 0: ruin collapses → lose condition.
+
+[MAY CHANGE] Advanced mode timer formula and base multiplier subject to balancing. Alternative simpler approach: remove separate timer, rely solely on 15% faster drain.
+
+====================================================================
+
+5. World, Level & Progression
+
+5.1 Setting & Tone
+
+Setting:
+• Interior of an ancient ruined temple or fortress, partially collapsed.
+• Environment: stone corridors, broken pillars, fallen debris, dim light shafts from above.
+
+Tone:
+• Mysterious, slightly tense but not horror.
+• Focus on cleverness and control rather than panic.
+• Narrative emphasis: wounded protagonist racing against failing health.
+
+5.2 Level Structure
+
+Single handcrafted level reused for both modes, with variation through rules (drain rate, timer, aggression, optional tune).
+
+Rough Area Flow:
+
+Start Area – Tutorial
+• Safe entry zone.
+• Introduces movement and camera.
+• Teaches tune 1 (Move) with a simple, low-risk puzzle.
+• Low snake threat; player can experiment safely.
+
+Area 1 – Simple Blockade
+• 1–2 snakes blocking the path.
+• Player uses Move or Sleep tunes to clear path.
+• First opportunity to practice health restoration mechanic.
+
+Area 2 – Mixed Behavior
+• Combination of blocking and patrolling snakes.
+• Requires decisions between Move and Sleep.
+• Maybe one optional use of Attack to remove extra risk.
+• Health management becomes relevant.
+
+Area 3 – Aggressive Encounter
+• An aggressive snake patrolling a narrow corridor.
+• Encourages use of Sleep or Attack tunes under pressure.
+• Mistakes costly (-25 HP); rewards careful play.
+
+Area 4 – Hidden Alcove (Advanced Only)
+• Optional side path containing scroll unlocking Tune 4.
+• Accessible only if player solves a small positioning puzzle.
+• Risk vs. reward: extra time/health spent for powerful tool.
+
+Area 5 – Finale
+• 3+ snakes in a layered layout near the window.
+• Intended to require combined usage of all tunes.
+• Highly visible exit with light beam.
+• Final push—health management critical.
+
+[MAY CHANGE]
+Number of areas and specific snake placements will be refined during level iteration.
+Advanced mode might adjust snake layouts slightly if necessary.
+Checkpoint healing (+15 HP) may be added between areas if playtesting shows excessive difficulty.
+
+====================================================================
+
+6. Controls & UX
+
+6.1 Controls (Keyboard & Mouse)
+
+Movement: WASD
+Camera: Mouse move (third-person orbit/follow)
+Tunes:
+• Tune 1: Hold Key 1
+• Tune 2: Hold Key 2
+• Tune 3: Hold Key 3
+• Tune 4 (Advanced): Hold Key 4 (after unlock)
+Interaction / Confirm: E (if needed, e.g., to read scroll)
+
+6.2 UI Elements [UPDATED v1.1]
+
+Main HUD:
+
+[NEW v1.1] Health Bar (replaces heart icons):
+• Location: Top-center or top-left.
+• Elements:
+  - Background bar (dark red/gray).
+  - Foreground fill with color gradient:
+    * Green (100–50 HP).
+    * Yellow (50–25 HP).
+    * Red (25–0 HP).
+  - Numeric display: "30 / 100".
+  - Smooth continuous depletion animation reflecting passive drain.
+• Visual warnings:
+  - At 50% HP: Yellow color shift.
+  - At 25% HP: Red + pulsing effect.
+  - At 10% HP: Red vignette at screen edges + heartbeat audio.
+
+Current mode label: "Simple Escape" / "Advanced Escape".
+
+Advanced mode: Dynamic timer at top-center (if using HP-linked timer).
+
+Tune Feedback:
+
+On screen: small icons or text labels for each tune (1–4) with short description (e.g., Move, Sleep, Attack, Freeze).
+
+When holding tune key:
+• Progress circle or bar indicating casting time.
+• Musical note particles.
+• Corresponding audio melody plays.
+
+Snake Feedback:
+
+Visual VFX when a tune affects a snake:
+• Success: colored glow (green/blue), smooth behavior transition, snake obeys.
+• Failure: red flash, aggressive animation, snake lunges to bite.
+
+Clear difference between success and failure states.
+
+[NEW v1.1] Health Restoration Feedback:
+• Small "+5" floating text at player position (green).
+• Green particle burst around player.
+• Brief health bar flash (positive green glow).
+• Uplifting sound effect.
+
+[NEW v1.1] Damage Feedback:
+• Large "-25" floating text at impact point (red).
+• Red particle burst from bite location.
+• Screen shake (mild, 0.1–0.2 second).
+• Health bar flash (red).
+• Impact sound + hiss.
+• Optional: brief player pain voice clip.
+
+Result Screen:
+
+Show:
+• Mode
+• Success / Failure
+• Completion time
+• Snakes successfully commanded
+• Starting HP: 30
+• Ending HP: [value]
+• Total damage taken
+• Total HP restored
+• Successful tune casts
+• Failed tune casts
+• Fourth tune unlocked? (Advanced)
+
+Buttons: "Retry" and "Main Menu".
+
+====================================================================
+
+7. Technical & Data
+
+7.1 Engine & Performance
+
+Unity 3D project.
+
+Third-person character controller (custom or based on starter assets).
+
+Target: 60 FPS on school laptops, minimal overdraw and complex shaders.
+
+7.2 Data & Backend Requirements [UPDATED v1.1]
+
+As required for all themes (DB + HTTP/JSON).
+
+Session Data Stored per Run:
+
+{
+  "sessionId": "UUID",
+  "modeType": "simple" | "advanced",
+  "success": boolean,
+  "completionTime": int (seconds),
+  "startingHP": 30,
+  "endingHP": int (0–100),
+  "totalDamageTaken": int,
+  "totalHPRestored": int,
+  "successfulTuneCasts": int,
+  "failedTuneCasts": int,
+  "snakeBiteCount": int,
+  "objectivesCompleted": int (snakes successfully commanded or key events),
+  "fourthTuneUnlocked": boolean (advanced mode only),
+  "timestamp": "ISO 8601 datetime"
+}
+
+API Expectations:
+
+POST /api/game-session – store session stats (JSON body).
+GET /api/leaderboard?mode=simple – top results for simple mode.
+GET /api/leaderboard?mode=advanced – top results for advanced mode.
+GET /api/player-stats – aggregate stats for display (optional).
+
+[MAY CHANGE]
+Exact endpoint naming and additional stats may be extended depending on backend constraints or teacher feedback.
+
+====================================================================
+
+8. Assets & Audio
+
+8.1 Visual Assets
+
+Snakes: Toon Snakes Pack (Unity Asset Store) – 3D animated snakes used for all snake entities.
+• Package: Snake Toon Series by Meshtint Studio ($6.90).
+• Models: Toon Cobra (288 tris), Toon Snake (248 tris).
+• Textures: Hand-painted, 3 color variants.
+• Confirmed animations: Idle, Move, Attack (Bite), Hit, Die.
+• Unity version: 2021.3.15+.
+
+Environment:
+• Ruin/temple modular assets or ProBuilder-based geometry.
+• Stone materials, rubble, simple props (pillars, broken walls).
+
+Player:
+• Simple adventurer model (3D, biped), ideally with walk/run animation.
+• Fallback: Capsule with basic animation for early prototype.
+
+[MAY CHANGE]
+Exact environment asset packs may be swapped based on performance and style.
+
+8.2 Audio
+
+Music:
+• Ambient ruins background track (generated with Suno.ai or similar).
+• Optional tension layer in Advanced mode (activated as HP drops or timer shortens).
+
+Sound Effects:
+• Flute melodies for each tune (4 unique audio clips, ~1 second each).
+• Snake sounds:
+  - Hiss (ambient, aggressive warning).
+  - Bite impact.
+  - Death sound.
+• Player sounds:
+  - Pain/grunt (optional, on taking damage).
+  - Breathing (low health warning audio).
+• Environmental:
+  - Stone crumble ambient SFX.
+  - Distant rumble (collapse threat in Advanced).
+• UI sounds:
+  - Success chime (tune cast successful + HP restore).
+  - Failure beep (wrong tune).
+  - Button clicks.
+  - Heartbeat loop (low HP warning).
+
+All audio must be free/licensed for use and properly credited.
+
+====================================================================
+
+9. Risks & Open Questions
+
+9.1 Design Risks
+
+Teaching cost:
+• 3–4 tunes plus health drain/restoration and mode differences could overwhelm players.
+• Mitigation: Very gentle tutorial ramp, clear on-screen prompts, low-risk early areas.
+
+Complexity of snake behaviors:
+• Multi-state snakes (idle, blocking, patrolling, aggressive, charmed) can be complex to debug.
+• Mitigation: Start with minimal states and build up only if needed.
+
+[NEW v1.1] Passive drain feeling oppressive:
+• Continuous HP loss may frustrate rather than motivate players.
+• Mitigation: Generous +5 HP restoration every ~15-30 seconds with good play; drain rates calibrated to allow skilled completion with HP to spare (target: 40–60 HP remaining on win).
+
+[NEW v1.1] Balancing drain + restoration + attack damage:
+• Three-variable balance equation is complex and fragile.
+• Mitigation: Extensive playtesting Week 4, all values configurable via inspector, implement debug UI for real-time adjustment.
+
+9.2 Open Questions / [MAY CHANGE]
+
+Should some tunes only work on specific snake types (e.g., Attack only on aggressive snakes)?
+
+Should 4th tune be mandatory for Advanced win, or only a bonus?
+
+Do we need additional environmental hazards to create more variety, or are snakes alone enough?
+
+[NEW v1.1] Should restoration amount be +5 HP or +10 HP?
+• Depends on drain rate tuning and desired difficulty.
+• To be decided during Week 4 balancing.
+
+[NEW v1.1] Should Advanced mode use dynamic HP-linked timer or just rely on faster drain?
+• Dynamic timer: More complex, greater tension escalation.
+• Faster drain only: Simpler to implement and communicate.
+• To be decided before GDD v2.0 (Feb 11 deadline).
+
+[NEW v1.1] Should poison fog be implemented, or focus solely on bite attacks?
+• Poison fog requires custom particle system + scripting (not in Toon Snakes Pack).
+• Recommendation: Implement bite attacks first (Week 3), add fog only if time permits (Week 4+).
+
+These will be answered during early playtests and GDD v2.0 iteration.
+
+====================================================================
+
+10. Summary for Development
+
+Theme B Requirements Check:
+
+✔ Eigenständiges Spiel mit klarer Kernmechanik (tune-based snake control + health management).
+✔ Vollständiger Gameplay-Loop (Start → Navigate → Command → Manage health → Reach window / Fail).
+✔ Klare Ziel- & Verlustbedingungen (window exit with HP > 0 vs. HP = 0 / timer expiry).
+✔ Speicherung von Spiel- / Runden-Statistiken in einer Datenbank (defined schema + endpoints, expanded for HP tracking).
+✔ Strukturierter Code & saubere Projektorganisation (enforced by coding standards).
+✔ Wahlinhalt: Verschiedene Modi (2 Modi erfüllt: Simple & Advanced with distinct mechanics).
+
+====================================================================
+
+11. Version History & Change Log
+
+Version 1.0 (21.01.2026 – 26.01.2026):
+• Initial draft GDD (Grobkonzept).
+• Health system: 3 discrete hearts, damage only on wrong tune.
+• No restoration mechanic.
+• Timer: Fixed 8 minutes in Advanced mode.
+
+Version 1.1 (27.01.2026):
+• [MAJOR UPDATE] Health system completely revised (Section 4.3):
+  - Changed from 3 discrete hearts to continuous 0–100 HP system.
+  - Player starts at 30/100 HP (injured narrative).
+  - Added passive health drain over time (Simple: ~0.83 HP/s, Advanced: ~0.95 HP/s).
+  - Added health restoration on successful tune cast (+5 HP, subject to balancing).
+  - Snake attacks now deal -25 HP instant damage (bite).
+  - Optional poison fog: -5 HP/second (custom implementation required).
+• Updated Section 3.1 (Game Loop) to reflect health management beats.
+• Updated Section 4.2 (Tune System) to document restoration mechanic.
+• Updated Section 6.2 (UI Elements) to replace heart icons with health bar.
+• Updated Section 7.2 (Database Schema) to track HP values and damage/restoration stats.
+• Updated Section 2.1 (Elevator Pitch) to emphasize health management narrative.
+• Updated Section 8.1 (Visual Assets) with Toon Snakes Pack verified details.
+• Updated Section 9 (Risks) to address new health system balance challenges.
+• Advanced mode timer changed to dynamic HP-linked formula (subject to final decision).
+
+Next version (v2.0, due 11.02.2026):
+• Will reflect implementation learnings and playtesting results.
+• All [MAY CHANGE] items to be resolved with concrete values.
+• Level layout finalized with specific snake counts and positions.
+• Balance values locked after Week 4 playtesting.
+
+====================================================================
+
+END OF GDD v1.1
