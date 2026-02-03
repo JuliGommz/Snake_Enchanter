@@ -1,0 +1,588 @@
+# Architecture Decisions - Snake Enchanter
+
+**Format**: Architecture Decision Records (ADR)
+**Status**: Living Document
+**Letzte Aktualisierung**: 2026-02-03
+
+---
+
+## ADR-001: State Machine für Snake Behavior
+
+**Status**: ✅ ENTSCHIEDEN
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+
+### Kontext
+Schlangen haben mehrere Zustände (Idle, Alert, Charmed, Sleeping, Attacking).
+Saubere State-Übergänge ohne if-else-Chaos nötig.
+
+### Entscheidung
+**Einfache Enum-basierte State Machine** (keine externen Frameworks).
+
+### Begründung
+
+**PRO Enum State Machine**:
+- Simpel zu implementieren (10 min Setup)
+- Gut lesbar und debuggbar
+- Unity-freundlich (Inspector-sichtbar)
+- Keine externe Dependency
+
+**CONTRA HFSM/Behavior Trees**:
+- Overkill für 3-4 States
+- Längere Setup-Zeit
+- Komplexer zu debuggen
+
+### Implementation
+```csharp
+public enum SnakeState { Idle, Alert, Charmed, Sleeping, Attacking }
+
+public class SnakeBehavior : MonoBehaviour
+{
+    [SerializeField] private SnakeState _currentState = SnakeState.Idle;
+
+    public void SetState(SnakeState newState)
+    {
+        _currentState = newState;
+        OnStateChanged?.Invoke(newState);
+    }
+}
+```
+
+**Status nach Implementation**: [Offen]
+
+---
+
+## ADR-002: ScriptableObjects für Tune-Konfiguration
+
+**Status**: ✅ ENTSCHIEDEN
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+
+### Kontext
+Tunes haben verschiedene Parameter (MinDuration, MaxDuration, Effect, AudioClip).
+Diese sollen einfach anpassbar sein ohne Code-Änderungen.
+
+### Entscheidung
+**ScriptableObjects für alle Tune-Definitionen**.
+
+### Begründung
+
+**Warum ScriptableObjects?**:
+- Designer-freundlich (Inspector-Editing)
+- Keine Code-Änderung für Balancing
+- Einfach erweiterbar (neue Tunes = neue SO)
+- Gut für akademische Dokumentation
+
+**Struktur**:
+```
+Assets/_Project/ScriptableObjects/Tunes/
+├── Tune_Move.asset
+├── Tune_Sleep.asset
+├── Tune_Attack.asset
+└── Tune_Freeze.asset (Advanced Mode)
+```
+
+### Implementation
+```csharp
+[CreateAssetMenu(fileName = "NewTune", menuName = "SnakeEnchanter/TuneConfig")]
+public class TuneConfig : ScriptableObject
+{
+    [Header("Basic Info")]
+    public string tuneName;
+    public int keyNumber; // 1-4
+    public SnakeState resultState;
+
+    [Header("Timing (Hold & Release Slider)")]
+    public float duration;           // Zeit bis Slider am Ende (3-6s)
+    [Range(0f, 1f)]
+    public float triggerZoneStart;   // 0-1 (z.B. 0.4) - Beginn Triggerzone
+    [Range(0f, 1f)]
+    public float triggerZoneEnd;     // 0-1 (z.B. 0.65) - Ende Triggerzone
+
+    [Header("Audio")]
+    public AudioClip melody;
+
+    [Header("Mode Adjustments")]
+    public float simpleModeZoneBonus = 0.1f; // Zone wird größer in Simple Mode
+}
+```
+
+**Status nach Implementation**: [Offen]
+
+---
+
+## ADR-003: Event System für Loose Coupling
+
+**Status**: ✅ ENTSCHIEDEN
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+
+### Kontext
+Systeme kommunizieren miteinander:
+- TuneSystem → SnakeSystem (Tune erfolgreich)
+- HealthSystem → UI (HP geändert)
+- GameManager → Alle (Game Over)
+
+Direkte Referenzen führen zu Spaghetti-Code.
+
+### Entscheidung
+**C# Events + UnityEvents hybrid Ansatz**.
+
+### Begründung
+
+**Warum Events?**:
+- Lose Kopplung (Systeme kennen sich nicht)
+- Einfach testbar
+- Inspector-Anbindung möglich (UnityEvents)
+- Skaliert gut
+
+**Strategie**:
+- **C# Events**: Code-zu-Code Kommunikation
+- **UnityEvents**: Designer kann im Inspector verknüpfen
+
+### Implementation
+```csharp
+// GameEvents.cs - Zentrale Event-Definitionen
+public static class GameEvents
+{
+    public static event Action<int> OnHealthChanged;
+    public static event Action<TuneConfig, bool> OnTuneCompleted; // bool = success
+    public static event Action OnGameOver;
+    public static event Action OnGameWin;
+
+    public static void HealthChanged(int newHealth) => OnHealthChanged?.Invoke(newHealth);
+    public static void TuneCompleted(TuneConfig tune, bool success) => OnTuneCompleted?.Invoke(tune, success);
+}
+```
+
+**Status nach Implementation**: [Offen]
+
+---
+
+## ADR-004: CharacterController für Player Movement
+
+**Status**: ✅ ENTSCHIEDEN
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+
+### Kontext
+Player-Bewegung: Rigidbody vs CharacterController?
+
+### Entscheidung
+**CharacterController** für Player-Movement.
+
+### Begründung
+
+**PRO CharacterController**:
+- Built-in Ground Detection
+- Slope Handling automatisch
+- Gravity-Control einfacher
+- Keine Physics-Interaktion-Bugs
+
+**CONTRA Rigidbody**:
+- Mehr Setup für Ground Check
+- Physics-Interaktionen können stören
+- Weniger vorhersagbar
+
+### Konsequenzen
+
+**Positiv**:
+- Stabiles Movement
+- Eingebaute Kollision
+
+**Negativ**:
+- Keine physikalische Interaktion mit anderen Objekten
+- Muss Gravity selbst handhaben
+
+### Implementation
+```csharp
+public class PlayerController : MonoBehaviour
+{
+    [SerializeField] private float _moveSpeed = 5f;
+    [SerializeField] private float _gravity = -9.81f;
+
+    private CharacterController _controller;
+    private Vector3 _velocity;
+
+    void Update()
+    {
+        // Gravity
+        if (_controller.isGrounded && _velocity.y < 0)
+            _velocity.y = -2f;
+
+        _velocity.y += _gravity * Time.deltaTime;
+        _controller.Move(_velocity * Time.deltaTime);
+    }
+}
+```
+
+**Status nach Implementation**: [Offen]
+
+---
+
+## ADR-005: Object Pooling für Particles/VFX
+
+**Status**: ✅ ENTSCHIEDEN
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+
+### Kontext
+Tune-Erfolg/Fail, Snake-Effekte, UI-Feedback benötigen Particle-Effekte.
+Instantiate/Destroy = GC Spikes.
+
+### Entscheidung
+**Simples Object Pooling für wiederholte Effekte** (Phase 3).
+
+### Begründung
+
+**Priorität**: Phase 3 (Schön)
+- Phase 1-2: Einfaches Instantiate OK für Prototyping
+- Phase 3: Pooling implementieren wenn VFX hinzugefügt wird
+
+**Warum nicht sofort?**:
+- Overhead für wenige Effekte nicht nötig
+- Phase 1 = Greybox, keine Particles
+
+### Pool-Größen (geschätzt)
+- Tune Success Particles: 10
+- Tune Fail Particles: 10
+- Snake Charm Effect: 5
+
+**Status nach Implementation**: [Offen - Phase 3]
+
+---
+
+## ADR-006: Unity New Input System
+
+**Status**: ✅ ENTSCHIEDEN + ⚠️ PROJEKT-REGEL
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+
+### Kontext
+Player-Input: Legacy (Input.GetKey) vs New Input System?
+
+### Entscheidung
+**AUSSCHLIESSLICH New Input System verwenden.**
+
+### ⚠️ NICHT VERHANDELBARE REGEL
+```
+NIEMALS Legacy Input verwenden!
+- VERBOTEN: Input.GetKey(), Input.GetAxis(), Input.GetButton()
+- VERBOTEN: UnityEngine.Input.*
+- ERLAUBT: UnityEngine.InputSystem.*
+
+Project Settings → Player → Active Input Handling = "Input System Package (New)"
+```
+
+### Begründung
+
+**Warum New Input System?**:
+- Modern, zukunftssicher
+- Action-basiert (nicht polling)
+- Einfaches Rebinding (Bonus Feature möglich)
+- Besser strukturierter Code
+- **Projekt-Regel**: Konsistenz über gesamtes Projekt
+
+**Input Actions**:
+```
+Assets/_Project/Data/SnakeEnchanter.inputactions
+├── Player Map:
+│   ├── Move (Vector2, WASD)
+│   ├── Look (Vector2, Mouse Delta)
+│   ├── Tune1 (Button, Key 1) - started/canceled
+│   ├── Tune2 (Button, Key 2) - started/canceled
+│   ├── Tune3 (Button, Key 3) - started/canceled
+│   ├── Tune4 (Button, Key 4) - started/canceled
+│   └── Pause (Button, Escape)
+├── UI Map:
+│   ├── Navigate, Submit, Cancel
+```
+
+### Implementation Pattern
+```csharp
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class ExampleController : MonoBehaviour
+{
+    [SerializeField] private InputActionAsset _inputActions;
+
+    private InputAction _moveAction;
+    private InputAction _tuneAction;
+
+    void Awake()
+    {
+        var playerMap = _inputActions.FindActionMap("Player");
+        _moveAction = playerMap.FindAction("Move");
+        _tuneAction = playerMap.FindAction("Tune1");
+    }
+
+    void OnEnable()
+    {
+        _moveAction.Enable();
+        _tuneAction.Enable();
+        _tuneAction.started += OnTuneStarted;
+        _tuneAction.canceled += OnTuneCanceled;
+    }
+
+    void OnDisable()
+    {
+        _tuneAction.started -= OnTuneStarted;
+        _tuneAction.canceled -= OnTuneCanceled;
+        _moveAction.Disable();
+        _tuneAction.Disable();
+    }
+
+    void Update()
+    {
+        Vector2 input = _moveAction.ReadValue<Vector2>();
+        // Movement...
+    }
+
+    void OnTuneStarted(InputAction.CallbackContext ctx) { /* Key Down */ }
+    void OnTuneCanceled(InputAction.CallbackContext ctx) { /* Key Up */ }
+}
+```
+
+**Status nach Implementation**: ✅ IMPLEMENTIERT (v1.2/v2.1)
+
+---
+
+## ADR-007: Namespace-Struktur
+
+**Status**: ✅ ENTSCHIEDEN
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+
+### Kontext
+Code-Organisation für Übersicht und Vermeidung von Namenskonflikten.
+
+### Entscheidung
+**Strikte Namespace-Hierarchie**.
+
+### Struktur
+```csharp
+SnakeEnchanter.Core        // GameManager, GameState, Events
+SnakeEnchanter.Player      // PlayerController, PlayerHealth
+SnakeEnchanter.Snakes      // SnakeAI, SnakeBehavior, SnakeState
+SnakeEnchanter.Tunes       // TuneController, TimingMeter, TuneConfig
+SnakeEnchanter.UI          // HealthBar, TuneUI, ResultScreen
+SnakeEnchanter.Data        // API, SessionData, Persistence
+```
+
+### Konsequenzen
+
+**Positiv**:
+- Klare Code-Organisation
+- IntelliSense-freundlich
+- Akademisch professionell
+
+**Negativ**:
+- Mehr Typing (`using SnakeEnchanter.Core;`)
+
+**Status nach Implementation**: [Offen]
+
+---
+
+## ADR-008: Timing System Design (Genshin-Style Hold & Release)
+
+**Status**: ✅ FINAL (2026-02-03)
+**Datum**: 2026-02-03
+**Entscheider**: Julian
+**Referenz**: Genshin Impact Cooking Mini-Game
+
+### Kontext
+Kern-Mechanik: Hold & Release Slider - inspiriert von Genshin Impact Cooking.
+- Taste HALTEN = Slider bewegt sich
+- Taste LOSLASSEN = Auswertung
+- Position beim Loslassen bestimmt Ergebnis
+
+### Entscheidung
+**Hold & Release Slider + Trigger Zone System**.
+
+### Implementation-Konzept
+```
+Tune Bar mit Triggerbereich:
+[░░░░░░░░░░░|████████|░░░░░░░░░░░░░░░]
+  Zu früh    TRIGGER    Zu spät
+  (safe)     ZONE       (Angriff!)
+
+Slider bewegt sich solange Taste GEHALTEN:
+[░░░░░░░░░░░|███▼████|░░░░░░░░░░░░░░░]
+                ↑
+         Slider (→ solange gehalten)
+```
+
+### Mechanik
+1. **Taste DRÜCKEN & HALTEN** → Slider startet bei 0, bewegt sich nach rechts
+2. **Slider bewegt sich** solange Taste gehalten wird
+3. **Taste LOSLASSEN** → Slider stoppt, Position wird ausgewertet
+
+### Drei Ergebnisse
+| Loslassen | Position | Ergebnis | Konsequenz |
+|-----------|----------|----------|------------|
+| **Zu früh** | Vor Triggerzone | ❌ FAIL (Safe) | Zurück zu Start, kein Schaden |
+| **Im Bereich** | In Triggerzone | ✅ SUCCESS | Snake charmed, +HP |
+| **Zu spät** | Nach Triggerzone | 💀 FAIL (Danger) | Schlange greift an! Schaden |
+
+### Balancing: Triggerzone-Größe
+| Schwierigkeit | Triggerzone | Anwendung |
+|---------------|-------------|-----------|
+| Tutorial | 35-40% | Erste Schlange, Lernen |
+| Einfach | 25-30% | Area 1 |
+| Mittel | 18-22% | Area 2 |
+| Schwer | 12-15% | Area 3 |
+| Elite | 8-10% | Boss-Schlangen |
+
+### Simple vs Advanced Mode
+**Simple Mode:**
+- Triggerzone +10% größer
+- Langsamerer Slider
+- Mehr Toleranz
+
+**Advanced Mode:**
+- Standard Triggerzonen
+- Schnellerer Slider
+- Weniger Fehlertoleranz
+
+### Code-Konzept
+```csharp
+public class TuneController : MonoBehaviour
+{
+    [SerializeField] private float _sliderPosition = 0f; // 0-1
+    private TuneConfig _activeTune;
+    private bool _isHolding = false;
+
+    void Update()
+    {
+        if (!_isHolding) return;
+
+        // Slider bewegt sich solange Taste gehalten
+        float speed = 1f / _activeTune.duration;
+        _sliderPosition += speed * Time.deltaTime;
+
+        // Slider am Ende = automatisch zu spät (Angriff)
+        if (_sliderPosition >= 1f)
+        {
+            _sliderPosition = 1f;
+            EndTune(TuneResult.TooLate);
+        }
+    }
+
+    // Input System: OnTuneStart (Button Down)
+    void OnTuneStart(TuneConfig tune)
+    {
+        _activeTune = tune;
+        _sliderPosition = 0f;
+        _isHolding = true;
+        // Start Melodie spielen
+    }
+
+    // Input System: OnTuneStop (Button Up)
+    void OnTuneRelease()
+    {
+        if (!_isHolding) return;
+        _isHolding = false;
+
+        TuneResult result = EvaluatePosition(_sliderPosition);
+        EndTune(result);
+    }
+
+    TuneResult EvaluatePosition(float pos)
+    {
+        float zoneStart = _activeTune.triggerZoneStart;
+        float zoneEnd = _activeTune.triggerZoneEnd;
+
+        if (pos < zoneStart)
+            return TuneResult.TooEarly;  // Safe fail
+        if (pos <= zoneEnd)
+            return TuneResult.Success;   // Charmed!
+        return TuneResult.TooLate;       // Angriff!
+    }
+
+    void EndTune(TuneResult result)
+    {
+        switch (result)
+        {
+            case TuneResult.TooEarly:
+                // Melodie stoppt, zurück zu Start
+                // Kein Schaden, Snake bleibt neutral
+                GameEvents.TuneFailed(_activeTune, false);
+                break;
+
+            case TuneResult.Success:
+                // Snake wird charmed
+                // +HP Restoration
+                GameEvents.TuneSuccess(_activeTune);
+                break;
+
+            case TuneResult.TooLate:
+                // Snake greift an!
+                // Player nimmt Schaden
+                GameEvents.TuneFailed(_activeTune, true); // true = attack
+                break;
+        }
+    }
+}
+
+public enum TuneResult { TooEarly, Success, TooLate }
+```
+
+### UI-Visualisierung
+```
+┌─────────────────────────────────────────┐
+│  ♪ MOVE TUNE                     [1]    │
+│                                         │
+│  [░░░░░░░░░░|████████|░░░░░░░░░░░░░░]   │
+│       ▲                                 │
+│    Slider                               │
+│                                         │
+│  HOLD [1] ... Release in green zone!    │
+└─────────────────────────────────────────┘
+
+Farben:
+- Grau links (░): Zu früh - Safe
+- Grün (█): Triggerzone - SUCCESS
+- Rot/Grau rechts (░): Zu spät - DANGER!
+```
+
+### Vorteile
+- **Intuitiv**: Halten & Loslassen ist natürlich
+- **Spannend**: Risiko/Reward - zu lange = Strafe
+- **Skalierbar**: Schwierigkeit über Zone-Größe
+- **Fair**: Zu früh = safe, ermutigt zum Üben
+
+**Status nach Implementation**: [Offen]
+
+---
+
+## Entscheidungs-Log
+
+| ADR | Thema | Status | Phase | Notizen |
+|-----|-------|--------|-------|---------|
+| 001 | Snake State Machine | ENTSCHIEDEN | 1 | Enum-basiert |
+| 002 | ScriptableObjects Tunes | ENTSCHIEDEN | 1 | TuneConfig SO |
+| 003 | Event System | ENTSCHIEDEN | 1 | GameEvents static |
+| 004 | CharacterController | ENTSCHIEDEN | 1 | Für Player |
+| 005 | Object Pooling | ENTSCHIEDEN | 3 | Später |
+| 006 | New Input System | **PROJEKT-REGEL** | 1 | NUR New Input System! |
+| 007 | Namespace-Struktur | ENTSCHIEDEN | 1 | SnakeEnchanter.* |
+| 008 | Timing System | FINAL | 1 | Hold & Release Slider |
+
+**Last Updated**: 2026-02-03 (ADR-006 elevated to PROJEKT-REGEL, ADR-008 updated)
+
+---
+
+## Änderungs-Prozedur
+
+**Neue Entscheidung hinzufügen**:
+1. ADR-Nummer vergeben (fortlaufend)
+2. Template ausfüllen
+3. Kontext/Begründung dokumentieren
+4. Konsequenzen klar benennen
+5. In Log-Tabelle eintragen
+
+**Entscheidung ändern**:
+1. Alten ADR auf Status "⚠️ ÜBERARBEITET" setzen
+2. Neuen ADR mit "Supersedes ADR-XXX" erstellen
+3. Begründung für Change dokumentieren

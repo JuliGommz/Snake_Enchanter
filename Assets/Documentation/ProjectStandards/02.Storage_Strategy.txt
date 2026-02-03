@@ -1,0 +1,144 @@
+# Storage Strategy - Snake Enchanter (Vereinfacht)
+
+**Version**: 2.0 (Snake Enchanter Edition)
+**Purpose**: Dokumentation für AI-Sessions + akademische Abgabe
+**Principle**: Einfach > Komplex | Weniger > Mehr
+
+---
+
+## DOKUMENTATIONS-ÜBERSICHT
+
+### Aktive Dokumente (7)
+
+| Datei | Zweck | Update-Frequenz |
+|-------|-------|-----------------|
+| **STATE.md** | Session-Handoff, aktueller Stand | Bei jedem Milestone |
+| **CLAUDE.md** | Statischer Projektkontext | Selten |
+| **Projektplan** | Task-Tracking Phase 1-4 | Täglich |
+| **Arbeitsprotokoll** | Akademisches Protokoll | Täglich |
+| **GDD** | Game Design Document | Bei Design-Änderungen |
+| **Architecture_Decisions** | ADRs | Bei neuen Entscheidungen |
+| **ProjectStandards/** | Entwicklungsstandards | Selten |
+
+---
+
+## UPDATE-RHYTHMUS
+
+### Täglich (während aktiver Entwicklung)
+```
+1. Arbeitsprotokoll aktualisieren
+   → Aufgaben markieren (geplant/in Bearbeitung/erledigt)
+   → Screenshot machen
+
+2. Git Commit
+   → Mindestens 1 sinnvoller Commit pro Tag
+
+3. STATE.md aktualisieren (bei Session-Ende)
+   → Aktueller Stand
+   → Nächste Aktion
+   → Git Status
+```
+
+### Bei Meilensteinen (Phase-Ende)
+```
+1. Projektplan aktualisieren
+   → Phase als Done markieren
+   → Nächste Phase vorbereiten
+
+2. STATE.md komplett aktualisieren
+   → Fortschritt-Checkboxen
+   → Session History
+
+3. GDD v2 (nach Phase 2)
+   → Design-Änderungen dokumentieren
+```
+
+### Bei neuen Entscheidungen
+```
+1. Architecture_Decisions.txt erweitern
+   → Neues ADR hinzufügen
+   → In Log-Tabelle eintragen
+```
+
+---
+
+## DATEI-STRUKTUR
+
+```
+Snake_Enchanter/
+├── CLAUDE.md                    # AI-Kontext (statisch)
+├── STATE.md                     # Session-Handoff (dynamisch)
+├── Assets/
+│   └── Documentation/
+│       ├── GDD/
+│       │   └── GDD_v1.3.txt    # Game Design
+│       ├── ProjectStandards/    # Diese Ordner
+│       │   ├── 01.Architecture_Decisions.txt
+│       │   ├── 02.Storage_Strategy.txt (diese Datei)
+│       │   ├── 03.Quality_Standards.txt
+│       │   ├── 04.Code_Standards.txt
+│       │   ├── 05.Documentation_Standards.txt
+│       │   ├── 06.Working_Methodology.txt
+│       │   └── 07.Session_Standards.txt
+│       ├── MVP_Phasen.md
+│       ├── Projektplan_SnakeEnchanter.md
+│       └── Arbeitsprotokoll_Julian_Gomez.md
+```
+
+---
+
+## FÜR NEUE SESSION (Quick Reference)
+
+**Lies in dieser Reihenfolge:**
+1. `STATE.md` → Wo sind wir?
+2. `CLAUDE.md` → Was ist das Projekt?
+3. Letzte Commit-Message → Was war der letzte Schritt?
+
+**Das reicht für 90% der Fälle.**
+
+Bei komplexeren Fragen:
+- `Architecture_Decisions.txt` → Warum-Entscheidungen
+- `GDD` → Game Design Details
+- `Projektplan` → Was kommt als Nächstes
+
+---
+
+## ANTI-PATTERNS (Was wir NICHT machen)
+
+❌ Kein komplexes Tier-System
+❌ Keine wöchentlichen/monatlichen Audits
+❌ Keine Master-Index-Datei
+❌ Keine Archive-Ordner für alte Dokumente
+❌ Keine redundanten Informationen
+
+**Warum?** Solo-Projekt, 4 Wochen Zeitraum, kein Overhead nötig.
+
+---
+
+## AKADEMISCHE ABGABE
+
+### Pflicht-Dokumentation
+```
+[ ] Arbeitsprotokoll (täglich geführt)
+[ ] GDD v2 (finalisiert)
+[ ] Präsentation
+[ ] Trailer
+[ ] ZIP mit Build
+```
+
+### Optional (wenn Zeit)
+```
+[ ] Making-of Document
+[ ] Architecture Overview
+[ ] README mit Setup
+```
+
+---
+
+**Status**: Active
+**Review**: Bei Phase-Wechsel
+**Owner**: Session Standards
+
+---
+
+**END OF STORAGE STRATEGY v2.0**
