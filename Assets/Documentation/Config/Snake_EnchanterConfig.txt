@@ -102,8 +102,8 @@ Per session (run):
   - Free 3D movement using **WASD**.
   - **Mouse** controls camera orientation.
 - **Camera:**
-  - **Third-person follow** camera behind/above player.
-  - Uses Cinemachine or similar for smoothing **[IMPLEMENTATION DETAIL LATER]**.
+  - **First-person** camera (mouse look).
+  - Camera attached to player at eye height.
 - **Interaction Radius:**
   - Tunes only affect snakes within a defined range and line-of-sight **[MAY CHANGE]**.
 
@@ -359,7 +359,7 @@ Theme-wide mandatory requirements: database + HTTP/JSON + CRUD. [file:1]
 
 ### 10.1 Major Decisions (Already Changed Once)
 
-- Perspective: from initial **2D side-view** → **3D third-person** (to leverage Toon Snakes Pack and better spatial puzzle).  
+- Perspective: from initial **2D side-view** → **3D first-person** (to leverage Toon Snakes Pack and better spatial puzzle).
 - Visual style: from **pixel art** → **low-poly 3D**.  
 - Mechanic: from potential full rhythm game → simplified **button-hold tune commands**.
 
@@ -389,7 +389,7 @@ When resuming work (with Perplexity, Claude, or others):
    - Checking which milestone is upcoming (from §9.1).
    - Verifying current implementation state against this config.
 3. Focus initial assistance on:
-   - Unity setup & third-person controller (if not done).
+   - Unity setup & first-person controller (if not done).
    - Core tune → snake reaction prototype.
    - GDD updates for the next submission.
 4. Keep this config file as **stable reference**, updating only when major design or requirement changes are decided.

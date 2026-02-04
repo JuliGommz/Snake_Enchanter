@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 1.2 - NEW INPUT SYSTEM
+* Version: 1.5 - HIERARCHY CAMERA
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -26,16 +26,19 @@
 * - Unity New Input System (InputSystem package)
 * - SnakeEnchanter.inputactions asset
 
-* NOTES:
-* - Phase 1 implementation - basic movement
-* - First-person perspective (v1.1)
-* - Camera offset adjustable for head height
-* - v1.2: Migrated to New Input System (project rule)
+* SETUP:
+* 1. Camera must be a CHILD of the Player GameObject in Hierarchy
+* 2. Position the Camera in Scene View (Transform) — no code needed
+* 3. Assign the Camera reference in Inspector
+* 4. Script handles: rotation, movement, crouch — NOT camera position
 
 * VERSION HISTORY:
 * - v1.0: Initial with Legacy Input
 * - v1.1: First-Person camera
 * - v1.2: New Input System only
+* - v1.3: Crouch system (hold LeftCtrl)
+* - v1.4: Live camera offset (removed — caused override issues)
+* - v1.5: Camera position via Hierarchy only, script never overrides
 ====================================================================
 */
 
@@ -46,7 +49,8 @@ namespace SnakeEnchanter.Player
 {
     /// <summary>
     /// Controls player movement using CharacterController with first-person camera.
-    /// Uses New Input System for WASD movement and mouse look.
+    /// Camera must be a child of the Player in the Hierarchy.
+    /// Position the camera freely via Transform — this script only handles rotation.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public class PlayerController : MonoBehaviour
@@ -55,17 +59,22 @@ namespace SnakeEnchanter.Player
         [Header("Movement")]
         [SerializeField] private float _moveSpeed = 5f;
         [SerializeField] private float _gravity = -9.81f;
-        [SerializeField] private float _groundCheckDistance = 0.1f;
+
+        [Header("Crouch")]
+        [SerializeField] private float _crouchHeight = 1.0f;
+        [SerializeField] private float _crouchSpeed = 2.5f;
+        [SerializeField] private float _crouchTransitionSpeed = 8f;
         #endregion
 
         #region Camera Settings
         [Header("Camera - First Person")]
+        [Tooltip("Assign the Camera that is a CHILD of this Player in the Hierarchy.")]
         [SerializeField] private Camera _playerCamera;
-        [Tooltip("Height offset for camera (eye level)")]
-        [SerializeField] private float _cameraHeight = 1.6f;
         [SerializeField] private float _mouseSensitivity = 0.1f;
-        [SerializeField] private float _minPitch = -80f;
-        [SerializeField] private float _maxPitch = 80f;
+        [Tooltip("How far the player can look down (negative = down). Best practice: -70 to -80.")]
+        [SerializeField] private float _minPitch = -70f;
+        [Tooltip("How far the player can look up (positive = up). Best practice: 70 to 80.")]
+        [SerializeField] private float _maxPitch = 70f;
         #endregion
 
         #region Input Settings
@@ -82,8 +91,16 @@ namespace SnakeEnchanter.Player
         // Input System
         private InputAction _moveAction;
         private InputAction _lookAction;
+        private InputAction _crouchAction;
         private Vector2 _moveInput;
         private Vector2 _lookInput;
+
+        // Crouch — stored at startup from Hierarchy/Inspector values
+        private bool _isCrouching;
+        private float _standingHeight;
+        private Vector3 _standingCenter;
+        private Vector3 _standingCamLocalPos;
+        private Vector3 _crouchCamLocalPos;
         #endregion
 
         #region Unity Lifecycle
@@ -95,10 +112,20 @@ namespace SnakeEnchanter.Player
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            // Setup camera for first-person
-            SetupFirstPersonCamera();
+            // Store standing dimensions exactly as set in Inspector/Hierarchy
+            _standingHeight = _controller.height;
+            _standingCenter = _controller.center;
 
-            // Setup Input System
+            // Camera position comes from Hierarchy — read it, never invent it
+            if (_playerCamera != null)
+            {
+                _standingCamLocalPos = _playerCamera.transform.localPosition;
+
+                // Crouch camera: same X/Z, Y drops by the same amount as the collider
+                float heightDiff = _standingHeight - _crouchHeight;
+                _crouchCamLocalPos = _standingCamLocalPos - new Vector3(0f, heightDiff, 0f);
+            }
+
             SetupInputActions();
         }
 
@@ -115,6 +142,7 @@ namespace SnakeEnchanter.Player
         private void Update()
         {
             HandleGroundCheck();
+            HandleCrouch();
             HandleMovement();
             HandleCameraLook();
             ApplyGravity();
@@ -129,7 +157,6 @@ namespace SnakeEnchanter.Player
         {
             if (_inputActions == null)
             {
-                // Try to find the input actions asset
                 _inputActions = Resources.Load<InputActionAsset>("SnakeEnchanter");
             }
 
@@ -140,15 +167,16 @@ namespace SnakeEnchanter.Player
                 {
                     _moveAction = playerMap.FindAction("Move");
                     _lookAction = playerMap.FindAction("Look");
+                    _crouchAction = playerMap.FindAction("Crouch");
                 }
                 else
                 {
-                    Debug.LogError("PlayerController: 'Player' action map not found in InputActionAsset!");
+                    Debug.LogError("PlayerController: 'Player' action map not found!");
                 }
             }
             else
             {
-                Debug.LogError("PlayerController: InputActionAsset not assigned! Assign SnakeEnchanter.inputactions in Inspector.");
+                Debug.LogError("PlayerController: InputActionAsset not assigned!");
             }
         }
 
@@ -167,6 +195,13 @@ namespace SnakeEnchanter.Player
                 _lookAction.performed += OnLook;
                 _lookAction.canceled += OnLook;
             }
+
+            if (_crouchAction != null)
+            {
+                _crouchAction.Enable();
+                _crouchAction.started += OnCrouchStarted;
+                _crouchAction.canceled += OnCrouchCanceled;
+            }
         }
 
         private void DisableInput()
@@ -184,6 +219,13 @@ namespace SnakeEnchanter.Player
                 _lookAction.canceled -= OnLook;
                 _lookAction.Disable();
             }
+
+            if (_crouchAction != null)
+            {
+                _crouchAction.started -= OnCrouchStarted;
+                _crouchAction.canceled -= OnCrouchCanceled;
+                _crouchAction.Disable();
+            }
         }
 
         private void OnMove(InputAction.CallbackContext context)
@@ -195,47 +237,69 @@ namespace SnakeEnchanter.Player
         {
             _lookInput = context.ReadValue<Vector2>();
         }
+
+        private void OnCrouchStarted(InputAction.CallbackContext context)
+        {
+            _isCrouching = true;
+        }
+
+        private void OnCrouchCanceled(InputAction.CallbackContext context)
+        {
+            _isCrouching = false;
+        }
         #endregion
 
-        #region Camera Setup
+        #region Crouch
         /// <summary>
-        /// Configures camera for first-person view at eye height.
+        /// Smoothly transitions CharacterController height and camera between standing/crouching.
+        /// Standing values come from Hierarchy at startup — never from SerializeField offsets.
         /// </summary>
-        private void SetupFirstPersonCamera()
+        private void HandleCrouch()
         {
-            // If no camera assigned, try to find main camera
-            if (_playerCamera == null)
+            float targetHeight = _isCrouching ? _crouchHeight : _standingHeight;
+            float heightDiff = _standingHeight - targetHeight;
+            Vector3 targetCenter = new Vector3(
+                _standingCenter.x,
+                _standingCenter.y - heightDiff / 2f,
+                _standingCenter.z);
+            Vector3 targetCamPos = _isCrouching ? _crouchCamLocalPos : _standingCamLocalPos;
+
+            // Skip if already at target
+            if (Mathf.Abs(_controller.height - targetHeight) < 0.001f)
             {
-                _playerCamera = Camera.main;
+                _controller.height = targetHeight;
+                _controller.center = targetCenter;
+                if (_playerCamera != null)
+                {
+                    _playerCamera.transform.localPosition = targetCamPos;
+                }
+                return;
             }
+
+            // Smooth transition
+            float t = _crouchTransitionSpeed * Time.deltaTime;
+            _controller.height = Mathf.Lerp(_controller.height, targetHeight, t);
+            _controller.center = Vector3.Lerp(_controller.center, targetCenter, t);
 
             if (_playerCamera != null)
             {
-                // Position camera at eye level
-                _playerCamera.transform.SetParent(transform);
-                _playerCamera.transform.localPosition = new Vector3(0f, _cameraHeight, 0f);
-                _playerCamera.transform.localRotation = Quaternion.identity;
-            }
-            else
-            {
-                Debug.LogError("PlayerController: No camera found! Assign camera in Inspector.");
+                _playerCamera.transform.localPosition = Vector3.Lerp(
+                    _playerCamera.transform.localPosition, targetCamPos, t);
             }
         }
         #endregion
 
         #region Movement
         /// <summary>
-        /// Handles movement input and moves the player.
+        /// Handles movement input relative to camera facing direction.
         /// </summary>
         private void HandleMovement()
         {
             if (_playerCamera == null) return;
 
-            // Calculate move direction relative to camera's forward direction
             Vector3 forward = _playerCamera.transform.forward;
             Vector3 right = _playerCamera.transform.right;
 
-            // Flatten forward and right vectors (no vertical movement from looking up/down)
             forward.y = 0f;
             right.y = 0f;
             forward.Normalize();
@@ -243,31 +307,23 @@ namespace SnakeEnchanter.Player
 
             Vector3 moveDirection = right * _moveInput.x + forward * _moveInput.y;
 
-            // Only normalize if moving to prevent zero vector normalization
             if (moveDirection.sqrMagnitude > 0.01f)
             {
                 moveDirection.Normalize();
-                _controller.Move(moveDirection * _moveSpeed * Time.deltaTime);
+                float currentSpeed = _isCrouching ? _crouchSpeed : _moveSpeed;
+                _controller.Move(moveDirection * currentSpeed * Time.deltaTime);
             }
         }
 
-        /// <summary>
-        /// Checks if player is grounded using CharacterController.
-        /// </summary>
         private void HandleGroundCheck()
         {
             _isGrounded = _controller.isGrounded;
-
-            // Reset vertical velocity when grounded
             if (_isGrounded && _velocity.y < 0)
             {
-                _velocity.y = -2f; // Small downward force to keep grounded
+                _velocity.y = -2f;
             }
         }
 
-        /// <summary>
-        /// Applies gravity to the player.
-        /// </summary>
         private void ApplyGravity()
         {
             _velocity.y += _gravity * Time.deltaTime;
@@ -277,21 +333,18 @@ namespace SnakeEnchanter.Player
 
         #region Camera
         /// <summary>
-        /// Handles mouse look for first-person camera rotation.
-        /// Rotates entire player on Y-axis (yaw) and camera on X-axis (pitch).
+        /// Mouse look: rotates player body (yaw) and camera (pitch).
+        /// Never touches camera local position — only rotation.
         /// </summary>
         private void HandleCameraLook()
         {
             if (_playerCamera == null) return;
 
-            // Use look input from New Input System
             float mouseX = _lookInput.x * _mouseSensitivity;
             float mouseY = _lookInput.y * _mouseSensitivity;
 
-            // Rotate player body (yaw)
             transform.Rotate(Vector3.up * mouseX);
 
-            // Rotate camera (pitch) with clamping
             _cameraPitch -= mouseY;
             _cameraPitch = Mathf.Clamp(_cameraPitch, _minPitch, _maxPitch);
             _playerCamera.transform.localRotation = Quaternion.Euler(_cameraPitch, 0f, 0f);
@@ -299,26 +352,17 @@ namespace SnakeEnchanter.Player
         #endregion
 
         #region Public Methods
-        /// <summary>
-        /// Enables or disables player movement (for tune playing, cutscenes, etc.)
-        /// </summary>
         public void SetMovementEnabled(bool enabled)
         {
             this.enabled = enabled;
         }
 
-        /// <summary>
-        /// Unlocks cursor (for menus, pause, etc.)
-        /// </summary>
         public void UnlockCursor()
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
 
-        /// <summary>
-        /// Locks cursor (for gameplay)
-        /// </summary>
         public void LockCursor()
         {
             Cursor.lockState = CursorLockMode.Locked;

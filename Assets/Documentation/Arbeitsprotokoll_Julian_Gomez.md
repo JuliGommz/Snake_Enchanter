@@ -45,13 +45,25 @@
 ### 04.02.2026 (Dienstag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-| Player Controller (WASD + Kamera) |  |  |  |
-| Greybox Level (1 Raum) |  |  |  |
-|  |  |  |  |
+| PlayerController v1.3: Crouch-System (LeftCtrl) | x | x | x |
+| PlayerController v1.4: Camera Offset (entfernt) | x | x | x |
+| PlayerController v1.5: Hierarchy Camera | x | x | x |
+| Crouch Action in InputActions + Binding | x | x | x |
+| Camera Pitch Limits (Best Practice -70/+70) | x | x | x |
+| Crouch Speed 50% (2.5 von 5.0) | x | x | x |
+| Config Update: Third-Person → First-Person | x | x | x |
+| Cave Assets inventarisieren + Collider prüfen | x | x | x |
+| Cave System aufbauen (Caves Parts Set) | x | x | x |
 
-**Screenshot:** `Media/Screenshots/2026-02-04_.png`
+**Screenshot:** `Media/Screenshots/2026-02-04_CaveMap.png`
 
 **Notizen:**
+- PlayerController durchlief 3 Iterationen (v1.3→v1.5) wegen Camera-Override-Problem
+- Lektion: Script sollte Kamera-Position NICHT besitzen, sondern aus Hierarchy lesen
+- Cave Prefabs haben alle MeshCollider (IsTrigger=false, Convex=false)
+- Dwarven Pack für Deko (Pillars, Arches, Window Props für Exit)
+- Cave System fertig gebaut in Unity
+- **OFFEN:** TuneConfig SOs, UI (HealthBar/Slider), Snake AI, Toon Snakes Pack
 
 
 ---
