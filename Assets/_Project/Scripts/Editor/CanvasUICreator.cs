@@ -242,15 +242,15 @@ namespace SnakeEnchanter.Editor
             sliderAreaRect.offsetMin = new Vector2(20f, 25f);
             sliderAreaRect.offsetMax = new Vector2(-20f, -28f);
 
-            // Slider Frame (Image for curved sprite, behind segments)
+            // Slider Frame (Image for curved sprite, wraps AROUND segments as border)
             GameObject frameGO = new GameObject("SliderFrame");
             frameGO.transform.SetParent(sliderArea.transform, false);
             RectTransform frameRect = frameGO.AddComponent<RectTransform>();
             frameRect.anchorMin = Vector2.zero;
             frameRect.anchorMax = Vector2.one;
-            frameRect.sizeDelta = Vector2.zero;
-            frameRect.offsetMin = Vector2.zero;
-            frameRect.offsetMax = Vector2.zero;
+            // Negative offsets = frame extends BEYOND SliderArea = visible border
+            frameRect.offsetMin = new Vector2(-6f, -6f);
+            frameRect.offsetMax = new Vector2(6f, 6f);
             Image frameImage = frameGO.AddComponent<Image>();
             frameImage.color = new Color(0.3f, 0.25f, 0.2f, 1f);
             frameImage.raycastTarget = false;
