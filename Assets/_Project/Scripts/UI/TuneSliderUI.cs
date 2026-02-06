@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-06
-* Version: 2.0
+* Version: 2.1
 
 * WICHTIG: KOMMENTIERUNG NICHT LOSCHEN!
 * Diese detaillierte Authorship-Dokumentation ist fuer die akademische
@@ -46,6 +46,7 @@
 * VERSION HISTORY:
 * - v1.0: Initial - Unity Slider, solid fill, zone overlay
 * - v2.0: Segmented blocks, marker sprite, frame image, zone colors
+* - v2.1: Fix marker size apply, frame sprite Sliced, OnValidate live update, keep aspect ratio
 ====================================================================
 */
 
@@ -115,6 +116,9 @@ namespace SnakeEnchanter.UI
         [Tooltip("Marker size in pixels")]
         [SerializeField] private Vector2 _markerSize = new Vector2(24f, 32f);
 
+        [Tooltip("Keep marker sprite aspect ratio (adjusts height from width)")]
+        [SerializeField] private bool _markerKeepAspect = true;
+
         [Header("Segment Colors - Safe Zone (before trigger)")]
         [Tooltip("Gelb: Inactive segments before the trigger zone")]
         [SerializeField] private Color _segmentSafeColor = new Color(0.85f, 0.75f, 0.3f, 0.4f);
@@ -157,23 +161,13 @@ namespace SnakeEnchanter.UI
                 _tuneController = FindFirstObjectByType<TuneController>();
             }
 
-            // Apply frame sprite if assigned
-            if (_frameImageRef != null)
-            {
-                _frameImageRef.color = _frameColor;
-                if (_sliderFrameSprite != null)
-                {
-                    _frameImageRef.sprite = _sliderFrameSprite;
-                }
-            }
+            // Apply frame sprite and color
+            ApplyFrameSettings();
 
-            // Apply marker sprite if assigned
+            // Apply marker sprite and size
+            ApplyMarkerSettings();
             if (_markerImage != null)
             {
-                if (_markerSprite != null)
-                {
-                    _markerImage.sprite = _markerSprite;
-                }
                 _markerImage.gameObject.SetActive(false);
             }
 
@@ -216,6 +210,66 @@ namespace SnakeEnchanter.UI
                     HideResultText();
                 }
             }
+        }
+        #endregion
+
+        #region Inspector Live Update
+#if UNITY_EDITOR
+        /// <summary>
+        /// Called by Unity when Inspector values change (Editor only).
+        /// Applies frame color, frame sprite, marker sprite, and marker size live.
+        /// </summary>
+        private void OnValidate()
+        {
+            // Delay to next frame to avoid Unity warnings about SendMessage
+            UnityEditor.EditorApplication.delayCall += () =>
+            {
+                if (this == null) return;
+                ApplyFrameSettings();
+                ApplyMarkerSettings();
+            };
+        }
+#endif
+
+        /// <summary>
+        /// Applies frame sprite and color to the frame Image.
+        /// </summary>
+        private void ApplyFrameSettings()
+        {
+            if (_frameImageRef == null) return;
+
+            _frameImageRef.color = _frameColor;
+
+            if (_sliderFrameSprite != null)
+            {
+                _frameImageRef.sprite = _sliderFrameSprite;
+                _frameImageRef.type = Image.Type.Sliced;
+                _frameImageRef.preserveAspect = false;
+            }
+        }
+
+        /// <summary>
+        /// Applies marker sprite and _markerSize to the marker Image.
+        /// If _markerKeepAspect is true, height is calculated from width using sprite aspect ratio.
+        /// </summary>
+        private void ApplyMarkerSettings()
+        {
+            if (_markerImage == null) return;
+
+            if (_markerSprite != null)
+            {
+                _markerImage.sprite = _markerSprite;
+            }
+
+            // Apply _markerSize with optional aspect ratio lock
+            Vector2 finalSize = _markerSize;
+            if (_markerKeepAspect && _markerSprite != null && _markerSprite.rect.width > 0f)
+            {
+                float aspect = _markerSprite.rect.height / _markerSprite.rect.width;
+                finalSize.y = finalSize.x * aspect;
+            }
+
+            _markerImage.rectTransform.sizeDelta = finalSize;
         }
         #endregion
 
