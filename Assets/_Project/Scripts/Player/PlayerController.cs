@@ -5,33 +5,42 @@
 * Project: Snake Enchanter
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
-* Date: 2026-02-03
-* Version: 1.5 - HIERARCHY CAMERA
-
+* Date: 2026-02-06
+* Version: 1.7 - CINEMACHINE FINAL
+* 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
 * Bewertung erforderlich und darf nicht entfernt werden!
-
+* 
 * AUTHORSHIP CLASSIFICATION:
-
 * [AI-ASSISTED]
 * - Initial implementation structure
 * - CharacterController movement logic
 * - First-person camera system (v1.1)
 * - New Input System migration (v1.2)
+* - Cinemachine compatibility - auto Camera.main (v1.6)
+* - Cinemachine final integration - pitch control only (v1.7)
 * - Human reviewed and will modify as needed
-
+* 
 * DEPENDENCIES:
 * - Unity CharacterController component
 * - Unity New Input System (InputSystem package)
 * - SnakeEnchanter.inputactions asset
-
+* - Cinemachine 3.x (Position: Cinemachine, Rotation: Split Control)
+* 
+* DESIGN RATIONALE:
+* - Cinemachine handles camera position (follows CameraTarget under Head)
+* - Cinemachine "Rotate With Follow Target" handles yaw (follows Player body)
+* - PlayerController handles pitch (vertical look) via direct camera rotation
+* - Player body rotates on Y-axis (mouse X), camera pitch on X-axis (mouse Y)
+* 
 * SETUP:
-* 1. Camera must be a CHILD of the Player GameObject in Hierarchy
-* 2. Position the Camera in Scene View (Transform) — no code needed
-* 3. Assign the Camera reference in Inspector
-* 4. Script handles: rotation, movement, crouch — NOT camera position
-
+* 1. Main Camera with Cinemachine Brain (auto-managed)
+* 2. CM_PlayerCamera with "Rotate With Follow Target"
+* 3. CameraTarget under animated Head bone
+* 4. This script on Player GameObject
+* 5. Camera reference auto-found (Camera.main) or manually assigned
+* 
 * VERSION HISTORY:
 * - v1.0: Initial with Legacy Input
 * - v1.1: First-Person camera
@@ -39,6 +48,8 @@
 * - v1.3: Crouch system (hold LeftCtrl)
 * - v1.4: Live camera offset (removed — caused override issues)
 * - v1.5: Camera position via Hierarchy only, script never overrides
+* - v1.6: Cinemachine compatibility - auto-finds Camera.main
+* - v1.7: Cinemachine final - pitch-only control, yaw via Cinemachine
 ====================================================================
 */
 
@@ -48,55 +59,79 @@ using UnityEngine.InputSystem;
 namespace SnakeEnchanter.Player
 {
     /// <summary>
-    /// Controls player movement using CharacterController with first-person camera.
-    /// Camera must be a child of the Player in the Hierarchy.
-    /// Position the camera freely via Transform — this script only handles rotation.
+    /// Controls player movement using CharacterController with Cinemachine camera.
+    /// Cinemachine handles position + yaw, PlayerController handles pitch (vertical look).
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public class PlayerController : MonoBehaviour
     {
         #region Movement Settings
+
         [Header("Movement")]
+        [Tooltip("Bewegungsgeschwindigkeit (m/s)")]
         [SerializeField] private float _moveSpeed = 5f;
+
+        [Tooltip("Gravitationskraft (negativ = nach unten)")]
         [SerializeField] private float _gravity = -9.81f;
 
         [Header("Crouch")]
+        [Tooltip("CharacterController Höhe beim Ducken")]
         [SerializeField] private float _crouchHeight = 1.0f;
+
+        [Tooltip("Bewegungsgeschwindigkeit beim Ducken")]
         [SerializeField] private float _crouchSpeed = 2.5f;
+
+        [Tooltip("Geschwindigkeit der Crouch-Transition (höher = schneller)")]
         [SerializeField] private float _crouchTransitionSpeed = 8f;
+
         #endregion
 
         #region Camera Settings
-        [Header("Camera - First Person")]
-        [Tooltip("Assign the Camera that is a CHILD of this Player in the Hierarchy.")]
+
+        [Header("Camera - Cinemachine Compatible")]
+        [Tooltip("Main Camera (optional - wird automatisch als Camera.main gefunden)")]
         [SerializeField] private Camera _playerCamera;
+
+        [Tooltip("Maus-Empfindlichkeit (höher = schneller)")]
         [SerializeField] private float _mouseSensitivity = 0.1f;
-        [Tooltip("How far the player can look down (negative = down). Best practice: -70 to -80.")]
+
+        [Tooltip("Minimaler Pitch-Winkel (nach unten schauen, negativ)")]
         [SerializeField] private float _minPitch = -70f;
-        [Tooltip("How far the player can look up (positive = up). Best practice: 70 to 80.")]
+
+        [Tooltip("Maximaler Pitch-Winkel (nach oben schauen, positiv)")]
         [SerializeField] private float _maxPitch = 70f;
+
         #endregion
 
         #region Animation
+
         [Header("Animation")]
-        [Tooltip("Animator component on the player model")]
+        [Tooltip("Animator component auf dem Player-Modell")]
         [SerializeField] private Animator _animator;
 
         // Animation parameter hashes (performance optimization)
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
         private static readonly int IsCrouchingHash = Animator.StringToHash("IsCrouching");
+
         #endregion
 
         #region Input Settings
+
         [Header("Input")]
+        [Tooltip("Input Action Asset (SnakeEnchanter)")]
         [SerializeField] private InputActionAsset _inputActions;
+
         #endregion
 
         #region Private Fields
+
+        // CharacterController
         private CharacterController _controller;
         private Vector3 _velocity;
-        private float _cameraPitch = 0f;
         private bool _isGrounded;
+
+        // Camera control
+        private float _cameraPitch = 0f;
 
         // Input System
         private InputAction _moveAction;
@@ -105,15 +140,18 @@ namespace SnakeEnchanter.Player
         private Vector2 _moveInput;
         private Vector2 _lookInput;
 
-        // Crouch — stored at startup from Hierarchy/Inspector values
+        // Crouch state
         private bool _isCrouching;
         private float _standingHeight;
         private Vector3 _standingCenter;
         private Vector3 _standingCamLocalPos;
         private Vector3 _crouchCamLocalPos;
+        private bool _cameraIsChild; // Cache: Ist Camera Child dieses GameObjects?
+
         #endregion
 
         #region Unity Lifecycle
+
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
@@ -124,22 +162,46 @@ namespace SnakeEnchanter.Player
                 _animator = GetComponentInChildren<Animator>();
             }
 
+            // Auto-find Camera if not assigned (Cinemachine mode)
+            if (_playerCamera == null)
+            {
+                _playerCamera = Camera.main;
+
+                if (_playerCamera == null)
+                {
+                    Debug.LogWarning("[PlayerController] Camera.main nicht gefunden! Mouse Look wird nicht funktionieren.", this);
+                }
+                else
+                {
+                    Debug.Log("[PlayerController] Camera.main automatisch gefunden (Cinemachine Mode).", this);
+                }
+            }
+
+            // Check if camera is child (affects crouch camera position handling)
+            _cameraIsChild = _playerCamera != null && _playerCamera.transform.IsChildOf(transform);
+
             // Lock cursor for gameplay
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            // Store standing dimensions exactly as set in Inspector/Hierarchy
+            // Store standing dimensions from Inspector/Hierarchy
             _standingHeight = _controller.height;
             _standingCenter = _controller.center;
 
-            // Camera position comes from Hierarchy — read it, never invent it
-            if (_playerCamera != null)
+            // Camera position handling (only if camera is child)
+            if (_cameraIsChild)
             {
                 _standingCamLocalPos = _playerCamera.transform.localPosition;
 
-                // Crouch camera: same X/Z, Y drops by the same amount as the collider
+                // Crouch camera: same X/Z, Y drops by collider height difference
                 float heightDiff = _standingHeight - _crouchHeight;
                 _crouchCamLocalPos = _standingCamLocalPos - new Vector3(0f, heightDiff, 0f);
+            }
+            else
+            {
+                // Cinemachine mode: no local position handling needed
+                _standingCamLocalPos = Vector3.zero;
+                _crouchCamLocalPos = Vector3.zero;
             }
 
             SetupInputActions();
@@ -168,8 +230,9 @@ namespace SnakeEnchanter.Player
         #endregion
 
         #region Input System Setup
+
         /// <summary>
-        /// Sets up Input System actions from the InputActionAsset.
+        /// Lädt Input Action Asset und findet Player Action Map.
         /// </summary>
         private void SetupInputActions()
         {
@@ -189,12 +252,12 @@ namespace SnakeEnchanter.Player
                 }
                 else
                 {
-                    Debug.LogError("PlayerController: 'Player' action map not found!");
+                    Debug.LogError("[PlayerController] 'Player' action map not found in InputActionAsset!", this);
                 }
             }
             else
             {
-                Debug.LogError("PlayerController: InputActionAsset not assigned!");
+                Debug.LogError("[PlayerController] InputActionAsset 'SnakeEnchanter' nicht gefunden!", this);
             }
         }
 
@@ -265,12 +328,15 @@ namespace SnakeEnchanter.Player
         {
             _isCrouching = false;
         }
+
         #endregion
 
         #region Crouch
+
         /// <summary>
-        /// Smoothly transitions CharacterController height and camera between standing/crouching.
-        /// Standing values come from Hierarchy at startup — never from SerializeField offsets.
+        /// Smooth transition zwischen Stehen und Ducken.
+        /// CharacterController Höhe + Center werden angepasst.
+        /// Camera localPosition nur wenn Camera Child ist (nicht Cinemachine).
         /// </summary>
         private void HandleCrouch()
         {
@@ -287,7 +353,9 @@ namespace SnakeEnchanter.Player
             {
                 _controller.height = targetHeight;
                 _controller.center = targetCenter;
-                if (_playerCamera != null)
+
+                // Only update camera position if camera is child (not Cinemachine)
+                if (_cameraIsChild)
                 {
                     _playerCamera.transform.localPosition = targetCamPos;
                 }
@@ -299,17 +367,21 @@ namespace SnakeEnchanter.Player
             _controller.height = Mathf.Lerp(_controller.height, targetHeight, t);
             _controller.center = Vector3.Lerp(_controller.center, targetCenter, t);
 
-            if (_playerCamera != null)
+            // Only update camera position if camera is child (not Cinemachine)
+            if (_cameraIsChild)
             {
                 _playerCamera.transform.localPosition = Vector3.Lerp(
                     _playerCamera.transform.localPosition, targetCamPos, t);
             }
         }
+
         #endregion
 
         #region Movement
+
         /// <summary>
-        /// Handles movement input relative to camera facing direction.
+        /// Bewegung relativ zur Kamera-Richtung.
+        /// WASD/Arrows bewegen Player in Richtung der Kamera-Blickrichtung.
         /// </summary>
         private void HandleMovement()
         {
@@ -336,6 +408,7 @@ namespace SnakeEnchanter.Player
         private void HandleGroundCheck()
         {
             _isGrounded = _controller.isGrounded;
+
             if (_isGrounded && _velocity.y < 0)
             {
                 _velocity.y = -2f;
@@ -346,17 +419,23 @@ namespace SnakeEnchanter.Player
         {
             _velocity.y += _gravity * Time.deltaTime;
 
-            // Clamp terminal velocity to prevent falling through floor
+            // Clamp terminal velocity
             _velocity.y = Mathf.Max(_velocity.y, -20f);
 
             _controller.Move(_velocity * Time.deltaTime);
         }
+
         #endregion
 
         #region Camera
+
         /// <summary>
-        /// Mouse look: rotates player body (yaw) and camera (pitch).
-        /// Never touches camera local position — only rotation.
+        /// Mouse Look - Cinemachine-kompatibel.
+        /// Verantwortlichkeiten:
+        /// - Player Body Rotation (Yaw/Y-Achse): Dieser Code (Mouse X)
+        /// - Camera Yaw: Cinemachine "Rotate With Follow Target" folgt Player automatisch
+        /// - Camera Pitch (X-Achse): Dieser Code (Mouse Y)
+        /// - Camera Position: Cinemachine Follow (folgt CameraTarget)
         /// </summary>
         private void HandleCameraLook()
         {
@@ -365,36 +444,61 @@ namespace SnakeEnchanter.Player
             float mouseX = _lookInput.x * _mouseSensitivity;
             float mouseY = _lookInput.y * _mouseSensitivity;
 
+            // Rotate player body around Y-axis (horizontal mouse = yaw)
+            // Cinemachine "Rotate With Follow Target" folgt diesem automatisch
             transform.Rotate(Vector3.up * mouseX);
 
+            // Calculate vertical look angle (pitch)
             _cameraPitch -= mouseY;
             _cameraPitch = Mathf.Clamp(_cameraPitch, _minPitch, _maxPitch);
-            _playerCamera.transform.localRotation = Quaternion.Euler(_cameraPitch, 0f, 0f);
+
+            // Apply rotation to Main Camera (world space)
+            // X-axis: Pitch (wir setzen direkt)
+            // Y-axis: Yaw (Cinemachine steuert via "Rotate With Follow Target")
+            // Z-axis: Roll (immer 0)
+            _playerCamera.transform.rotation = Quaternion.Euler(
+                _cameraPitch,              // X: Pitch (vertical look)
+                transform.eulerAngles.y,   // Y: Match player yaw (Cinemachine folgt dem)
+                0f                         // Z: No roll
+            );
         }
+
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Aktiviert/Deaktiviert Bewegung und Input.
+        /// </summary>
         public void SetMovementEnabled(bool enabled)
         {
             this.enabled = enabled;
         }
 
+        /// <summary>
+        /// Entsperrt Cursor (z.B. für Menüs).
+        /// </summary>
         public void UnlockCursor()
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
 
+        /// <summary>
+        /// Sperrt Cursor für Gameplay.
+        /// </summary>
         public void LockCursor()
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
+
         #endregion
 
         #region Animation
+
         /// <summary>
-        /// Updates animator parameters based on current movement state.
+        /// Aktualisiert Animator-Parameter basierend auf Bewegungs-State.
         /// </summary>
         private void UpdateAnimations()
         {
@@ -409,8 +513,7 @@ namespace SnakeEnchanter.Player
             _animator.SetFloat(SpeedHash, speed);
             _animator.SetBool(IsCrouchingHash, _isCrouching);
         }
+
         #endregion
     }
-
 }
-
