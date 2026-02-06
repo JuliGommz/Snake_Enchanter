@@ -418,6 +418,7 @@ namespace SnakeEnchanter.Tunes
                 case TuneResult.Success:
                     // Success - Snake charmed, healing via event
                     GameEvents.TuneSuccess();
+                    GameEvents.TuneSuccessWithId(tuneNumber);
                     Debug.Log($"TuneController: Tune {tuneNumber} SUCCESS! | Position: {finalPosition:F2} in Zone [{_activeZoneStart:F2}-{_activeZoneEnd:F2}]");
                     break;
 

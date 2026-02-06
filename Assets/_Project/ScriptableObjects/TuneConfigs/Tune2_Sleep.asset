@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d118c75d058a749a7800e688376228, type: 3}
+  m_Name: Tune2_Sleep
+  m_EditorClassIdentifier: 
+  tuneName: Sleep
+  keyNumber: 2
+  resultEffect: 1
+  description: Lulls the snake into a deep sleep. Disables collision.
+  duration: 4
+  triggerZoneStart: 0.35
+  triggerZoneEnd: 0.6
+  simpleModeZoneBonus: 0.1
+  melody: {fileID: 0}
+  successSound: {fileID: 0}
+  failSound: {fileID: 0}
+  zoneColor: {r: 0.3, g: 0.5, b: 0.9, a: 1}
+  icon: {fileID: 0}

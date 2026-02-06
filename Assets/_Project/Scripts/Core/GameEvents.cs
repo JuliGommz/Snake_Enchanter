@@ -58,6 +58,12 @@ namespace SnakeEnchanter.Core
         public static event Action OnTuneSuccess;
 
         /// <summary>
+        /// Fired when a tune is successfully completed (with tune number).
+        /// int = tune number (1-4) that was successfully cast
+        /// </summary>
+        public static event Action<int> OnTuneSuccessWithId;
+
+        /// <summary>
         /// Fired when a tune fails.
         /// bool = true if snake attacks (too late), false if safe fail (too early)
         /// </summary>
@@ -101,6 +107,7 @@ namespace SnakeEnchanter.Core
 
         // Tune
         public static void TuneSuccess() => OnTuneSuccess?.Invoke();
+        public static void TuneSuccessWithId(int tuneNumber) => OnTuneSuccessWithId?.Invoke(tuneNumber);
         public static void TuneFailed(bool snakeAttacks) => OnTuneFailed?.Invoke(snakeAttacks);
         public static void TuneStarted(int tuneNumber) => OnTuneStarted?.Invoke(tuneNumber);
         public static void TuneReleased() => OnTuneReleased?.Invoke();
@@ -121,6 +128,7 @@ namespace SnakeEnchanter.Core
             OnPlayerDamaged = null;
             OnPlayerHealed = null;
             OnTuneSuccess = null;
+            OnTuneSuccessWithId = null;
             OnTuneFailed = null;
             OnTuneStarted = null;
             OnTuneReleased = null;

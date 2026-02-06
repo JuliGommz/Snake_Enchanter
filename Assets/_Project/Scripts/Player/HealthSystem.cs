@@ -5,39 +5,41 @@
 * Project: Snake Enchanter
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
-* Date: 2026-02-03
-* Version: 1.1 - Terminology Update (Bite → Attack)
-
+* Date: 2026-02-05
+* Version: 1.2.1 - Fixed namespace references + Unity 2023 API
+*
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
 * Bewertung erforderlich und darf nicht entfernt werden!
-
+*
 * AUTHORSHIP CLASSIFICATION:
-
 * [AI-ASSISTED]
 * - Health system architecture
 * - Passive drain implementation
 * - Event-driven design pattern
+* - Single Source of Truth for drain rates (v1.2)
 * - Human reviewed and will modify as needed
-
+*
 * DEPENDENCIES:
 * - GameEvents.cs (SnakeEnchanter.Core)
 * - Unity MonoBehaviour
-
+*
 * DESIGN RATIONALE:
 * - Continuous HP (0-100) instead of discrete hearts for smooth feedback
-* - Passive drain creates constant pressure (matches GDD v1.3)
+* - Passive drain creates constant pressure (GDD v1.4)
 * - Event-driven communication prevents tight coupling
+* - Mode-specific drain rates stored HERE (not duplicated elsewhere)
 * - All values configurable for balancing Phase 2+
-
+*
 * NOTES:
 * - Phase 1 implementation - core functionality
-* - Balancing values are placeholders (see GDD Section 10)
-* - Drain rate calibrated for ~6min survival (Simple Mode)
-
+* - Drain rates: Simple 0.1 HP/sec, Advanced 0.115 HP/sec (GDD Section 10)
+*
 * VERSION HISTORY:
 * - v1.0: Initial implementation
 * - v1.1: Changed "Bite" terminology to "Attack" for consistency
+* - v1.2: Refactored to Single Source of Truth pattern
+* - v1.2.1: Fixed namespace references + Unity 2023 API
 ====================================================================
 */
 
@@ -49,6 +51,7 @@ namespace SnakeEnchanter.Player
     /// <summary>
     /// Manages player health including passive drain, damage, healing, and death.
     /// Integrates with GameEvents for decoupled communication.
+    /// Single source of truth for mode-specific drain rates.
     /// </summary>
     public class HealthSystem : MonoBehaviour
     {
@@ -60,12 +63,15 @@ namespace SnakeEnchanter.Player
         [Tooltip("Starting health (GDD: 30 - wounded warrior)")]
         [SerializeField] private int _startingHealth = 30;
 
-        [Header("Passive Drain")]
-        [Tooltip("HP lost per second (Simple Mode baseline)")]
-        [SerializeField] private float _drainRatePerSecond = 2.5f;
+        [Header("Passive Drain - Mode Settings (GDD Section 10)")]
+        [Tooltip("Simple Mode drain rate (0.1 HP/sec = 5 min survival from 30 HP)")]
+        [SerializeField] private float _simpleDrainRate = 0.1f;
 
-        [Tooltip("Enable passive drain (disable for testing)")]
-        [SerializeField] private bool _enablePassiveDrain = true;
+        [Tooltip("Advanced Mode drain rate (15% faster than Simple)")]
+        [SerializeField] private float _advancedDrainRate = 0.115f;
+
+        [Tooltip("Enable passive drain (disable for testing/development)")]
+        [SerializeField] private bool _enablePassiveDrain = false;
 
         [Header("Balancing Values - Phase 2 Tuning")]
         [Tooltip("HP restored per successful tune cast")]
@@ -77,53 +83,50 @@ namespace SnakeEnchanter.Player
 
         #region Private Fields
         private float _currentHealth;
+        private float _activeDrainRate;
         private bool _isDead = false;
+        private int _lastReportedHealth = -1;
         #endregion
 
         #region Properties
-        /// <summary>
-        /// Current health value (0-100 range).
-        /// </summary>
+        /// <summary>Current health value (0-100 range).</summary>
         public float CurrentHealth => _currentHealth;
 
-        /// <summary>
-        /// Maximum health cap.
-        /// </summary>
+        /// <summary>Maximum health cap.</summary>
         public int MaxHealth => _maxHealth;
 
-        /// <summary>
-        /// Health as normalized percentage (0.0 - 1.0).
-        /// </summary>
+        /// <summary>Health as normalized percentage (0.0 - 1.0).</summary>
         public float HealthPercentage => _currentHealth / _maxHealth;
 
-        /// <summary>
-        /// Is the player dead (HP <= 0)?
-        /// </summary>
+        /// <summary>Is the player dead (HP <= 0)?</summary>
         public bool IsDead => _isDead;
+
+        /// <summary>Simple Mode drain rate (read-only).</summary>
+        public float SimpleDrainRate => _simpleDrainRate;
+
+        /// <summary>Advanced Mode drain rate (read-only).</summary>
+        public float AdvancedDrainRate => _advancedDrainRate;
         #endregion
 
         #region Unity Lifecycle
         private void Awake()
         {
-            // Initialize health
             _currentHealth = _startingHealth;
+            _activeDrainRate = _simpleDrainRate; // Default to Simple Mode
         }
 
         private void Start()
         {
-            // Notify systems of initial health
             GameEvents.HealthChanged(Mathf.RoundToInt(_currentHealth));
         }
 
         private void OnEnable()
         {
-            // Subscribe to tune success for healing
             GameEvents.OnTuneSuccess += OnTuneSuccessHealing;
         }
 
         private void OnDisable()
         {
-            // Unsubscribe to prevent memory leaks
             GameEvents.OnTuneSuccess -= OnTuneSuccessHealing;
         }
 
@@ -131,7 +134,6 @@ namespace SnakeEnchanter.Player
         {
             if (_isDead) return;
 
-            // Apply passive health drain
             if (_enablePassiveDrain)
             {
                 ApplyPassiveDrain();
@@ -146,16 +148,18 @@ namespace SnakeEnchanter.Player
         /// </summary>
         private void ApplyPassiveDrain()
         {
-            float drainAmount = _drainRatePerSecond * Time.deltaTime;
+            float drainAmount = _activeDrainRate * Time.deltaTime;
             _currentHealth -= drainAmount;
-
-            // Clamp to prevent negative health
             _currentHealth = Mathf.Max(_currentHealth, 0f);
 
-            // Notify UI of continuous change
-            GameEvents.HealthChanged(Mathf.RoundToInt(_currentHealth));
+            // Only notify when rounded value changes (prevents event flood)
+            int rounded = Mathf.RoundToInt(_currentHealth);
+            if (rounded != _lastReportedHealth)
+            {
+                _lastReportedHealth = rounded;
+                GameEvents.HealthChanged(rounded);
+            }
 
-            // Check death condition
             if (_currentHealth <= 0f && !_isDead)
             {
                 Die();
@@ -164,15 +168,11 @@ namespace SnakeEnchanter.Player
         #endregion
 
         #region Damage
-        /// <summary>
-        /// Applies damage to the player (e.g., snake attack, timing failure).
-        /// </summary>
-        /// <param name="amount">Damage amount to subtract from health.</param>
+        /// <summary>Applies damage to the player (e.g., snake attack).</summary>
         public void TakeDamage(int amount)
         {
             if (_isDead) return;
 
-            // Validate input
             if (amount < 0)
             {
                 Debug.LogWarning($"HealthSystem: TakeDamage called with negative value ({amount}). Ignoring.");
@@ -182,20 +182,16 @@ namespace SnakeEnchanter.Player
             _currentHealth -= amount;
             _currentHealth = Mathf.Max(_currentHealth, 0f);
 
-            // Notify systems
             GameEvents.PlayerDamaged(amount);
             GameEvents.HealthChanged(Mathf.RoundToInt(_currentHealth));
 
-            // Check death
             if (_currentHealth <= 0f)
             {
                 Die();
             }
         }
 
-        /// <summary>
-        /// Convenience method for snake attack damage.
-        /// </summary>
+        /// <summary>Convenience method for snake attack damage.</summary>
         public void TakeSnakeAttack()
         {
             TakeDamage(_snakeAttackDamage);
@@ -203,15 +199,11 @@ namespace SnakeEnchanter.Player
         #endregion
 
         #region Healing
-        /// <summary>
-        /// Restores health to the player (e.g., successful tune cast).
-        /// </summary>
-        /// <param name="amount">Heal amount to add to health.</param>
+        /// <summary>Restores health to the player (e.g., successful tune cast).</summary>
         public void Heal(int amount)
         {
             if (_isDead) return;
 
-            // Validate input
             if (amount < 0)
             {
                 Debug.LogWarning($"HealthSystem: Heal called with negative value ({amount}). Ignoring.");
@@ -219,19 +211,13 @@ namespace SnakeEnchanter.Player
             }
 
             _currentHealth += amount;
-
-            // Cap at max health
             _currentHealth = Mathf.Min(_currentHealth, _maxHealth);
 
-            // Notify systems
             GameEvents.PlayerHealed(amount);
             GameEvents.HealthChanged(Mathf.RoundToInt(_currentHealth));
         }
 
-        /// <summary>
-        /// Event handler for successful tune casts - restores health.
-        /// GDD: "Each successful melody restores health"
-        /// </summary>
+        /// <summary>Event handler for successful tune casts.</summary>
         private void OnTuneSuccessHealing()
         {
             Heal(_healPerTuneSuccess);
@@ -239,18 +225,14 @@ namespace SnakeEnchanter.Player
         #endregion
 
         #region Death
-        /// <summary>
-        /// Handles player death (HP <= 0).
-        /// GDD: Immediate game over, lose screen, session data sent to backend.
-        /// </summary>
+        /// <summary>Handles player death (HP <= 0).</summary>
         private void Die()
         {
-            if (_isDead) return; // Prevent multiple death triggers
+            if (_isDead) return;
 
             _isDead = true;
             _currentHealth = 0f;
 
-            // Notify all systems
             GameEvents.HealthChanged(0);
             GameEvents.GameOver();
 
@@ -259,9 +241,7 @@ namespace SnakeEnchanter.Player
         #endregion
 
         #region Public Utilities
-        /// <summary>
-        /// Resets health to starting value (for game restart).
-        /// </summary>
+        /// <summary>Resets health to starting value (for game restart).</summary>
         public void ResetHealth()
         {
             _isDead = false;
@@ -270,19 +250,25 @@ namespace SnakeEnchanter.Player
         }
 
         /// <summary>
-        /// Sets drain rate (for mode switching: Simple vs Advanced).
-        /// Advanced Mode = 15% faster than Simple.
+        /// Applies drain rate for specified game mode.
+        /// GameManager calls this with the appropriate mode.
         /// </summary>
-        /// <param name="ratePerSecond">New drain rate per second.</param>
-        public void SetDrainRate(float ratePerSecond)
+        public void ApplyModeSettings(Core.GameMode mode)
         {
-            _drainRatePerSecond = ratePerSecond;
-            Debug.Log($"HealthSystem: Drain rate set to {ratePerSecond}/sec");
+            switch (mode)
+            {
+                case Core.GameMode.Simple:
+                    _activeDrainRate = _simpleDrainRate;
+                    break;
+                case Core.GameMode.Advanced:
+                    _activeDrainRate = _advancedDrainRate;
+                    break;
+            }
+
+            Debug.Log($"HealthSystem: Drain rate set to {_activeDrainRate}/sec ({mode} Mode)");
         }
 
-        /// <summary>
-        /// Enables or disables passive drain (for testing/cutscenes).
-        /// </summary>
+        /// <summary>Enables or disables passive drain (for testing/cutscenes).</summary>
         public void SetPassiveDrainEnabled(bool enabled)
         {
             _enablePassiveDrain = enabled;
@@ -299,21 +285,25 @@ namespace SnakeEnchanter.Player
             if (!_showDebugInfo) return;
 
             GUI.color = Color.white;
-            GUILayout.BeginArea(new Rect(10, 10, 300, 150));
+            GUILayout.BeginArea(new Rect(10, 10, 300, 170));
+
             GUILayout.Label($"<b>HealthSystem Debug</b>", new GUIStyle(GUI.skin.label) { richText = true });
             GUILayout.Label($"Current HP: {_currentHealth:F1} / {_maxHealth}");
             GUILayout.Label($"HP %: {HealthPercentage:P1}");
-            GUILayout.Label($"Drain Rate: {_drainRatePerSecond}/sec");
+            GUILayout.Label($"Active Drain: {_activeDrainRate}/sec");
             GUILayout.Label($"Dead: {_isDead}");
+            GUILayout.Space(5);
 
             if (GUILayout.Button("Test Damage (20)"))
             {
                 TakeDamage(20);
             }
+
             if (GUILayout.Button("Test Heal (15)"))
             {
                 Heal(15);
             }
+
             GUILayout.EndArea();
         }
 #endif

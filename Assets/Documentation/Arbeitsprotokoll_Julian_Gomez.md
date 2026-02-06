@@ -71,11 +71,42 @@
 ### 05.02.2026 (Mittwoch)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| Toon Snakes Pack importieren + in Scene platzieren | x | x | x |
+| Snake-Sichtbarkeit in Game View debuggen (mit Dozent gelöst) | | x | x |
+| TuneConfig ScriptableObjects erstellen (Editor-Tool) | x | x | x |
+| GameManager GameObject anlegen + konfigurieren | x | x | x |
+| SnakeAI auf Snakes (BoxCollider + SnakeAI Component) | x | x | x |
+| TuneConfigs im TuneController zuweisen | x | x | x |
+| HealthSystem Drain-Rate kalibrieren (0.1 HP/sec, deaktiviert für Dev) | | x | x |
+| HealthSystem Event-Flood Fix (_lastReportedHealth) | | x | x |
+| Snake Tune-Targeting testen (Proximity-basiert, Command Range) | x | x | x |
+| 16 neue Mixamo-Animationen importiert (Crouch, Spell, etc.) | x | x | x |
+| MC_Controller Animator neu aufgebaut (Idle, Walk, Crouch) | x | x | x |
+| Player/Animation Setup untersuchen + debuggen | x | x | x |
+| Player Einsinken Fix (heightFromFeet + keepOriginalOrientation) | | x | x |
+| Animator von Player auf Cowboy (child) verschoben | | x | x |
+| CharacterController Capsule korrekt konfiguriert | | x | x |
+| Canvas UI aufbauen (HealthBar + TuneSlider) | x | | |
 
 **Screenshot:** `Media/Screenshots/2026-02-05_.png`
 
 **Notizen:**
+- Toon Snakes Pack (Meshtint Studio) importiert: 6 Prefabs (Cobra/Snake x Green/Purple/Magenta)
+- Snake-Sichtbarkeit: Snakes in Scene View sichtbar aber Game View unsichtbar — mit Dozent gelöst
+- TuneConfigs: 4 ScriptableObjects per Editor-Tool erstellt (Move 3s, Sleep 4s, Attack 5s, Freeze 6s)
+- HealthDrain Bug: Rate war 2.5 HP/sec (viel zu schnell), korrigiert auf 0.1 HP/sec, deaktiviert für Dev
+- HealthChanged Event Flood: Feuerte 60x/sec, Fix durch _lastReportedHealth Check
+- Snake-Verhalten getestet: Proximity-basiertes Targeting funktioniert (nächste Snake reagiert)
+- Snake MoveAwayTarget: Beide Snakes liefen zum gleichen Punkt — individuell pro Snake nötig
+- 16 neue Mixamo-Animationen importiert (Crouch Walk, Spell Casting, Jump, etc.)
+- MC_Controller neu aufgebaut: Idle → Walk (Speed > 0.1), Crouch Forward/Back (IsCrouching)
+- **Player Einsinken debuggt:** Ursache war Humanoid Animator Root Transform Position — heightFromFeet war 0 (Original) statt 1 (Feet). Alle 4 Animations-FBX gefixt.
+- **Animator verschoben:** Von Player (Parent) auf Cowboy (Child mit Bone-Hierarchy) — Standard Unity Pattern
+- **CharacterController:** Height=1.84, Center Y=0.9, Radius=0.3 — Capsule korrekt um Model
+- **Animationen funktionieren!** Walk, Crouch — Fortschritt!
+- **Injured Idle ersetzt:** FBX hatte defekte Root-Orientation. Ersetzt durch "Old Man Idle" — funktioniert!
+- **PLAYER ANIMATION KOMPLETT GELÖST!** Idle steht, Walk funktioniert, Crouch funktioniert
+- **OFFEN:** Canvas UI (HealthBar + TuneSlider) noch nicht aufgebaut
 
 
 ---

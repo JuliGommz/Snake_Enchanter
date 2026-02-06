@@ -77,6 +77,16 @@ namespace SnakeEnchanter.Player
         [SerializeField] private float _maxPitch = 70f;
         #endregion
 
+        #region Animation
+        [Header("Animation")]
+        [Tooltip("Animator component on the player model")]
+        [SerializeField] private Animator _animator;
+
+        // Animation parameter hashes (performance optimization)
+        private static readonly int SpeedHash = Animator.StringToHash("Speed");
+        private static readonly int IsCrouchingHash = Animator.StringToHash("IsCrouching");
+        #endregion
+
         #region Input Settings
         [Header("Input")]
         [SerializeField] private InputActionAsset _inputActions;
@@ -107,6 +117,12 @@ namespace SnakeEnchanter.Player
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
+
+            // Auto-find Animator if not assigned
+            if (_animator == null)
+            {
+                _animator = GetComponentInChildren<Animator>();
+            }
 
             // Lock cursor for gameplay
             Cursor.lockState = CursorLockMode.Locked;
@@ -146,7 +162,9 @@ namespace SnakeEnchanter.Player
             HandleMovement();
             HandleCameraLook();
             ApplyGravity();
+            UpdateAnimations();
         }
+
         #endregion
 
         #region Input System Setup
@@ -327,6 +345,10 @@ namespace SnakeEnchanter.Player
         private void ApplyGravity()
         {
             _velocity.y += _gravity * Time.deltaTime;
+
+            // Clamp terminal velocity to prevent falling through floor
+            _velocity.y = Mathf.Max(_velocity.y, -20f);
+
             _controller.Move(_velocity * Time.deltaTime);
         }
         #endregion
@@ -369,5 +391,26 @@ namespace SnakeEnchanter.Player
             Cursor.visible = false;
         }
         #endregion
+
+        #region Animation
+        /// <summary>
+        /// Updates animator parameters based on current movement state.
+        /// </summary>
+        private void UpdateAnimations()
+        {
+            if (_animator == null) return;
+
+            // Calculate horizontal speed (ignore Y axis)
+            Vector3 horizontalVelocity = _controller.velocity;
+            horizontalVelocity.y = 0f;
+            float speed = horizontalVelocity.magnitude;
+
+            // Update animator parameters
+            _animator.SetFloat(SpeedHash, speed);
+            _animator.SetBool(IsCrouchingHash, _isCrouching);
+        }
+        #endregion
     }
+
 }
+
