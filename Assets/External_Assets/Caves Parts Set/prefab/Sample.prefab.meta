@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ba6df413c20ae844d9d76310316d9d74
+timeCreated: 1427800274
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33385
+  packageName: Caves Parts Set
+  packageVersion: 1.0.0
+  assetPath: Assets/Caves Parts Set/prefab/Sample.prefab
+  uploadId: 57304

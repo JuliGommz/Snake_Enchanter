@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c3b65961d89f9ea4fad8089cba59a0eb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 62721
+  packageName: Toon Snakes Pack
+  packageVersion: 1.1
+  assetPath: Assets/Toon Snakes Pack/Scenes/DemoSettings.lighting
+  uploadId: 685847

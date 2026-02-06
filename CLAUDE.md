@@ -118,6 +118,19 @@ Assets/
 
 ## Arbeitsweise
 
+### Git Branch-Strategie (ab Session 5)
+**Jedes Feature bekommt einen eigenen Branch!**
+
+- **Branch-Naming:** `feature/<kurzer-name>` (z.B. `feature/canvas-ui`, `feature/snake-moveaway`)
+- **Workflow:**
+  1. Neues Feature → `git checkout -b feature/<name>` von `main`
+  2. Arbeiten + Commits auf dem Feature-Branch
+  3. Feature fertig → Merge in `main` (oder PR falls gewünscht)
+  4. Branch löschen nach Merge
+- **Claude-Pflicht:** Bei Feature-Start und Feature-Ende den Entwickler erinnern:
+  - **Start:** "Neuen Branch erstellen: `feature/<name>`"
+  - **Ende:** "Feature fertig — Branch in `main` mergen?"
+
 ### Für den Entwickler:
 - **Täglich:** Arbeitsprotokoll + Screenshot + Commit
 - **Phasen-Regel:** Keine neue Phase bevor vorherige DONE
