@@ -1,48 +1,48 @@
 /*
 ====================================================================
-* HealthBarUI - Minimal health bar display
+* HealthBarUI - Visual health bar with gradient, pulse, and debuff
 ====================================================================
 * Project: Snake Enchanter
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
-* Date: 2026-02-04
-* Version: 1.0
+* Date: 2026-02-06
+* Version: 2.0
 
-* ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
-* Diese detaillierte Authorship-Dokumentation ist für die akademische
+* WICHTIG: KOMMENTIERUNG NICHT LOSCHEN!
+* Diese detaillierte Authorship-Dokumentation ist fuer die akademische
 * Bewertung erforderlich und darf nicht entfernt werden!
 
 * AUTHORSHIP CLASSIFICATION:
 
 * [AI-ASSISTED]
 * - UI Slider-based health bar
-* - Color gradient system (GDD Section 6.2)
+* - Gradient color system (replaces threshold-based v1.0)
+* - Pulsing effect at low HP
+* - Debuff indicator text
 * - Event-driven update via GameEvents
 * - Human reviewed and will modify as needed
 
 * DEPENDENCIES:
 * - GameEvents.cs (SnakeEnchanter.Core)
 * - Unity UI (UnityEngine.UI)
+* - TextMeshPro (TMPro)
 * - Canvas with Slider element in scene
 
 * DESIGN RATIONALE (GDD Section 6.2):
-* - Location: Top-left
-* - Gradient: Green (100-50%) → Yellow (50-25%) → Red (25-0%)
-* - Numeric display: "Current / Maximum"
-* - Smooth continuous depletion animation
+* - Location: Top-center, 500x50
+* - Gradient: Red (0%) -> Yellow (50%) -> Green (100%)
+* - Visual only: No numeric display
+* - Debuff text: Always visible (constant poison drain)
+* - Pulsing: Subtle alpha oscillation, faster at low HP
 
 * SETUP:
-* 1. Create Canvas → UI → Slider
-* 2. Remove "Handle Slide Area" child
-* 3. Assign Fill Image and Text references
-* 4. Position top-left (anchor top-left)
-
-* NOTES:
-* - Phase 1: Minimal — slider + color + text
-* - Phase 3: Pulsing at low HP, vignette, damage flash
+* 1. Use CanvasUICreator (Menu -> SnakeEnchanter -> Create Canvas UI)
+* 2. Or manually: Canvas -> Slider, assign Fill Image
+* 3. All values adjustable in Inspector after creation
 
 * VERSION HISTORY:
-* - v1.0: Initial — slider, gradient, text
+* - v1.0: Initial - slider, 3-color thresholds, numeric text
+* - v2.0: Gradient, pulse effect, debuff text, no numbers, bigger bar
 ====================================================================
 */
 
@@ -54,8 +54,8 @@ using SnakeEnchanter.Core;
 namespace SnakeEnchanter.UI
 {
     /// <summary>
-    /// Displays player health as a color-coded slider with numeric text.
-    /// GDD: Top-left, Green→Yellow→Red gradient.
+    /// Displays player health as a gradient-colored slider with pulsing effect.
+    /// GDD: Top-center, Red->Yellow->Green gradient, visual only.
     /// </summary>
     public class HealthBarUI : MonoBehaviour
     {
@@ -64,22 +64,32 @@ namespace SnakeEnchanter.UI
         [Tooltip("The Slider component for health bar")]
         [SerializeField] private Slider _healthSlider;
 
-        [Tooltip("The fill image of the slider (for color change)")]
+        [Tooltip("The fill image of the slider (for color + pulse)")]
         [SerializeField] private Image _fillImage;
 
-        [Tooltip("Text showing 'Current / Max' HP")]
-        [SerializeField] private TextMeshProUGUI _healthText;
+        [Header("Color Gradient")]
+        [Tooltip("Maps health % to color. Key 0=red(dead), 0.5=yellow, 1.0=green(full)")]
+        [SerializeField] private Gradient _healthGradient;
 
-        [Header("Color Gradient (GDD Section 6.2)")]
-        [SerializeField] private Color _highColor = new Color(0.2f, 0.8f, 0.2f);    // Green
-        [SerializeField] private Color _mediumColor = new Color(0.9f, 0.8f, 0.1f);  // Yellow
-        [SerializeField] private Color _lowColor = new Color(0.9f, 0.2f, 0.2f);     // Red
+        [Header("Debuff Indicator")]
+        [Tooltip("TextMeshPro element showing debuff status")]
+        [SerializeField] private TextMeshProUGUI _debuffText;
 
-        [Tooltip("HP% threshold for yellow (GDD: 50%)")]
-        [SerializeField] private float _mediumThreshold = 0.5f;
+        [Tooltip("Debuff message text (configurable in Inspector)")]
+        [SerializeField] private string _debuffMessage = "\u2620 Giftiger Nebel \u2014 HP sinkt";
 
-        [Tooltip("HP% threshold for red (GDD: 25%)")]
-        [SerializeField] private float _lowThreshold = 0.25f;
+        [Header("Pulsing Effect")]
+        [Tooltip("Base pulse speed (oscillations per second)")]
+        [SerializeField] private float _pulseSpeed = 2f;
+
+        [Tooltip("Pulse intensity - max alpha deviation (0-0.3 recommended)")]
+        [SerializeField] private float _pulseIntensity = 0.15f;
+
+        [Tooltip("HP threshold below which pulsing accelerates (0-1)")]
+        [SerializeField] private float _pulseAccelerateThreshold = 0.3f;
+
+        [Tooltip("Maximum pulse speed multiplier at 0 HP")]
+        [SerializeField] private float _pulseMaxSpeedMultiplier = 3f;
 
         [Header("Animation")]
         [Tooltip("Smooth speed for slider movement")]
@@ -92,10 +102,29 @@ namespace SnakeEnchanter.UI
         #endregion
 
         #region Unity Lifecycle
+        private void Awake()
+        {
+            // Initialize default gradient if not configured in Inspector
+            if (_healthGradient == null || _healthGradient.colorKeys.Length < 2)
+            {
+                _healthGradient = new Gradient();
+                GradientColorKey[] colorKeys = new GradientColorKey[3];
+                colorKeys[0] = new GradientColorKey(new Color(0.9f, 0.2f, 0.2f), 0.0f);  // Red at 0%
+                colorKeys[1] = new GradientColorKey(new Color(0.9f, 0.8f, 0.1f), 0.5f);  // Yellow at 50%
+                colorKeys[2] = new GradientColorKey(new Color(0.2f, 0.8f, 0.2f), 1.0f);  // Green at 100%
+
+                GradientAlphaKey[] alphaKeys = new GradientAlphaKey[2];
+                alphaKeys[0] = new GradientAlphaKey(1f, 0f);
+                alphaKeys[1] = new GradientAlphaKey(1f, 1f);
+
+                _healthGradient.SetKeys(colorKeys, alphaKeys);
+            }
+        }
+
         private void Start()
         {
             // Get max health from HealthSystem
-            var healthSystem = FindObjectOfType<Player.HealthSystem>();
+            var healthSystem = FindFirstObjectByType<Player.HealthSystem>();
             if (healthSystem != null)
             {
                 _maxHealth = healthSystem.MaxHealth;
@@ -106,6 +135,12 @@ namespace SnakeEnchanter.UI
                 _healthSlider.minValue = 0f;
                 _healthSlider.maxValue = 1f;
                 _healthSlider.interactable = false; // Display only
+            }
+
+            // Initialize debuff text
+            if (_debuffText != null)
+            {
+                _debuffText.text = _debuffMessage;
             }
         }
 
@@ -127,6 +162,9 @@ namespace SnakeEnchanter.UI
                 _healthSlider.value = Mathf.Lerp(
                     _healthSlider.value, _targetValue, _smoothSpeed * Time.deltaTime);
             }
+
+            // Pulsing effect on fill
+            ApplyPulseEffect();
         }
         #endregion
 
@@ -139,47 +177,50 @@ namespace SnakeEnchanter.UI
             float percentage = (float)newHealth / _maxHealth;
             _targetValue = Mathf.Clamp01(percentage);
 
-            // Update text
-            if (_healthText != null)
-            {
-                _healthText.text = $"{newHealth} / {_maxHealth}";
-            }
-
-            // Update color based on thresholds (GDD Section 6.2)
+            // Update color via gradient
             UpdateBarColor(percentage);
         }
         #endregion
 
         #region Color Management
         /// <summary>
-        /// Updates bar color based on HP percentage.
-        /// GDD: Green (100-50%) → Yellow (50-25%) → Red (25-0%)
+        /// Updates bar color using gradient evaluation.
+        /// Gradient maps 0.0 (dead/red) to 1.0 (full/green).
         /// </summary>
         private void UpdateBarColor(float percentage)
         {
             if (_fillImage == null) return;
+            _fillImage.color = _healthGradient.Evaluate(percentage);
+        }
+        #endregion
 
-            Color targetColor;
+        #region Pulse Effect
+        /// <summary>
+        /// Applies subtle alpha oscillation to the fill image.
+        /// Pulse accelerates as HP drops below threshold for urgency feedback.
+        /// </summary>
+        private void ApplyPulseEffect()
+        {
+            if (_fillImage == null) return;
 
-            if (percentage > _mediumThreshold)
+            // Calculate pulse speed based on current health
+            float healthPercent = _healthSlider != null ? _healthSlider.value : 1f;
+            float speedMultiplier = 1f;
+
+            if (healthPercent < _pulseAccelerateThreshold && _pulseAccelerateThreshold > 0f)
             {
-                // Green zone: 100% - 50%
-                targetColor = _highColor;
-            }
-            else if (percentage > _lowThreshold)
-            {
-                // Yellow zone: 50% - 25% — lerp from yellow to orange
-                float t = (percentage - _lowThreshold) / (_mediumThreshold - _lowThreshold);
-                targetColor = Color.Lerp(_mediumColor, _highColor, t);
-            }
-            else
-            {
-                // Red zone: 25% - 0% — lerp from red to yellow
-                float t = percentage / _lowThreshold;
-                targetColor = Color.Lerp(_lowColor, _mediumColor, t);
+                // Accelerate pulse as HP drops below threshold
+                float t = 1f - (healthPercent / _pulseAccelerateThreshold);
+                speedMultiplier = Mathf.Lerp(1f, _pulseMaxSpeedMultiplier, t);
             }
 
-            _fillImage.color = targetColor;
+            // Sine wave oscillation for smooth pulsing
+            float pulse = Mathf.Sin(Time.time * _pulseSpeed * speedMultiplier * Mathf.PI * 2f);
+            float alphaOffset = pulse * _pulseIntensity;
+
+            Color current = _fillImage.color;
+            current.a = Mathf.Clamp01(1f + alphaOffset);
+            _fillImage.color = current;
         }
         #endregion
     }
