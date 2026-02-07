@@ -2,15 +2,15 @@
 > **WICHTIG FÜR NEUE SESSIONS:** Diese Datei enthält den aktuellen Projektstand.
 > Lies diese Datei ZUERST bevor du mit der Arbeit beginnst.
 
-**Letzte Aktualisierung:** 2026-02-06 (Session 5)
-**Letzte Session:** Git Branch-Strategie, Canvas UI v2.0 (Gradient HealthBar + Segmented TuneSlider)
+**Letzte Aktualisierung:** 2026-02-07 (Session 6)
+**Letzte Session:** UI Polish (v2.1/v3.1), Cinemachine Integration, Setup Review, Doku-Update
 
 ---
 
 ## AKTUELLER STAND
 
 ### Phase: 1 - SPIELBAR (von 4)
-### Status: Player + Animationen funktionieren! Canvas UI v2.0 Scripts fertig, Canvas in Unity testen.
+### Status: UI Polish fertig (v2.1/v3.1), Cinemachine integriert, Animationen BROKEN nach Avatar-Wechsel
 
 ### Fortschritt Phase 1:
 - [x] 1.1 Unity Projekt Setup
@@ -28,13 +28,16 @@
 - [x] 1.13 Snake AI (Basic) ✅ Script + Unity-Integration fertig
 - [x] 1.14 TuneConfig ScriptableObjects anlegen ✅ 4 SOs erstellt (Move/Sleep/Attack/Freeze)
 - [x] 1.15 Player/Animation Setup debuggen ✅ GELÖST (heightFromFeet, Animator auf Child, Old Man Idle)
-- [x] 1.16 UI: HealthBar + TuneSlider ✅ v2.0 Scripts fertig (Canvas via Menu erstellen + testen)
-- [ ] 1.17 Play-Test Core Loop
+- [x] 1.16 UI: HealthBar + TuneSlider ✅ v3.1/v2.1 fertig + in Unity getestet + Steampunk Theme
+- [x] 1.17 Cinemachine Integration ✅ CM_PlayerCamera + CameraHeadTracker
+- [ ] 1.18 Animationen reparieren (broken nach Avatar/Cinemachine-Umbau)
+- [ ] 1.19 Play-Test Core Loop
 
 ### Scripts Status:
 | Script | Version | Namespace | Status |
 |--------|---------|-----------|--------|
-| PlayerController.cs | **v1.5** | SnakeEnchanter.Player | ✅ Hierarchy Camera, Crouch, Pitch Limits |
+| PlayerController.cs | **v1.7** | SnakeEnchanter.Player | ✅ Cinemachine Final, Pitch-only, Auto Camera.main |
+| CameraHeadTracker.cs | **v1.0** | SnakeEnchanter.Player | ✅ NEU — Position-only Head Bone Tracking |
 | HealthSystem.cs | **v1.2.1** | SnakeEnchanter.Player | ✅ Drain 0.1 HP/sec, deaktiviert für Dev |
 | TuneController.cs | **v2.2** | SnakeEnchanter.Tunes | ✅ + TuneSuccessWithId Event |
 | TuneConfig.cs | v1.0 | SnakeEnchanter.Tunes | ✅ ScriptableObject |
@@ -42,22 +45,25 @@
 | GameEvents.cs | **v1.1** | SnakeEnchanter.Core | ✅ + OnTuneSuccessWithId |
 | SnakeAI.cs | **v1.0** | SnakeEnchanter.Snakes | ✅ State Machine, Tune Reaction |
 | GameManager.cs | **v1.1.1** | SnakeEnchanter.Core | ✅ Game Loop, Mode, Session Tracking |
-| HealthBarUI.cs | **v2.0** | SnakeEnchanter.UI | ✅ Gradient, Pulse, Debuff-Text |
-| TuneSliderUI.cs | **v2.0** | SnakeEnchanter.UI | ✅ Segmente, Marker, Frame, Zonen-Farben |
+| HealthBarUI.cs | **v3.1** | SnakeEnchanter.UI | ✅ Gradient (continuous), Pulse, Debuff, Frame, Steampunk |
+| TuneSliderUI.cs | **v2.1** | SnakeEnchanter.UI | ✅ Segmente, Marker, Frame, OnValidate, KeepAspect |
 | CanvasUICreator.cs | **v2.0** | SnakeEnchanter.Editor | ✅ Neue Hierarchie + Auto-Wiring |
 | TuneConfigCreator.cs | **v1.0** | SnakeEnchanter.Editor | ✅ Editor Menu Tool |
 
 ### Unity Scene Status (GameLevel.unity):
 | GameObject | Components | Status |
 |------------|------------|--------|
-| Player | CharacterController, PlayerController v1.5, HealthSystem v1.2.1, TuneController v2.2 | ✅ Komplett |
-| Main Camera | Camera, AudioListener — **CHILD of Player** | ✅ Position via Hierarchy |
+| Player | CharacterController, PlayerController v1.7, HealthSystem v1.2.1, TuneController v2.2 | ✅ Komplett |
+| Cowboy (Child) | Animator (MC_Controller), Avatar | ⚠️ Animationen broken nach Avatar-Wechsel |
+| CameraTarget | CameraHeadTracker v1.0 — unter Head Bone | ✅ Position-only Tracking |
+| Main Camera | Camera, CinemachineBrain | ✅ Cinemachine-gesteuert |
+| CM_PlayerCamera | CinemachineCamera, Follow=CameraTarget, Rotate With Follow Target | ✅ Cinemachine v3.x |
 | ExitTrigger | BoxCollider (IsTrigger), ExitTrigger.cs | ✅ Platziert |
 | Cave Map | Caves Parts Set + Dwarven Pack Prefabs | ✅ Fertig |
 | Input Actions | SnakeEnchanter.inputactions (inkl. Crouch) | ✅ Funktioniert |
 | GameManager | GameManager.cs | ✅ Angelegt |
 | Snake(s) | Toon Cobra/Snake Prefabs + SnakeAI + BoxCollider | ✅ Platziert |
-| Canvas (UI) | **Menu → SnakeEnchanter → Create Canvas UI** — v2.0 fertig | ⏳ In Unity erstellen + testen |
+| Canvas (UI) | HealthBarUI v3.1, TuneSliderUI v2.1, Steampunk Theme, Arvo SDE Font | ✅ Fertig + getestet |
 
 ### TuneConfig ScriptableObjects:
 | Asset | Key | Duration | Zone | Effect |
@@ -80,36 +86,37 @@
 ## GIT STATUS
 
 ```
-Branch: feature/canvas-ui (aktiv)
-Letzter Commit: 7e71b13 Canvas UI v2.0: Gradient HealthBar, Segmented TuneSlider
+Branch: feature/animations-complete (aktiv)
+Letzter Commit: dae0b75 Remove orphaned 3D_Assets.meta after folder restructure
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 Uncommitted Changes: NEIN (clean state)
-Weitere Branches: feature/animations-complete (erstellt, noch keine Arbeit)
-Main: 5e1f5b1 Session 5 prep: Branch-Strategie, External Assets, 3D Assets, Media
+Main: dae0b75 (up-to-date, feature/canvas-ui wurde gemergt + gelöscht)
 ```
 
 ---
 
 ## ⚠️ OFFENE PROBLEME
 
-### 1. ~~Player/Animation Setup~~ ✅ GELÖST
-- **Ursache gefunden:** Humanoid Animator Root Transform Position `heightFromFeet: 0` (Original) statt `1` (Feet)
-- **Fixes angewendet:**
-  - Animator von Player (Parent) auf Cowboy (Child) verschoben — Standard Unity Pattern
-  - heightFromFeet: 1 für alle Animations-FBX
-  - CharacterController: Height=1.84, Center Y=0.9
-  - Injured Idle ersetzt durch Old Man Idle (defekte Root-Orientation)
-- **Ergebnis:** Idle, Walk, Crouch funktionieren!
+### 1. ~~Player/Animation Setup~~ ✅ GELÖST (Session 4) → ⚠️ BROKEN (Session 5)
+- Session 4: Gelöst (heightFromFeet, Animator auf Child, Old Man Idle)
+- **Session 5: Animationen broken nach Cinemachine-Umbau + Avatar-Wechsel**
+- User hat Player Avatar geändert und alles neu zugewiesen
+- **Zu prüfen in Unity:**
+  - Animator-Komponente auf Cowboy (Child), NICHT auf Player
+  - Avatar = vom gleichen FBX wie das Mesh (z.B. Cowboy@Idle)
+  - Apply Root Motion = **UNCHECKED**
+  - PlayerController findet Animator via GetComponentInChildren
+  - MC_Controller.controller zugewiesen mit Speed + IsCrouching Parametern
 
 ### 2. Snake MoveAwayTarget
 - Beide Snakes liefen zum gleichen Punkt (übereinander)
 - Jede Snake braucht ein individuelles MoveAwayTarget (Empty GameObject)
 - Alternativ: Feature für Phase 1 Boceto deaktivieren
 
-### 3. ~~Canvas UI noch nicht aufgebaut~~ ✅ v2.0 FERTIG
-- CanvasUICreator v2.0 erstellt alles automatisch (Menu → SnakeEnchanter → Create Canvas UI)
-- **Nächster Schritt:** Alten GameCanvas löschen → Menu ausführen → In Unity testen
-- Marker-Sprite + Frame-Sprite per Inspector zuweisen
+### 3. ~~Canvas UI~~ ✅ v3.1/v2.1 FERTIG + getestet
+- Steampunk Theme mit Pergament-Rahmen, Arvo SDE Font
+- HealthBarUI v3.1: Gradient (continuous), Pulse, Debuff, Frame
+- TuneSliderUI v2.1: OnValidate, MarkerSize, FrameSliced, KeepAspect
 
 ---
 
@@ -131,13 +138,13 @@ Main: 5e1f5b1 Session 5 prep: Branch-Strategie, External Assets, 3D Assets, Medi
 
 ## NÄCHSTE AKTION
 
-**Ziel:** Canvas UI in Unity testen, dann Animationen fertigstellen
+**Ziel:** Animationen reparieren, dann Core Loop testen
 
-1. ✅ **Canvas UI v2.0** — HealthBarUI, TuneSliderUI, CanvasUICreator fertig (feature/canvas-ui)
-2. ⬜ **Canvas UI in Unity testen** — Alten Canvas löschen → Menu → Sprites zuweisen → Play Mode
-3. ⬜ **feature/canvas-ui → main mergen** (nach erfolgreichem Test)
-4. ⬜ **Animationen fertigstellen** (feature/animations-complete) — Spell Cast, Death, Transitions
-5. ⬜ **Play-Test Core Loop** — Bewegen → Schlange → Tune → Effekt → Win/Lose
+1. ✅ **Canvas UI v3.1/v2.1** — Fertig + getestet + Steampunk Theme (feature/canvas-ui → main gemergt)
+2. ⬜ **Animationen reparieren** — Avatar/Cinemachine-Umbau hat Anims broken (feature/animations-complete)
+3. ⬜ **Spell Cast + Death** zum Animator hinzufügen (IsCasting, IsDead Parameter)
+4. ⬜ **Play-Test Core Loop** — Bewegen → Schlange → Tune → Effekt → Win/Lose
+5. ⬜ **Phase 1 abschließen** — Alles spielbar?
 
 ---
 
@@ -221,6 +228,31 @@ Assets/Documentation/Media/Screenshots/Cooking-Slider-Example.png (Referenz)
 
 ---
 
+## ⚠️ WICHTIGE ÄNDERUNGEN SESSION 5 NACHTRAG (06.02 spät)
+
+### UI Polish:
+- **TuneSliderUI v2.1:** OnValidate() für live Inspector-Updates, MarkerSize fix, Frame Image.Type=Sliced, KeepAspect
+- **HealthBarUI v3.1:** Gradient continuous update (war nur bei Event), Steampunk Theme, Frame + Texture
+- **CanvasUICreator:** SliderFrame extends beyond SliderArea (-6/-6 bis 6/6)
+- **Steampunk UI Pack** (Gentleland) importiert für Rahmen-Sprites, Font: Arvo SDE
+
+### Cinemachine v3.x Integration:
+- **CM_PlayerCamera:** CinemachineCamera, Follow=CameraTarget, Rotate With Follow Target
+- **CameraHeadTracker v1.0:** Position-only tracking des animierten Head Bones (LateUpdate)
+- **PlayerController v1.7:** Cinemachine Final — Camera.main Auto-Find, Pitch-only Steuerung
+- Body Rotation (Yaw) → PlayerController, Cinemachine folgt via "Rotate With Follow Target"
+- Camera Position → Cinemachine Follow (folgt CameraTarget unter Head)
+
+### Setup-Review:
+- Alle 12 Scripts validiert — kein überflüssiges Script
+- Backlog: B-001 Lambda-Leak, B-002 deprecated API
+
+### Git:
+- feature/canvas-ui → main gemergt (fast-forward) + Branch gelöscht
+- feature/animations-complete erstellt + main gemergt
+
+---
+
 ## ⚠️ WICHTIGE REGELN (NICHT VERHANDELBAR)
 
 ### Input System (ADR-006):
@@ -230,12 +262,16 @@ AUSSCHLIESSLICH Unity New Input System!
 - IMMER UnityEngine.InputSystem
 ```
 
-### Kamera-Position:
+### Kamera-System (Cinemachine v3.x):
 ```
-Kamera = Child des Players in Hierarchy.
-Position über Transform im Scene View.
-Script kontrolliert NUR Rotation + Crouch-Transition.
-NIEMALS Kamera-Position per SerializeField überschreiben.
+Main Camera = Cinemachine Brain (auto-managed)
+CM_PlayerCamera = CinemachineCamera mit:
+  - Follow = CameraTarget (unter Head Bone, via CameraHeadTracker)
+  - Rotation = "Rotate With Follow Target" (folgt Player Yaw)
+PlayerController v1.7 steuert NUR:
+  - Player Body Rotation (Yaw/Y-Achse, Mouse X)
+  - Camera Pitch (X-Achse, Mouse Y, direkt auf Camera.main)
+NIEMALS Kamera-Position per Script überschreiben!
 ```
 
 ### Animation-Entscheidung:
@@ -253,10 +289,10 @@ Snake_Enchanter/
 │   ├── _Project/
 │   │   ├── Scripts/
 │   │   │   ├── Core/{GameEvents v1.1, GameManager v1.1.1}.cs
-│   │   │   ├── Player/{PlayerController v1.5, HealthSystem v1.2.1}.cs
+│   │   │   ├── Player/{PlayerController v1.7, HealthSystem v1.2.1, CameraHeadTracker v1.0}.cs
 │   │   │   ├── TuneSystem/{TuneController v2.2, TuneConfig}.cs
 │   │   │   ├── Snakes/SnakeAI.cs
-│   │   │   ├── UI/{HealthBarUI v2.0, TuneSliderUI v2.0}.cs
+│   │   │   ├── UI/{HealthBarUI v3.1, TuneSliderUI v2.1}.cs
 │   │   │   ├── Level/ExitTrigger.cs
 │   │   │   └── Editor/{CanvasUICreator v2.0, TuneConfigCreator}.cs
 │   │   ├── ScriptableObjects/TuneConfigs/ (4 TuneConfig SOs)
@@ -316,3 +352,12 @@ Snake_Enchanter/
 | **06.02.2026** | **HealthBarUI v2.0**: Gradient, Pulse, Debuff-Text, kein HP-Text | ✅ Fertig |
 | **06.02.2026** | **TuneSliderUI v2.0**: Segmente, Marker, Frame, 3 Zonen-Farben | ✅ Fertig |
 | **06.02.2026** | **CanvasUICreator v2.0**: Neue Hierarchie + Auto-Wiring | ✅ Commit 7e71b13 |
+| **06.02.2026** | **TuneSliderUI v2.1**: MarkerSize, FrameSliced, OnValidate, KeepAspect | ✅ Commit b8c03e4 |
+| **06.02.2026** | **CanvasUICreator**: SliderFrame extends beyond SliderArea | ✅ Commit 302c9cb |
+| **06.02.2026** | **HealthBarUI v3.1**: Gradient continuous update fix | ✅ Steampunk Theme |
+| **06.02.2026** | **Cinemachine v3.x** integriert: CM_PlayerCamera + CameraHeadTracker | ✅ PlayerController v1.7 |
+| **06.02.2026** | **Steampunk UI Pack** importiert, Player Avatar geändert | ✅ Visuelles Update |
+| **06.02.2026** | **Setup-Review** aller 12 Scripts: Keine Redundanz, Standards OK | ✅ B-001, B-002 geloggt |
+| **06.02.2026** | **Commit Session 5**: UI polish, Cinemachine, asset restructure | ✅ Commit 01c0329 |
+| **06.02.2026** | **feature/canvas-ui → main** gemergt + Branch gelöscht | ✅ Fast-forward |
+| **06.02.2026** | **feature/animations-complete** erstellt, main gemergt | ⚠️ Anims broken |

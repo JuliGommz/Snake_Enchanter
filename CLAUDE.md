@@ -92,6 +92,16 @@ Assets/
 - Input Actions Asset: `Assets/_Project/Data/SnakeEnchanter.inputactions`
 - Project Settings → Player → Active Input Handling = "Input System Package (New)"
 
+### Kamera-System (Cinemachine v3.x)
+**Cinemachine steuert Position + Yaw, PlayerController steuert Pitch!**
+- **Main Camera:** CinemachineBrain (auto-managed)
+- **CM_PlayerCamera:** CinemachineCamera
+  - Follow = CameraTarget (unter animiertem Head Bone)
+  - Rotation = "Rotate With Follow Target" (folgt Player Body Yaw)
+- **CameraHeadTracker.cs:** Position-only Tracking des Head Bones (LateUpdate)
+- **PlayerController v1.7:** Nur Pitch (Mouse Y) + Body Yaw (Mouse X)
+- NIEMALS Kamera-Position per Script überschreiben — Cinemachine besitzt die Position!
+
 ---
 
 ## Wichtige Dateien

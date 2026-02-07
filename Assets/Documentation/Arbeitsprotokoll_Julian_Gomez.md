@@ -114,11 +114,39 @@
 ### 06.02.2026 (Donnerstag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| Git Branch-Strategie einrichten + dokumentieren | x | x | x |
+| CanvasUICreator v1.0 Editor-Tool erstellen | x | x | x |
+| HealthBarUI v2.0→v3.1: Gradient, Pulse, Debuff, Frame | x | x | x |
+| TuneSliderUI v2.0→v2.1: Segmente, Marker, Frame, Zonen | x | x | x |
+| CanvasUICreator v2.0: Neue Hierarchie + Auto-Wiring | x | x | x |
+| Canvas UI im Inspector anpassen (Steampunk-Theme, Arvo SDE Font) | x | x | x |
+| Cinemachine einbauen (CM_PlayerCamera, CameraHeadTracker) | x | x | x |
+| PlayerController v1.5→v1.7: Cinemachine-kompatibel (Pitch-only) | x | x | x |
+| CameraHeadTracker.cs erstellen (Position-only Tracking) | x | x | x |
+| Steampunk UI Pack (Gentleland) importieren | x | x | x |
+| 3D_Assets Ordnerstruktur bereinigen | x | x | x |
+| Gradient-Bug fixen (UpdateBarColor nur bei Event statt kontinuierlich) | | x | x |
+| TuneSliderUI Fixes: MarkerSize, Frame Sliced, OnValidate | | x | x |
+| Setup-Review aller 12 Scripts (Qualitaet, Standards, Redundanz) | x | x | x |
+| Backlog erstellen (B-001 Lambda-Leak, B-002 deprecated API) | | x | x |
+| Player Avatar geaendert + Cinemachine Kamera repariert | x | x | x |
+| Animationen nach Cinemachine-Umbau testen | x | x | |
 
 **Screenshot:** `Media/Screenshots/2026-02-06_.png`
 
 **Notizen:**
+- Git Branch-Strategie eingefuehrt: `feature/<name>` von main, Claude erinnert bei Start/Ende
+- Canvas UI komplett ueberarbeitet: Genshin-Style Segmented Slider mit 3 Farbzonen (Gelb=Safe, Orange=Success, Grau=Danger)
+- HealthBar: Gradient (Rot→Gelb→Gruen), Puls-Effekt unter 30% HP, Debuff-Text, kein HP-Text
+- Steampunk UI Pack fuer Rahmen/Frame-Sprites, Font: Arvo SDE
+- Cinemachine v3.x integriert: Kamera folgt Head-Bone, PlayerController steuert nur Pitch
+- CameraHeadTracker.cs: Verfolgt nur Position des Head-Bones, Rotation bleibt bei PlayerController
+- PlayerController v1.7: Cinemachine Final — Camera.main Auto-Find, Pitch-only Steuerung
+- **Gradient-Bug gefixt:** UpdateBarColor wurde nur bei OnHealthChanged aufgerufen, nicht kontinuierlich
+- **Setup-Review:** Alle 12 Scripts validiert — kein ueberflussiges Script, alle Standards eingehalten
+- **Backlog:** B-001 TuneController Lambda-Leak, B-002 SnakeAI deprecated FindObjectsOfType
+- **PROBLEM:** Nach Cinemachine-Umbau und Avatar-Aenderung funktionieren Animationen nicht mehr
+- **OFFEN:** Animations-Problem debuggen (Avatar-Zuweisung, Animator-Platzierung pruefen)
 
 
 ---
