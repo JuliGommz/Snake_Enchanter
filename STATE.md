@@ -39,11 +39,11 @@
 | PlayerController.cs | **v1.7** | SnakeEnchanter.Player | ✅ Cinemachine Final, Pitch-only, Auto Camera.main |
 | CameraHeadTracker.cs | **v1.0** | SnakeEnchanter.Player | ✅ NEU — Position-only Head Bone Tracking |
 | HealthSystem.cs | **v1.2.1** | SnakeEnchanter.Player | ✅ Drain 0.1 HP/sec, deaktiviert für Dev |
-| TuneController.cs | **v2.2** | SnakeEnchanter.Tunes | ✅ + TuneSuccessWithId Event |
+| TuneController.cs | **v2.3** | SnakeEnchanter.Tunes | ✅ B-001 Lambda-Leak fix + proper unsubscribe |
 | TuneConfig.cs | v1.0 | SnakeEnchanter.Tunes | ✅ ScriptableObject |
 | ExitTrigger.cs | v1.0 | SnakeEnchanter.Level | ✅ Done |
 | GameEvents.cs | **v1.1** | SnakeEnchanter.Core | ✅ + OnTuneSuccessWithId |
-| SnakeAI.cs | **v1.0** | SnakeEnchanter.Snakes | ✅ State Machine, Tune Reaction |
+| SnakeAI.cs | **v1.1** | SnakeEnchanter.Snakes | ✅ B-002 deprecated API fix |
 | GameManager.cs | **v1.1.1** | SnakeEnchanter.Core | ✅ Game Loop, Mode, Session Tracking |
 | HealthBarUI.cs | **v3.1** | SnakeEnchanter.UI | ✅ Gradient (continuous), Pulse, Debuff, Frame, Steampunk |
 | TuneSliderUI.cs | **v2.1** | SnakeEnchanter.UI | ✅ Segmente, Marker, Frame, OnValidate, KeepAspect |
@@ -122,17 +122,11 @@ Main: dae0b75 (up-to-date, feature/canvas-ui wurde gemergt + gelöscht)
 
 ## 📋 BACKLOG (Phase 2+)
 
-### B-001: TuneController Lambda-Leak in EnableInput()
-- **Schweregrad:** Niedrig (Phase 1 safe, wird selten getriggert)
-- **Problem:** Lambdas in `_tune1Action.started += ctx => OnTuneKeyPressed(1)` können nicht korrekt desubscribed werden. Bei wiederholtem Enable/Disable stapeln sich Listener.
-- **Fix:** Lambdas durch benannte Methoden ersetzen oder Listener-Referenzen cachen.
-- **Wann:** Phase 2 (wenn Restart/Pause häufiger Enable/Disable auslöst)
+### ~~B-001: TuneController Lambda-Leak~~ ✅ FIXED (v2.3)
+- Cached delegates in Awake(), proper unsubscribe in DisableInput()
 
-### B-002: SnakeAI deprecated FindObjectsOfType
-- **Schweregrad:** Niedrig (Warning only, funktioniert)
-- **Problem:** `FindObjectsOfType<SnakeAI>()` in `IsClosestTargetableSnake()` ist deprecated.
-- **Fix:** Ersetzen durch `FindObjectsByType<SnakeAI>(FindObjectsSortMode.None)` (Unity 2023+ API)
-- **Wann:** Nächster SnakeAI-Touch
+### ~~B-002: SnakeAI deprecated FindObjectsOfType~~ ✅ FIXED (v1.1)
+- Replaced with FindObjectsByType<SnakeAI>(FindObjectsSortMode.None)
 
 ---
 
@@ -290,7 +284,7 @@ Snake_Enchanter/
 │   │   ├── Scripts/
 │   │   │   ├── Core/{GameEvents v1.1, GameManager v1.1.1}.cs
 │   │   │   ├── Player/{PlayerController v1.7, HealthSystem v1.2.1, CameraHeadTracker v1.0}.cs
-│   │   │   ├── TuneSystem/{TuneController v2.2, TuneConfig}.cs
+│   │   │   ├── TuneSystem/{TuneController v2.3, TuneConfig}.cs
 │   │   │   ├── Snakes/SnakeAI.cs
 │   │   │   ├── UI/{HealthBarUI v3.1, TuneSliderUI v2.1}.cs
 │   │   │   ├── Level/ExitTrigger.cs

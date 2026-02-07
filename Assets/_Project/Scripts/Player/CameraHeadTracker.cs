@@ -27,21 +27,21 @@
 * - Unity Core (UnityEngine)
 * 
 * DESIGN RATIONALE:
-* - Problem: PlayerController expects Main Camera as Player child (mouse look)
-* - Problem: Head animation position must be tracked
-* - Solution: Track ONLY position from Head, leave rotation to PlayerController
+* - Cinemachine handles camera follow via CameraTarget
+* - This script tracks Head bone position for CameraTarget
+* - PlayerController handles pitch (Mouse Y) + body yaw (Mouse X)
 * - Architecture: Separation of Concerns (Position vs Rotation)
-* 
+*
 * COMPATIBILITY:
-* - Works WITH PlayerController.HandleCameraLook()
-* - Does NOT conflict with localRotation control
-* - Position from Head, Rotation from Mouse Input
-* 
+* - Cinemachine CM_PlayerCamera follows CameraTarget (this object)
+* - PlayerController v1.7 handles pitch directly on Camera.main
+* - Position from Head bone, Rotation from PlayerController + Cinemachine
+*
 * SETUP:
-* 1. Main Camera stays as child of Player (PlayerController requirement)
-* 2. Attach this script to Main Camera
+* 1. CameraTarget GameObject under animated Head bone
+* 2. Attach this script to CameraTarget
 * 3. Assign Head bone as Head Target
-* 4. PlayerController continues to handle rotation normally
+* 4. CM_PlayerCamera Follow = this CameraTarget
 * 5. Adjust Position Offset in Inspector (live preview available)
 * 
 * VERSION HISTORY:
@@ -94,7 +94,7 @@ namespace SnakeEnchanter.Player
 
             if (_headTarget == null)
             {
-                Debug.LogError("[CameraHeadTracker] Head Target nicht zugewiesen!", this);
+                Debug.LogError("CameraHeadTracker: Head Target nicht zugewiesen!", this);
             }
         }
 

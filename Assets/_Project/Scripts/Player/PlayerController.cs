@@ -169,11 +169,11 @@ namespace SnakeEnchanter.Player
 
                 if (_playerCamera == null)
                 {
-                    Debug.LogWarning("[PlayerController] Camera.main nicht gefunden! Mouse Look wird nicht funktionieren.", this);
+                    Debug.LogWarning("PlayerController: Camera.main nicht gefunden! Mouse Look wird nicht funktionieren.", this);
                 }
                 else
                 {
-                    Debug.Log("[PlayerController] Camera.main automatisch gefunden (Cinemachine Mode).", this);
+                    Debug.Log("PlayerController: Camera.main automatisch gefunden (Cinemachine Mode).", this);
                 }
             }
 
@@ -252,12 +252,12 @@ namespace SnakeEnchanter.Player
                 }
                 else
                 {
-                    Debug.LogError("[PlayerController] 'Player' action map not found in InputActionAsset!", this);
+                    Debug.LogError("PlayerController: 'Player' action map not found in InputActionAsset!", this);
                 }
             }
             else
             {
-                Debug.LogError("[PlayerController] InputActionAsset 'SnakeEnchanter' nicht gefunden!", this);
+                Debug.LogError("PlayerController: InputActionAsset 'SnakeEnchanter' nicht gefunden!", this);
             }
         }
 
