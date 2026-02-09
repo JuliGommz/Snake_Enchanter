@@ -135,15 +135,25 @@ Assets/
 ### Git Branch-Strategie (ab Session 5)
 **Jedes Feature bekommt einen eigenen Branch!**
 
-- **Branch-Naming:** `feature/<kurzer-name>` (z.B. `feature/canvas-ui`, `feature/snake-moveaway`)
-- **Workflow:**
-  1. Neues Feature → `git checkout -b feature/<name>` von `main`
-  2. Arbeiten + Commits auf dem Feature-Branch
-  3. Feature fertig → Merge in `main` (oder PR falls gewünscht)
-  4. Branch löschen nach Merge
-- **Claude-Pflicht:** Bei Feature-Start und Feature-Ende den Entwickler erinnern:
-  - **Start:** "Neuen Branch erstellen: `feature/<name>`"
-  - **Ende:** "Feature fertig — Branch in `main` mergen?"
+**Branch-Regeln:**
+1. **Ein Feature = Ein Branch** — Niemals zwei Branches für die gleiche Arbeit
+2. **Just-in-Time Branching** — Branch erst erstellen, wenn Feature startet
+3. **Nach Merge: LÖSCHEN** — Feature-Branch lokal + remote entfernen
+4. **Vor Session: Branch prüfen** — `git branch --show-current` und mit User bestätigen
+
+**Branch-Naming:** `feature/<kurzer-name>` (z.B. `feature/canvas-ui`, `feature/snake-moveaway`)
+
+**Feature-Workflow:**
+1. Start: `git checkout -b feature/<name>` von `main`
+2. Arbeiten: Commits auf Feature-Branch
+3. Ende: Merge in `main` (--no-ff für saubere Historie)
+4. Cleanup: Branch löschen (lokal + remote)
+5. STATE.md: Feature als "complete" markieren
+
+**Claude-Pflicht:**
+- Vor Code-Änderungen: Aktuellen Branch prüfen und mit User bestätigen
+- Nach Feature: User fragen: "Feature fertig — Branch löschen?"
+- NIEMALS einen zweiten Branch für die gleiche Arbeit erstellen
 
 ### Für den Entwickler:
 - **Täglich:** Arbeitsprotokoll + Screenshot + Commit
