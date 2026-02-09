@@ -1,0 +1,554 @@
+Snake Enchanter – Game Design Document
+Version: 1.5
+Date: 09.02.2026
+Author: Julian
+Project: PIP-3 Theme B – Solo Game Development Project
+
+====================================================================
+
+1. Project Frame
+
+1.1 Academic Context
+
+Theme: B – Eigenständiges 2D- oder 3D-Spiel mit klarer Kernmechanik
+Engine: Unity (3D)
+Platform: Windows, school laptops, stable 60 FPS, 1920×1080 + ultrawide support
+Team: Solo
+Duration: 03.02.2026 – ~03.03.2026
+
+Implications of Theme B:
+• Focus on one clear core mechanic.
+• Deliver a playable, completed prototype with clear win and loss conditions.
+• At least one full gameplay loop: Start → Play → End.
+• Game/round statistics stored in a database via HTTP/JSON API.
+• Structured code and clean project organization.
+• Implement one Wahlinhalt: "Verschiedene Modi – mind. 2 Modi" (Simple & Advanced mode).
+
+====================================================================
+
+2. High-Level Concept
+
+2.1 Elevator Pitch
+
+In Snake Enchanter, the player is a wounded warrior trapped in a collapsed ancient ruin, racing against failing health to reach the only escape: a distant window. Unable to fight in their weakened state, the warrior uses discovered magical melodies to command snakes—moving them aside, lulling them to sleep, or redirecting them toward other threats. Each melody requires precise timing: hold the tune key to charge a slider, then release when the marker enters the glowing trigger zone. Release too early and the charm fizzles harmlessly; release too late and the snake strikes back. Time is the enemy—health depletes continuously as the warrior weakens, and in Advanced mode, a dynamic collapse timer adapts to health levels, creating mounting pressure.
+
+2.2 Core Fantasy
+
+The player is a warrior, but not in fighting condition.
+Music becomes the weapon when physical strength fails.
+The ruins are unstable; snakes are both danger and tool.
+Every second counts—the warrior is injured and weakening.
+Skillful command—precise slider timing—extends survival; mistakes are costly.
+
+2.3 Target Audience
+
+Age 16+, casual-to-mid-core players, no specific genre experience required.
+Should understand goal and controls within 30–60 seconds.
+
+2.4 Project Goals (Theme B Alignment)
+
+• Deliver a clear, understandable core mechanic (slider-based snake command with timing skill).
+• Provide a short, replayable experience (5–8 minutes per run).
+• Implement two modes (Simple, Advanced) from same core level and systems.
+• Integrate database-backed stats to reflect player performance.
+• Support a highly readable, trailer-friendly experience.
+
+====================================================================
+
+3. Game Structure
+
+3.1 Game Loop
+
+1. Main Menu → Mode selection (Simple / Advanced).
+2. Brief intro (camera + on-screen hints).
+3. Core gameplay: move through ruin, charm snakes, manage health depletion.
+4. Health management:
+   a. Health drains passively over time (wounded warrior).
+   b. Successful tune casts restore HP (motivational boost).
+   c. Snake attacks deal HP damage.
+5. Reach window (win) or health reaches 0 (lose) or (Advanced) dynamic timer expires.
+6. Show result screen (stats) + send stats to backend.
+7. Option: Restart same mode or return to menu.
+
+3.2 Session Length
+
+Target: 5–8 minutes per run (both modes).
+Health drain rates calibrated to this target duration.
+
+3.3 Modes (Wahlinhalt – 2 Modi)
+
+Mode 1 – Simple Escape
+• All 3 core tunes available from start.
+• Slower passive health drain.
+• Snakes slower and less aggressive.
+• Wider trigger zones on slider (easier timing).
+• No additional timer pressure.
+• Objective: Reach the window with HP > 0.
+
+Mode 2 – Advanced Escape
+• All 3 core tunes from start.
+• Hidden scroll unlocks 4th tune mid-level (optional but rewarded).
+• Faster passive health drain (15% faster than Simple).
+• Narrower trigger zones on slider (more difficult).
+• Dynamic collapse timer linked to HP percentage.
+• Snakes patrol faster and react quicker.
+• Objective: Reach window before timer expires with HP > 0; bonus for unlocking Tune 4.
+
+====================================================================
+
+4. Core Gameplay & Mechanics
+
+4.1 Player Abilities
+
+Movement: Free 3D movement using WASD.
+Camera: First-person view with mouse look.
+Interaction: Trigger tune casting when inside "command range" of a target snake.
+
+4.2 Tune System (Kernmechanik) – Genshin-Style Hold & Release Slider
+
+Core Mechanic:
+Each tune is mapped to a single key (1, 2, 3, 4 – not Numpad). Player holds the key to charge a slider from 0% to 100%. A colored trigger zone marks the success area. Player must release the key when the slider position is within the trigger zone.
+
+Slider Behavior:
+• HOLD KEY: Slider moves continuously from 0% toward 100%.
+• RELEASE KEY: Current slider position is evaluated against trigger zone.
+• Slider speed determined by tune duration (shorter duration = faster slider).
+
+Three Possible Outcomes:
+
+1. TOO EARLY (Release before trigger zone):
+   • Charm fizzles – no effect.
+   • Snake returns to idle state.
+   • No damage to player (safe fail).
+   • Player can retry immediately.
+
+2. SUCCESS (Release within trigger zone):
+   • Charm succeeds – snake obeys command.
+   • Player health restored (+X HP).
+   • Visual/audio confirmation feedback.
+   • Snake executes commanded behavior.
+
+3. TOO LATE (Release after trigger zone OR slider reaches 100%):
+   • Charm breaks – loss of control.
+   • Snake becomes aggressive and attacks.
+   • Player takes HP damage.
+   • Time is lost (must deal with angry snake).
+
+Tune Parameters:
+
+| Tune | Key | Slider Duration | Trigger Zone | Effect |
+|------|-----|-----------------|--------------|--------|
+| Move | 1 | 3 seconds | 40-65% | Snake moves away |
+| Sleep | 2 | 4 seconds | 35-60% | Snake falls asleep |
+| Attack | 3 | 5 seconds | 30-55% | Snake attacks enemy |
+| Freeze | 4 | 6 seconds | 25-50% | All creatures freeze |
+
+Mode Difficulty Adjustment:
+• Simple Mode: Trigger zones are 10% wider (e.g., Move becomes 35-70%).
+• Advanced Mode: Trigger zones as specified above.
+
+Visual Slider Cue:
+• Location: Center-bottom of screen or near targeted snake.
+• Visual: Horizontal slider bar with moving marker.
+• Trigger zone highlighted in green/cyan color.
+• Before zone: Gray/neutral color.
+• After zone: Red color (danger).
+• Marker shows current position as key is held.
+
+Audio Feedback:
+• Melody plays continuously during hold, rising in pitch/intensity.
+• Success: Melody resolves with uplifting chime + snake responds.
+• Too Early: Melody fades out softly (no harsh sound).
+• Too Late: Melody distorts with warning tone, snake hisses.
+
+4.3 Tunes (Kernmechanik Detail)
+
+Tune 1 – Move Command
+• Key: 1
+• Slider Duration: 3 seconds.
+• Trigger Zone: 40-65% (Simple: 35-70%).
+• Effect: Targeted snake moves away from the path to a safe zone.
+• Primary use: Clear blocking snakes to open routes.
+• On success: Snake relocates, player health restored (+X HP).
+
+Tune 2 – Sleep Command
+• Key: 2
+• Slider Duration: 4 seconds.
+• Trigger Zone: 35-60% (Simple: 30-65%).
+• Effect: Snake coils up, becomes fully passive, collision disabled.
+• Primary use: Neutralize aggressive snakes safely.
+• Persistence: Sleeping snakes remain asleep until player passes or timer expires.
+• Critical for passage: Player MUST put snakes to sleep to pass unhindered.
+• On success: Snake sleeps peacefully, player health restored (+X HP).
+
+Tune 3 – Attack Command
+• Key: 3
+• Slider Duration: 5 seconds.
+• Trigger Zone: 30-55% (Simple: 25-60%).
+• Effect: Target snake attacks the nearest living enemy creature.
+• On success: Snake attacks target, player health restored (+X HP).
+• On failure (too late): Snake turns aggressive toward player.
+
+Tune 4 – Freeze Command (Advanced Mode Only)
+• Key: 4
+• Slider Duration: 6 seconds.
+• Trigger Zone: 25-50% (Simple: N/A – Advanced only).
+• Effect: Temporarily freezes all living creatures except player within a radius.
+• Emergency use: High-impact tool for complex encounters.
+• On success: All nearby creatures frozen, player health restored (+X HP).
+
+4.4 Health & Failure
+
+Health System:
+• Continuous HP scale: 0–100.
+• Starting HP: 30/100 (player begins injured).
+• Display: Health bar UI (top-left) with numeric value and color gradient.
+
+Passive Health Drain:
+• Simple Mode: Drain rate calibrated for ~6 minutes survival with competent play.
+• Advanced Mode: 15% faster than Simple Mode.
+
+Health Restoration:
+• Per successful tune cast (slider release within trigger zone): +X HP.
+• Cannot exceed 100 HP cap.
+
+Snake Attack Damage:
+• Triggered by:
+  1. Slider release too late (past trigger zone).
+  2. Collision with active/aggressive snake not put to sleep.
+• Damage amount: Subject to balancing (must allow mistakes without instant lethal).
+• Visual feedback: Red flash, screen shake, floating damage text.
+• Audio feedback: Hiss, bite impact sound.
+
+Death Condition:
+• HP ≤ 0 → immediate game over.
+• Lose screen displays stats; session data sent to backend.
+
+UI Feedback – Low Health Warnings:
+• At 50% HP: Health bar shifts to yellow.
+• At 25% HP: Health bar turns red with pulsing.
+• At 10% HP: Red vignette at screen edges with heartbeat audio loop.
+
+4.5 Win & Lose Conditions
+
+Win (both modes):
+• Reach the window exit trigger with HP > 0.
+• Advanced mode: Bonus rating if 4th tune unlocked and used.
+
+Lose (both modes):
+• Health reaches 0.
+
+Advanced Mode Additional Pressure:
+• Dynamic collapse timer linked to HP percentage.
+• Time remaining = (Current HP / Max HP) × Base Time Multiplier.
+• If timer reaches 0: Ruin collapses → lose condition.
+
+====================================================================
+
+5. World, Level & Progression
+
+5.1 Setting & Tone
+
+Setting: Interior of ancient ruined temple or cave system, partially collapsed.
+Environment: Stone corridors, broken pillars, fallen debris, dim light shafts.
+Tone: Mysterious, slightly tense but not horror. Focus on cleverness and precise control.
+
+5.2 Level Structure
+
+Single handcrafted level reused for both modes with variation through rules (drain rate, timer, aggression, trigger zone width).
+
+Area 1 – Tutorial & First Challenge
+
+• Safe entry zone introducing movement and camera controls.
+• Teaches all 3 core tunes with easy, forgiving puzzles.
+• Pack of smaller snakes (lower damage output, more patient).
+• Player experiments with slider timing on low-risk encounters.
+• Trigger zones widest here (Tutorial: 35-75% for all tunes).
+• Objective: Learn slider mechanics and timing precision without high threat.
+• Exit leads to Area 2.
+
+Area 2 – Escalation
+
+• Combination of blocking and patrolling snakes.
+• Requires decisions between Move and Sleep tunes for safe passage.
+• Aggressive snake encounter in narrow corridor.
+• Optional use of Attack tune to redirect threats.
+• Health management becomes critical; fewer mistakes tolerated.
+• Hidden alcove (Advanced mode only) containing scroll for Tune 4.
+• Trigger zones tighter than Area 1; consequences of failure increase.
+
+Area 3 – Finale
+
+• 3+ snakes in layered layout near window.
+• Requires combined, skillful usage of all learned tunes.
+• Highly visible exit with light beam.
+• Final push—health management and precise slider timing critical.
+• Trigger zones tightest here; snake behaviors most aggressive.
+
+====================================================================
+
+6. Controls & UX
+
+6.1 Controls (Keyboard & Mouse)
+
+Movement: WASD
+Camera: Mouse move (first-person look)
+Tunes: Hold keys 1, 2, 3, 4 (not Numpad) – release within trigger zone
+Interaction: E (if needed, e.g., to read scroll)
+
+6.2 UI Elements
+
+Health Bar:
+• Location: Top-left.
+• Gradient fill: Green (100–50 HP) → Yellow (50–25 HP) → Red (25–0 HP).
+• Numeric display: "Current / Maximum".
+• Smooth continuous depletion animation.
+
+Tune Slider UI:
+• Location: Center-bottom of screen during tune cast.
+• Visual: Horizontal bar (0% left, 100% right).
+• Moving marker shows current slider position.
+• Trigger zone highlighted in green/cyan.
+• Before zone: Gray (safe to release, but no effect).
+• After zone: Red (danger – snake will attack).
+• Appears when tune key is pressed, disappears on release.
+
+Mode Label:
+• Top-center: "Simple Escape" / "Advanced Escape".
+• Advanced mode: Dynamic timer display at top-center.
+
+Snake Feedback:
+• Success: Colored glow (green/blue), smooth behavior transition.
+• Too Early: No reaction, snake stays idle.
+• Too Late: Red flash, aggressive animation, snake lunges.
+
+Health Restoration Feedback:
+• Floating text at player position (green).
+• Green particle burst.
+• Health bar glow (positive).
+• Uplifting chime.
+
+Damage Feedback:
+• Floating damage text at impact point (red).
+• Red particle burst from bite.
+• Screen shake.
+• Health bar flash (red).
+• Impact sound + hiss.
+
+Result Screen displays:
+• Mode, Success/Failure, Completion time, HP stats, Tune cast stats, 4th tune unlock (Advanced).
+
+====================================================================
+
+7. Technical & Data
+
+7.1 Engine & Performance
+
+Unity 3D project with first-person character controller.
+Target: 60 FPS on school laptops, minimal overdraw.
+
+7.2 Data & Backend Requirements
+
+Session Data per Run:
+sessionId, modeType, success, completionTime, startingHP, endingHP, totalDamageTaken, totalHPRestored, successfulTuneCasts, failedTuneCasts (tooEarly + tooLate), snakeBiteCount, tooEarlyCount, tooLateCount, fourthTuneUnlocked, timestamp.
+
+API Endpoints:
+POST /api/game-session – store session stats.
+GET /api/leaderboard?mode=simple/advanced – top results.
+GET /api/player-stats – aggregate stats for display.
+
+====================================================================
+
+8. Assets & Audio
+
+8.1 Visual Assets
+
+Snakes: Toon Snakes Pack (Unity Asset Store, Meshtint Studio).
+Models: Toon Cobra (288 tri), Toon Snake (248 tri).
+Animations: Idle, Move, Attack (Bite), Hit, Die, Sleep (coiled).
+
+Environment:
+• Cave system: Caves Parts Set (Unity Asset Store).
+• Dwarven Pack for additional structures.
+
+Player Character:
+• Model: Pirate character (Mixamo Humanoid Rig).
+• View: First-person with visible arms and sometimes feet (full body model).
+• Materials: 8x URP/Lit materials (Body, Cloth, Hair, Weapon, etc.).
+• Animations (13 total):
+  - Movement (4): Idle (Breathing), Walk, Crouch Idle, Crouch Walk
+  - Spells (4): Spell Casting (Move), Wide Arm Spell Casting (Daze),
+    Standing 2H Cast Spell (Attack), Magic Spell Casting (Fear)
+  - Death (2): Standing React Death Forward (Drain), Standing React Death Left (Snake Attack)
+  - Others: Injured Walk (unused currently)
+• Camera: First-person via Cinemachine v3.x (CameraTarget under Head Bone, follows head position).
+
+8.2 Audio
+
+Music: Ambient ruins/cave background; optional tension layer in Advanced mode.
+
+Sound Effects:
+• Flute melodies (4 tunes, 3–6 seconds each matching slider duration).
+• Snake sounds: hiss, bite, death, sleep coil.
+• Player breathing (low health warning).
+• Environmental: stone crumble, distant rumble (collapse threat in Advanced).
+• UI sounds: success chime, soft fade (too early), warning tone (too late), button clicks, heartbeat loop.
+• All audio license-free or properly licensed and credited.
+
+====================================================================
+
+9. Risks & Open Questions
+
+9.1 Design Risks
+
+Teaching cost: Slider mechanic plus 3–4 tunes could overwhelm players.
+Mitigation: Gentle tutorial ramp, clear visual slider, wide trigger zones in tutorial area.
+
+Trigger zone balance: Too narrow = frustrating; too wide = trivial.
+Mitigation: Extensive playtesting; mode differentiation (Simple wider, Advanced narrower).
+
+"Too Early" being too safe: Players might always release early to avoid damage.
+Mitigation: No HP restoration on too-early release; must succeed to progress and heal.
+
+Snake sleeping persistence: Snakes remain asleep until player passes.
+Mitigation: Clear visual feedback when snake sleeps; test duration appropriateness.
+
+9.2 Technical Risks
+
+Slider precision: Input timing and visual sync must be accurate.
+Mitigation: Use Time.deltaTime for smooth slider movement; test on target hardware.
+
+Audio sync: Melody must match slider duration exactly.
+Mitigation: Pre-record audio clips matching each tune's slider duration (3s, 4s, 5s, 6s).
+
+====================================================================
+
+10. Balancing Framework
+
+10.1 Core Balance Variables
+
+Health Pool: Maximum HP 100, Starting HP 30.
+
+Passive Drain Rates:
+• Simple Mode: Drain rate for ~6 minutes survival (subject to playtesting).
+• Advanced Mode: 15% faster than Simple.
+
+Trigger Zone Sizes by Context:
+
+| Context | Zone Width | Example (Move Tune) |
+|---------|------------|---------------------|
+| Tutorial | 40% | 30-70% |
+| Simple Mode | 35% | 35-70% |
+| Advanced Mode | 25% | 40-65% |
+| Elite Snake | 15% | 42-57% |
+
+Health Restoration:
+• Per successful tune cast: +X HP (subject to balancing).
+• Only on success (release within trigger zone).
+
+Snake Attack Damage:
+• Bite damage: Subject to playtesting.
+• Must be significant threat without instant lethality.
+• Only triggered on "too late" releases, not "too early".
+
+10.2 Balancing Approach
+
+Phase 1 (Week 1-2): Initial implementation with placeholder values.
+Phase 2 (Week 3): Playtesting and iteration on trigger zones and damage.
+Phase 3 (Week 4): Polish and lock final values.
+
+10.3 Balance Constraints
+
+All numeric values must satisfy:
+• Slider rewarding: Successful release within zone extends survival.
+• Risk/reward clear: Too early = safe but no progress; too late = punishment.
+• Mode differentiation: Advanced clearly more demanding (narrower zones).
+• Completion viability: 5–8 minutes achievable with skill.
+
+====================================================================
+
+11. Summary for Development
+
+Theme B Requirements:
+✓ Eigenständiges Spiel mit klarer Kernmechanik (slider-based tune control).
+✓ Vollständiger Gameplay-Loop (Start → Navigate → Slider timing → Manage health → Win/Lose).
+✓ Klare Ziel- & Verlustbedingungen (window exit or HP ≤ 0 or timer expiry).
+✓ Datenbankgestützte Statistiken (HTTP/JSON API with detailed session tracking).
+✓ Strukturierter Code & saubere Projektorganisation.
+✓ Wahlinhalt: 2 Modi erfüllt (Simple vs. Advanced with distinct trigger zone difficulty).
+
+====================================================================
+
+12. Version History
+
+Version 1.0 (21.01.2026 – 26.01.2026):
+• Initial draft GDD with 3 discrete hearts system.
+• No restoration mechanic; fixed Advanced timer; 5 areas.
+
+Version 1.1 (27.01.2026 11:53):
+• Health system: 3 hearts → continuous 0-100 HP (starting at 30/100).
+• Added passive health drain and restoration on successful tune casts.
+• Updated UI, database schema, elevator pitch.
+• Added Toon Snakes Pack details.
+
+Version 1.2 (27.01.2026 12:18):
+• Revised Core Fantasy: Player is warrior, but not in fighting condition.
+• Corrected Tune 3: Snakes attack other enemies, not each other.
+• Updated Tune 4: Freezes all living creatures except player.
+• Reduced level structure from 5 areas to 3 areas.
+• Added Balancing Framework (Section 10) with 3-phase approach.
+• Removed specific numeric values; established playtesting process.
+
+Version 1.3 (27.01.2026 13:51):
+• Tune System redesigned as timing-based holding mechanic.
+• Each tune requires precise key-hold duration (5–12 seconds, variable).
+• Visual timing cue (progress ring/meter) added for player feedback.
+• Failure consequences: Too short or too long hold → snake attacks + time loss.
+• Key assignments specified: 1, 2, 3, 4 (not Numpad).
+• Tune 2 (Sleep) persistence: Snakes remain asleep until player passes.
+• Tune 3 (Attack) adapted: Early release stops attack; snake may attack player.
+• Tune 4 (Freeze) hold duration scales effect size and duration.
+• Audio melodies: 5–12 seconds per tune (variable, not fixed 1 second).
+• Tutorial Area: Pack of smaller snakes, lenient timing, player learns all 3 tunes.
+• Balancing data expanded: timingFailureCount added to session tracking.
+• Mode difficulty differentiated: Simple has longer timing windows; Advanced has stricter.
+
+Version 1.4 (03.02.2026):
+• MAJOR CHANGE: Tune System redesigned to Genshin-Style Hold & Release Slider.
+• New mechanic: Hold key → slider moves 0-100% → release within trigger zone.
+• Three distinct outcomes defined:
+  - Too Early (before zone): Safe fail, no damage, no effect.
+  - Success (within zone): Charm works, +HP restoration.
+  - Too Late (after zone): Snake attacks, HP damage.
+• Slider durations standardized: Move 3s, Sleep 4s, Attack 5s, Freeze 6s.
+• Trigger zones defined as percentages (e.g., Move: 40-65%).
+• Simple Mode bonus: +10% wider trigger zones.
+• Camera changed from third-person to first-person.
+• Visual UI updated: Horizontal slider bar with colored zones.
+• Audio feedback differentiated for three outcomes.
+• Session data expanded: tooEarlyCount, tooLateCount separate tracking.
+• Balancing framework updated with trigger zone percentages by context.
+• Risk assessment updated for slider-specific considerations.
+
+Version 1.5 (09.02.2026):
+• Player character implemented: Pirate model with Mixamo Humanoid Rig.
+• Camera remains first-person with full body model visible (arms + feet).
+• Added 13 Pirate animations:
+  - Movement (4): Idle (Breathing), Walk, Crouch Idle, Crouch Walk
+  - Spells (4): Visual feedback for successful tune casts
+    * Tune 1 (Move): Spell Casting animation
+    * Tune 2 (Daze): Wide Arm Spell Casting animation
+    * Tune 3 (Attack): Standing 2H Cast Spell animation
+    * Tune 4 (Fear): Magic Spell Casting animation
+  - Death (2): Different animations for death causes
+    * Death by Drain: Standing React Death Forward
+    * Death by Snake Attack: Standing React Death Left
+• MC_Controller Animator: 10 states (4 movement, 4 spell, 2 death).
+• TuneController v2.4: Triggers spell animations on successful tune.
+• HealthSystem v1.3: Plays death animation based on cause (drain vs snake).
+• Player visuals: 8 URP/Lit materials (Body, Cloth, Hair, Weapon).
+• Assets: Caves Parts Set + Dwarven Pack for environment.
+
+====================================================================
+
+END OF DOCUMENT

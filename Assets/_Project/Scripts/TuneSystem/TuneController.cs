@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 2.1 - NEW INPUT SYSTEM
+* Version: 2.4 - SPELL ANIMATION INTEGRATION
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -40,6 +40,9 @@
 * - v1.0: Time-based window system (deprecated)
 * - v2.0: ADR-008 compliant Slider system
 * - v2.1: New Input System only (project rule)
+* - v2.2: TuneSuccessWithId event for snake targeting
+* - v2.3: Fix lambda-leak (B-001), proper unsubscribe in DisableInput
+* - v2.4: Spell animation integration (triggers SpellMove/Daze/Attack/Fear)
 ====================================================================
 */
 
@@ -111,11 +114,24 @@ namespace SnakeEnchanter.Tunes
         // Reference to health system for damage
         private Player.HealthSystem _healthSystem;
 
+        // Reference to animator for spell animations
+        private Animator _animator;
+
         // Input System actions
         private InputAction _tune1Action;
         private InputAction _tune2Action;
         private InputAction _tune3Action;
         private InputAction _tune4Action;
+
+        // Cached delegates (fix B-001: lambdas can't be unsubscribed)
+        private System.Action<InputAction.CallbackContext> _onTune1Started;
+        private System.Action<InputAction.CallbackContext> _onTune1Canceled;
+        private System.Action<InputAction.CallbackContext> _onTune2Started;
+        private System.Action<InputAction.CallbackContext> _onTune2Canceled;
+        private System.Action<InputAction.CallbackContext> _onTune3Started;
+        private System.Action<InputAction.CallbackContext> _onTune3Canceled;
+        private System.Action<InputAction.CallbackContext> _onTune4Started;
+        private System.Action<InputAction.CallbackContext> _onTune4Canceled;
         #endregion
 
         #region Properties
@@ -172,6 +188,23 @@ namespace SnakeEnchanter.Tunes
             {
                 _healthSystem = GetComponentInParent<Player.HealthSystem>();
             }
+
+            // Get Animator component (looks in children for Pirate model)
+            _animator = GetComponentInChildren<Animator>();
+            if (_animator == null)
+            {
+                Debug.LogWarning("TuneController: No Animator found! Spell animations will not play.");
+            }
+
+            // Cache delegates to enable proper unsubscription (B-001 fix)
+            _onTune1Started = ctx => OnTuneKeyPressed(1);
+            _onTune1Canceled = ctx => OnTuneKeyReleased(1);
+            _onTune2Started = ctx => OnTuneKeyPressed(2);
+            _onTune2Canceled = ctx => OnTuneKeyReleased(2);
+            _onTune3Started = ctx => OnTuneKeyPressed(3);
+            _onTune3Canceled = ctx => OnTuneKeyReleased(3);
+            _onTune4Started = ctx => OnTuneKeyPressed(4);
+            _onTune4Canceled = ctx => OnTuneKeyReleased(4);
 
             SetupInputActions();
         }
@@ -234,38 +267,61 @@ namespace SnakeEnchanter.Tunes
             if (_tune1Action != null)
             {
                 _tune1Action.Enable();
-                _tune1Action.started += ctx => OnTuneKeyPressed(1);
-                _tune1Action.canceled += ctx => OnTuneKeyReleased(1);
+                _tune1Action.started += _onTune1Started;
+                _tune1Action.canceled += _onTune1Canceled;
             }
 
             if (_tune2Action != null)
             {
                 _tune2Action.Enable();
-                _tune2Action.started += ctx => OnTuneKeyPressed(2);
-                _tune2Action.canceled += ctx => OnTuneKeyReleased(2);
+                _tune2Action.started += _onTune2Started;
+                _tune2Action.canceled += _onTune2Canceled;
             }
 
             if (_tune3Action != null)
             {
                 _tune3Action.Enable();
-                _tune3Action.started += ctx => OnTuneKeyPressed(3);
-                _tune3Action.canceled += ctx => OnTuneKeyReleased(3);
+                _tune3Action.started += _onTune3Started;
+                _tune3Action.canceled += _onTune3Canceled;
             }
 
             if (_tune4Action != null)
             {
                 _tune4Action.Enable();
-                _tune4Action.started += ctx => OnTuneKeyPressed(4);
-                _tune4Action.canceled += ctx => OnTuneKeyReleased(4);
+                _tune4Action.started += _onTune4Started;
+                _tune4Action.canceled += _onTune4Canceled;
             }
         }
 
         private void DisableInput()
         {
-            _tune1Action?.Disable();
-            _tune2Action?.Disable();
-            _tune3Action?.Disable();
-            _tune4Action?.Disable();
+            if (_tune1Action != null)
+            {
+                _tune1Action.started -= _onTune1Started;
+                _tune1Action.canceled -= _onTune1Canceled;
+                _tune1Action.Disable();
+            }
+
+            if (_tune2Action != null)
+            {
+                _tune2Action.started -= _onTune2Started;
+                _tune2Action.canceled -= _onTune2Canceled;
+                _tune2Action.Disable();
+            }
+
+            if (_tune3Action != null)
+            {
+                _tune3Action.started -= _onTune3Started;
+                _tune3Action.canceled -= _onTune3Canceled;
+                _tune3Action.Disable();
+            }
+
+            if (_tune4Action != null)
+            {
+                _tune4Action.started -= _onTune4Started;
+                _tune4Action.canceled -= _onTune4Canceled;
+                _tune4Action.Disable();
+            }
         }
 
         private void OnTuneKeyPressed(int tuneNumber)
@@ -419,6 +475,26 @@ namespace SnakeEnchanter.Tunes
                     // Success - Snake charmed, healing via event
                     GameEvents.TuneSuccess();
                     GameEvents.TuneSuccessWithId(tuneNumber);
+
+                    // Trigger spell animation based on tune number
+                    if (_animator != null)
+                    {
+                        string triggerName = tuneNumber switch
+                        {
+                            1 => "SpellMove",
+                            2 => "SpellDaze",
+                            3 => "SpellAttack",
+                            4 => "SpellFear",
+                            _ => null
+                        };
+
+                        if (triggerName != null)
+                        {
+                            _animator.SetTrigger(triggerName);
+                            Debug.Log($"TuneController: Triggered animation '{triggerName}'");
+                        }
+                    }
+
                     Debug.Log($"TuneController: Tune {tuneNumber} SUCCESS! | Position: {finalPosition:F2} in Zone [{_activeZoneStart:F2}-{_activeZoneEnd:F2}]");
                     break;
 

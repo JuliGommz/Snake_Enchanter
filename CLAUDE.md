@@ -1,6 +1,6 @@
 # Snake Enchanter - Projektkontext
 
-> **⚠️ NEUE SESSION?** Lies zuerst `STATE.md` für den aktuellen Stand!
+> **⚠️ NEUE SESSION?** Lies `STATE.md` **KOMPLETT** bevor du eine einzige Frage stellst oder Vorschläge machst. Alles was du wissen musst steht dort. Frag NICHT nach Kontext — arbeite.
 
 ## Projekt-Übersicht
 - **Name:** Snake Enchanter
@@ -92,6 +92,18 @@ Assets/
 - Input Actions Asset: `Assets/_Project/Data/SnakeEnchanter.inputactions`
 - Project Settings → Player → Active Input Handling = "Input System Package (New)"
 
+### Kamera-System (Cinemachine v3.x)
+**First-Person View mit sichtbarem Körper (Arme + Füße)**
+**Cinemachine steuert Position + Yaw, PlayerController steuert Pitch!**
+- **Main Camera:** CinemachineBrain (auto-managed)
+- **CM_PlayerCamera:** CinemachineCamera
+  - Tracking Target = CameraTarget (leeres GameObject unter Head Bone)
+  - Kein eigenes Script nötig — Cinemachine übernimmt Follow, Offset, Damping
+- **CameraTarget:** Leeres GameObject unter Head Bone im Skeleton (kein Script!)
+- **PlayerController v1.8:** Nur Pitch (Mouse Y) + Body Yaw (Mouse X)
+- **Camera View:** First-person perspective (Pirate full body visible)
+- NIEMALS Kamera-Position per Script überschreiben — Cinemachine besitzt die Position!
+
 ---
 
 ## Wichtige Dateien
@@ -110,8 +122,10 @@ Assets/
 - GET `/api/player-stats` - Aggregierte Stats
 
 ## Assets
+- **Player Avatar:** Pirate Pack (`_Project/Animations/Pirate/`) — FBX + Materials + Texturen + 14 Mixamo Animations
 - **Snakes:** Toon Snakes Pack (Meshtint Studio)
-- **Environment:** ProBuilder oder Modular Ruins
+- **Environment:** Caves Parts Set + Dwarven Pack
+- **UI:** Steampunk UI Pack (Gentleland), Font: Arvo SDE
 - **Audio:** Lizenzfreie Flötenmelodien (5-12s pro Tune)
 
 ---

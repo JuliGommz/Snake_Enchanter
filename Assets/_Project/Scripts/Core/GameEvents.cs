@@ -6,17 +6,22 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 1.0
+* Version: 1.1 - Added OnTuneSuccessWithId
 *
 * AUTHORSHIP CLASSIFICATION:
 *
 * [AI-ASSISTED]
 * - Event system architecture based on ADR-003
 * - Static event pattern for decoupled communication
+* - OnTuneSuccessWithId for snake-tune targeting (v1.1)
 *
 * NOTES:
 * - All game systems subscribe/publish through this class
 * - Prevents tight coupling between systems
+*
+* VERSION HISTORY:
+* - v1.0: Initial event hub (health, tune, game state)
+* - v1.1: Added OnTuneSuccessWithId for per-snake tune targeting
 ====================================================================
 */
 

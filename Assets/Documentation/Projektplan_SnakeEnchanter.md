@@ -29,12 +29,12 @@
 | 1.1 | Unity Projekt Setup | ✅ |
 | 1.2 | Git/GitHub Setup | ✅ |
 | 1.3 | Dokumentation & Struktur | ✅ |
-| 1.4 | Player Controller (WASD + Kamera) | ⏳ |
-| 1.5 | Greybox Level (1 Raum) | ⏳ |
-| 1.6 | Tune Input (1 Taste halten → Timer) | ⏳ |
-| 1.7 | Timing Window (Erfolg/Fail) | ⏳ |
-| 1.8 | Health System (HP, Drain, Damage) | ⏳ |
-| 1.9 | Win/Lose Conditions | ⏳ |
+| 1.4 | Player Controller (WASD + Kamera) | ✅ v1.7 Cinemachine |
+| 1.5 | Greybox Level (1 Raum) | ✅ Cave Map |
+| 1.6 | Tune Input (1 Taste halten → Timer) | ✅ ADR-008 Slider |
+| 1.7 | Timing Window (Erfolg/Fail) | ✅ Triggerzone |
+| 1.8 | Health System (HP, Drain, Damage) | ✅ v1.2.1 |
+| 1.9 | Win/Lose Conditions | ✅ ExitTrigger |
 
 **Done when:** Spielbarer Loop mit Cubes/Capsules
 

@@ -321,9 +321,7 @@ namespace SnakeEnchanter.UI
         {
             float percentage = (float)newHealth / _maxHealth;
             _targetValue = Mathf.Clamp01(percentage);
-
-            // Update color via gradient or custom colors
-            UpdateBarColor(percentage);
+            // Color update happens continuously in Update() via smoothed slider value
         }
 
         #endregion

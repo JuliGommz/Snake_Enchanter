@@ -397,7 +397,7 @@ namespace SnakeEnchanter.Snakes
             float myDistance = Vector3.Distance(transform.position, _playerTransform.position);
 
             // Find all snakes and check if any targetable one is closer
-            SnakeAI[] allSnakes = FindObjectsOfType<SnakeAI>();
+            SnakeAI[] allSnakes = FindObjectsByType<SnakeAI>(FindObjectsSortMode.None);
             foreach (var snake in allSnakes)
             {
                 if (snake == this) continue;
