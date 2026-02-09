@@ -1,6 +1,6 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-09 (Session 8 - COMPLETE)
+**Letzte Aktualisierung:** 2026-02-09 (Session 9 - MC ANIMATIONS COMPLETE)
 
 ---
 
@@ -34,20 +34,50 @@
 - PlayerController.Animator Feld zugewiesen
 - Pirate als Prefab gespeichert (`Assets/_Project/Prefabs/Pirate.prefab`)
 
-#### ✅ 6. CameraTarget
+#### ✅ 6. CameraTarget + Camera View
 - Leeres GameObject unter Pirate Head Bone erstellt
 - CM_PlayerCamera Tracking Target zugewiesen
 - Kamera folgt smooth dem Kopf
+- **View:** First-person mit sichtbaren Armen + Füßen (full body model)
+
+---
+
+## ✅ MC SPELL + DEATH ANIMATIONS - ABGESCHLOSSEN
+
+### Was ist fertig (Session 9):
+
+#### ✅ Animator Erweitert
+- **10 States total:** 4 Movement + 4 Spell + 2 Death
+- **Spell States:** Spell_Move, Spell_Daze, Spell_Attack, Spell_Fear
+- **Death States:** Death_by_Drain, Death_by_Snakes
+- **7 Parameters:** Speed, IsCrouching, 4x Spell Triggers, IsDead
+
+#### ✅ TuneController v2.4
+- Animator Referenz hinzugefügt (`GetComponentInChildren<Animator>()`)
+- Bei Tune Success: Trigger Spell Animation basierend auf Tune Number
+  - Tune 1 → SpellMove → "Spell Casting.fbx"
+  - Tune 2 → SpellDaze → "Wide Arm Spell Casting.fbx"
+  - Tune 3 → SpellAttack → "Standing 2H Cast Spell.fbx"
+  - Tune 4 → SpellFear → "Magic Spell Casting.fbx"
+
+#### ✅ HealthSystem v1.3
+- Animator Referenz hinzugefügt
+- `Die()` erweitert mit `deathBySnakeAttack` Parameter
+- Bei Death: `animator.Play()` für passende Animation
+  - Drain Death → "Death_by_Drain" (Standing React Death Forward)
+  - Snake Attack → "Death_by_Snakes" (Standing React Death Left)
+
+#### ✅ Testing
+- ✅ Alle 4 Spell Animations getestet und funktionieren
+- ✅ Death_by_Drain getestet und funktioniert
+- ⏳ Death_by_Snakes noch nicht testbar (Snakes machen noch keinen Damage)
 
 ---
 
 ## 🟡 OFFENE AUFGABEN
 
-### Spell Animations
-- **Status:** Animations importiert, aber noch nicht im Animator
-- **Dateien:** 5 Spell FBX in `Pirate/Animations/Spell/`
-  - Magic Spell Casting.fbx
-  - Spell Casting.fbx
+### Enemy System + Snake Animations
+- **Status:** Nächster großer Schritt
   - Standing 2H Cast Spell.fbx
   - Two Hand Spell Casting.fbx
   - Wide Arm Spell Casting.fbx
@@ -62,8 +92,8 @@
 
 ### Was funktioniert:
 - ✅ Player Controller v1.7 (New Input System, Crouch, Cinemachine)
-- ✅ Health System v1.2.1 (Drain, Events)
-- ✅ Tune System (TuneController v2.3, 4 TuneConfig SOs)
+- ✅ Health System v1.3 (Drain, Events, Death Animations)
+- ✅ Tune System (TuneController v2.4, Spell Animations, 4 TuneConfig SOs)
 - ✅ Snake AI v1.1 + 6 Toon Snake Prefabs
 - ✅ Cave Map (Caves Parts Set + Dwarven Pack)
 - ✅ Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
@@ -71,12 +101,12 @@
 - ✅ Win Condition (ExitTrigger)
 - ✅ Game Loop (GameManager v1.1.1)
 - ✅ **Pirate Character komplett setup**
-- ✅ **Animations funktionieren (Idle, Walk, Crouch Idle, Crouch Walk)**
+- ✅ **MC Animations komplett: Movement (4), Spells (4), Death (2)**
 
 ### Was noch nicht fertig ist:
-- 🟡 Spell Animation Integration (Animations vorhanden, aber nicht verknüpft)
-- ⬜ Play-Test Core Loop (vollständig)
-- ⬜ Death Animations (optional für Phase 1)
+- 🟡 Enemy System vertiefen (Snake Damage, Behaviors)
+- 🟡 Snake Animations (Toon Snake Pack hat Animations)
+- ⬜ Death_by_Snakes Animation Testing (wartet auf Snake Damage)
 
 ---
 
@@ -157,22 +187,43 @@ _Project/Animations/Pirate/
 ## MC_CONTROLLER ANIMATOR
 
 ### States (Base Layer)
+**Movement States:**
 1. **Idle** → Motion: `Breathing Idle.fbx` (Pirate)
 2. **Walk** → Motion: `Walking.fbx` (Pirate)
 3. **Crouch Idle** → Motion: `Crouch Idle.fbx` (Pirate)
 4. **Crouch Walk** → Motion: `Crouched Walking.fbx` (Pirate)
 
+**Spell States:** (Triggered by successful Tune)
+5. **Spell_Move** → Motion: `Spell Casting.fbx` (Tune 1)
+6. **Spell_Daze** → Motion: `Wide Arm Spell Casting.fbx` (Tune 2)
+7. **Spell_Attack** → Motion: `Standing 2H Cast Spell.fbx` (Tune 3)
+8. **Spell_Fear** → Motion: `Magic Spell Casting.fbx` (Tune 4)
+
+**Death States:** (Triggered by HP = 0)
+9. **Death_by_Drain** → Motion: `Standing React Death Forward.fbx`
+10. **Death_by_Snakes** → Motion: `Standing React Death Left.fbx`
+
 ### Parameters
 - **Speed** (Float) - Horizontal movement speed
 - **IsCrouching** (Bool) - Crouch state
+- **SpellMove** (Trigger) - Tune 1 success
+- **SpellDaze** (Trigger) - Tune 2 success
+- **SpellAttack** (Trigger) - Tune 3 success
+- **SpellFear** (Trigger) - Tune 4 success
+- **IsDead** (Bool) - Player death (not used in v1.3, script-based)
 
 ### Transitions
-- Idle → Walk: Speed > 0.1
-- Walk → Idle: Speed <= 0.1
-- Idle → Crouch Idle: IsCrouching = true, Speed < 0.1
-- Crouch Idle → Idle: IsCrouching = false
-- Crouch Idle → Crouch Walk: Speed > 0.1
-- Crouch Walk → Crouch Idle: Speed <= 0.1
+**Movement:**
+- Idle ↔ Walk: Speed threshold (0.1)
+- Idle ↔ Crouch Idle: IsCrouching bool
+- Crouch Idle ↔ Crouch Walk: Speed threshold (0.1)
+
+**Spells:**
+- Any State → Spell States (via Triggers)
+- Spell States → Idle (Exit Time 0.9-0.96)
+
+**Death:**
+- Script calls `animator.Play("Death_by_Drain")` or `animator.Play("Death_by_Snakes")`
 
 ---
 
@@ -180,52 +231,58 @@ _Project/Animations/Pirate/
 
 ```
 Branch: feature/animations-complete (aktiv)
-Letzter Commit: 0027485 "Import Pirate character assets and reorganize animations"
+Letzter Commit: bd472c0 "Complete Pirate character setup - Phase 1 animations working"
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 
-Uncommitted Changes: JA (Session 8 Änderungen)
-  M Assets/_Project/Animations/MC_Controller.controller
-  M Assets/_Project/Scenes/GameLevel.unity
-  M Assets/_Project/Scripts/Player/PlayerController.cs
-  D Assets/_Project/Prefabs/Old Man Idle.prefab (gelöscht)
-  D Assets/_Project/Scripts/Player/CameraHeadTracker.cs (gelöscht - redundant)
-  ?? Assets/_Project/Animations/Pirate/ (neuer Ordner mit 13 Animations)
-  ?? Assets/_Project/Prefabs/Pirate.prefab (neuer Prefab)
+Uncommitted Changes: NEIN (alles committed)
+  ✅ 79 files changed
+  ✅ Pirate character setup complete
+  ✅ Core loop tested and functional
 ```
 
-**Nächster Commit:** "Complete Pirate character setup - Phase 1 animations done"
+**Nächster Commit:** "Phase 2 start" (nach Phase 1 Dokumentation)
 
 ---
 
 ## NÄCHSTE SCHRITTE (Priorität)
 
-1. 🟡 **Spell Animation Integration** (optional für Phase 1)
-   - Wähle eine Spell Animation aus (z.B. Magic Spell Casting)
-   - Verknüpfe mit TuneController Success Event
-   - Teste Tune Success → Spell Animation spielt
+### ✅ MC Animations KOMPLETT!
 
-2. ⬜ **Full Core Loop Play-Test**
-   - Movement (WASD)
-   - Crouch (Ctrl)
-   - Tune System (1-4 Keys)
-   - Snake Charming
-   - HP Drain/Restore
-   - Win/Lose Conditions
+**Session 9 Achievements:**
+1. ✅ **4 Spell Animations** — Spell_Move, Spell_Daze, Spell_Attack, Spell_Fear
+2. ✅ **2 Death Animations** — Death_by_Drain, Death_by_Snakes
+3. ✅ **TuneController v2.4** — Triggert Spell Animation bei Success
+4. ✅ **HealthSystem v1.3** — Spielt Death Animation bei HP=0
+5. ✅ **Testing** — Alle Spells + Death_by_Drain funktionieren
 
-3. ⬜ **Phase 1 Abschluss Documentation**
-   - Screenshot für Arbeitsprotokoll
-   - Git Commit + Push
-   - STATE.md Final Update
-   - Bereit für Phase 2
+**Nächste Schritte:**
+- ⬜ Alle Dokumente updaten (GDD, Arbeitsprotokoll, etc.)
+- ⬜ Git Commit "Add MC Spell + Death animations - Phase 2"
+- ⬜ Screenshot für Arbeitsprotokoll
+- ⬜ Git Push
+
+### Phase 2 - KOMPLETT: In Progress
+
+**Nächster großer Block:** Enemy System + Snake Animations
+
+Siehe `BACKLOG.md` für alle Issues:
+1. 🟡 Enemy System vertiefen (Snake Damage, Behaviors)
+2. 🟡 Snake Animations (Toon Snake Pack)
+3. 🔴 Exit Trigger Animation Hang (Game State Logic)
+4. 🟡 Cave Textures Fix (Neon-Yellow Materials)
+5. 🟡 Camera Position bei Crouch
+6. 🟢 Crouch Transition Polish
 
 ---
 
-## OFFENE NEBENPROBLEME
+## BACKLOG
 
-### Snake MoveAwayTarget
-- Beide Snakes laufen zum gleichen Punkt (stacken sich)
-- Jede Snake braucht individuelles MoveAwayTarget
-- **Niedrige Priorität** — kann für Phase 1 deaktiviert werden
+Alle identifizierten Issues sind im `BACKLOG.md` dokumentiert und priorisiert:
+- 🔴 High Priority: Exit Trigger Animation Hang
+- 🟡 Medium Priority: Crouch Transitions, Cave Textures
+- 🟢 Low Priority: Injured Walk, Spell Animations, Snake Stacking
+
+**Siehe:** `BACKLOG.md` für Details
 
 ---
 
@@ -244,7 +301,31 @@ AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
 
 ---
 
-## LESSONS LEARNED (Session 8)
+## LESSONS LEARNED
+
+### Session 9 (2026-02-09): MC Spell + Death Animations
+
+**✅ Durchgeführt:**
+- 4 Spell Animations in MC_Controller integriert (Any State → Spell → Idle)
+- 2 Death Animations hinzugefügt (script-basiert via `animator.Play()`)
+- TuneController v2.4: Trigger Spell Animation bei Success
+- HealthSystem v1.3: Death Animation basierend auf Death Cause
+- Alle Spell Animations getestet und funktionieren
+
+**🎯 Entscheidung:**
+- Death Animations via Script statt Animator Transitions (Option B)
+  - Vorteil: Sauber, keine zusätzlichen Parameter nötig
+  - Code entscheidet welche Animation via `animator.Play("Death_by_Drain" or "Death_by_Snakes")`
+
+**📝 Neues Backlog Item:**
+- Camera Position bei Crouch (folgt nicht dem Ducken)
+
+**⏳ Nicht testbar:**
+- Death_by_Snakes Animation (Snakes machen noch keinen Damage)
+
+---
+
+### Session 8 (2026-02-09): Pirate Character Setup
 
 ### ✅ Was funktioniert hat:
 - Worktree/Main Repo Workflow (Commits im Main, dann merge ins Worktree)
@@ -265,9 +346,33 @@ AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
 
 ---
 
-**Status**: Pirate Character Setup COMPLETE ✅
-**Next**: Spell Animation Integration (optional) → Phase 1 Play-Test → Phase 2 Start
+**Status**: ✅ PHASE 1 - SPIELBAR: COMPLETE
+**Next**: Dokumentation finalisieren → Git Push → Phase 2 Start
 
 ---
 
-**END OF STATE - Session 8**
+## SESSION 8 ZUSAMMENFASSUNG
+
+**Erledigt:**
+- ✅ Pirate Character komplett setup (FBX, Avatar, Materials, Animations)
+- ✅ Animator konfiguriert (4 States, 2 Parameters, alle Transitions)
+- ✅ Scene Integration (Prefab, CameraTarget, PlayerController)
+- ✅ Core Loop getestet und funktional
+- ✅ Git Commit: bd472c0 (79 files, 16323 insertions)
+- ✅ Backlog erstellt mit priorisierten Issues
+
+**Issues identifiziert (Backlog):**
+- Exit Trigger Animation Hang
+- Cave Textures Neon-Yellow
+- Crouch Transition Tuning
+- Injured Walk Animation (optional)
+
+**Lessons Learned:**
+- Worktree/Main Repo Workflow funktioniert gut
+- Manuelles Material Assignment statt FBX Remapping
+- Unity Setup direkt prüfen statt Dateien lesen
+- NEVER assume files match Unity's current state
+
+---
+
+**END OF STATE - Session 8 COMPLETE**

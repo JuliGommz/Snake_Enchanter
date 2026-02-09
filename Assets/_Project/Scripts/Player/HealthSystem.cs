@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.2.1 - Fixed namespace references + Unity 2023 API
+* Version: 1.3 - DEATH ANIMATION INTEGRATION
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -40,6 +40,7 @@
 * - v1.1: Changed "Bite" terminology to "Attack" for consistency
 * - v1.2: Refactored to Single Source of Truth pattern
 * - v1.2.1: Fixed namespace references + Unity 2023 API
+* - v1.3: Death animation integration (IsDead bool, death cause tracking)
 ====================================================================
 */
 
@@ -86,6 +87,7 @@ namespace SnakeEnchanter.Player
         private float _activeDrainRate;
         private bool _isDead = false;
         private int _lastReportedHealth = -1;
+        private Animator _animator;
         #endregion
 
         #region Properties
@@ -113,6 +115,13 @@ namespace SnakeEnchanter.Player
         {
             _currentHealth = _startingHealth;
             _activeDrainRate = _simpleDrainRate; // Default to Simple Mode
+
+            // Get Animator component (looks in children for Pirate model)
+            _animator = GetComponentInChildren<Animator>();
+            if (_animator == null)
+            {
+                Debug.LogWarning("HealthSystem: No Animator found! Death animations will not play.");
+            }
         }
 
         private void Start()
@@ -162,7 +171,7 @@ namespace SnakeEnchanter.Player
 
             if (_currentHealth <= 0f && !_isDead)
             {
-                Die();
+                Die(deathBySnakeAttack: false); // Death by drain
             }
         }
         #endregion
@@ -187,7 +196,7 @@ namespace SnakeEnchanter.Player
 
             if (_currentHealth <= 0f)
             {
-                Die();
+                Die(deathBySnakeAttack: true); // Death by snake attack
             }
         }
 
@@ -226,12 +235,23 @@ namespace SnakeEnchanter.Player
 
         #region Death
         /// <summary>Handles player death (HP <= 0).</summary>
-        private void Die()
+        /// <param name="deathBySnakeAttack">True if killed by snake, false if by drain</param>
+        private void Die(bool deathBySnakeAttack)
         {
             if (_isDead) return;
 
             _isDead = true;
             _currentHealth = 0f;
+
+            // Play appropriate death animation directly
+            if (_animator != null)
+            {
+                string stateName = deathBySnakeAttack ? "Death_by_Snakes" : "Death_by_Drain";
+                _animator.Play(stateName);
+
+                string deathCause = deathBySnakeAttack ? "by Snake Attack" : "by Drain";
+                Debug.Log($"HealthSystem: Player died {deathCause}. Playing '{stateName}' animation.");
+            }
 
             GameEvents.HealthChanged(0);
             GameEvents.GameOver();

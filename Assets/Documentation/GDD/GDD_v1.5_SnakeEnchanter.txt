@@ -1,6 +1,6 @@
 Snake Enchanter – Game Design Document
-Version: 1.4
-Date: 03.02.2026
+Version: 1.5
+Date: 09.02.2026
 Author: Julian
 Project: PIP-3 Theme B – Solo Game Development Project
 
@@ -366,8 +366,22 @@ GET /api/player-stats – aggregate stats for display.
 Snakes: Toon Snakes Pack (Unity Asset Store, Meshtint Studio).
 Models: Toon Cobra (288 tri), Toon Snake (248 tri).
 Animations: Idle, Move, Attack (Bite), Hit, Die, Sleep (coiled).
-Environment: Cave system asset or ProBuilder geometry.
-Player: First-person (no visible model needed).
+
+Environment:
+• Cave system: Caves Parts Set (Unity Asset Store).
+• Dwarven Pack for additional structures.
+
+Player Character:
+• Model: Pirate character (Mixamo Humanoid Rig).
+• View: First-person with visible arms and sometimes feet (full body model).
+• Materials: 8x URP/Lit materials (Body, Cloth, Hair, Weapon, etc.).
+• Animations (13 total):
+  - Movement (4): Idle (Breathing), Walk, Crouch Idle, Crouch Walk
+  - Spells (4): Spell Casting (Move), Wide Arm Spell Casting (Daze),
+    Standing 2H Cast Spell (Attack), Magic Spell Casting (Fear)
+  - Death (2): Standing React Death Forward (Drain), Standing React Death Left (Snake Attack)
+  - Others: Injured Walk (unused currently)
+• Camera: First-person via Cinemachine v3.x (CameraTarget under Head Bone, follows head position).
 
 8.2 Audio
 
@@ -515,6 +529,25 @@ Version 1.4 (03.02.2026):
 • Session data expanded: tooEarlyCount, tooLateCount separate tracking.
 • Balancing framework updated with trigger zone percentages by context.
 • Risk assessment updated for slider-specific considerations.
+
+Version 1.5 (09.02.2026):
+• Player character implemented: Pirate model with Mixamo Humanoid Rig.
+• Camera remains first-person with full body model visible (arms + feet).
+• Added 13 Pirate animations:
+  - Movement (4): Idle (Breathing), Walk, Crouch Idle, Crouch Walk
+  - Spells (4): Visual feedback for successful tune casts
+    * Tune 1 (Move): Spell Casting animation
+    * Tune 2 (Daze): Wide Arm Spell Casting animation
+    * Tune 3 (Attack): Standing 2H Cast Spell animation
+    * Tune 4 (Fear): Magic Spell Casting animation
+  - Death (2): Different animations for death causes
+    * Death by Drain: Standing React Death Forward
+    * Death by Snake Attack: Standing React Death Left
+• MC_Controller Animator: 10 states (4 movement, 4 spell, 2 death).
+• TuneController v2.4: Triggers spell animations on successful tune.
+• HealthSystem v1.3: Plays death animation based on cause (drain vs snake).
+• Player visuals: 8 URP/Lit materials (Body, Cloth, Hair, Weapon).
+• Assets: Caves Parts Set + Dwarven Pack for environment.
 
 ====================================================================
 

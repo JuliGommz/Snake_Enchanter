@@ -93,6 +93,7 @@ Assets/
 - Project Settings → Player → Active Input Handling = "Input System Package (New)"
 
 ### Kamera-System (Cinemachine v3.x)
+**First-Person View mit sichtbarem Körper (Arme + Füße)**
 **Cinemachine steuert Position + Yaw, PlayerController steuert Pitch!**
 - **Main Camera:** CinemachineBrain (auto-managed)
 - **CM_PlayerCamera:** CinemachineCamera
@@ -100,6 +101,7 @@ Assets/
   - Kein eigenes Script nötig — Cinemachine übernimmt Follow, Offset, Damping
 - **CameraTarget:** Leeres GameObject unter Head Bone im Skeleton (kein Script!)
 - **PlayerController v1.8:** Nur Pitch (Mouse Y) + Body Yaw (Mouse X)
+- **Camera View:** First-person perspective (Pirate full body visible)
 - NIEMALS Kamera-Position per Script überschreiben — Cinemachine besitzt die Position!
 
 ---

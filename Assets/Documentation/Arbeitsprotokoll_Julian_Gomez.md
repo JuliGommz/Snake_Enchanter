@@ -151,15 +151,69 @@
 
 ---
 
-### 07.02.2026 (Freitag)
+### 08.02.2026 (Samstag) - Session 8
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| Pirate FBX importieren + Humanoid Rig konfigurieren | x | x | x |
+| PirateAvatar erstellen (Configure in Unity) | x | x | x |
+| 8 URP/Lit Materials manuell auf SkinnedMeshRenderer zuweisen | x | x | x |
+| 13 Pirate Animations importieren + auf PirateAvatar retargeten | x | x | x |
+| MC_Controller.controller: 4 States (Idle, Walk, Crouch Idle, Crouch Walk) | x | x | x |
+| Pirate als Child von Player im GameLevel.unity | x | x | x |
+| CameraTarget unter Head Bone für Cinemachine erstellen | x | x | x |
+| CM_PlayerCamera Tracking Target auf CameraTarget setzen | x | x | x |
+| Full Core Loop Play-Test durchführen | x | x | x |
+| Backlog erstellen aus Test-Feedback | x | x | x |
+| Git Commit: "Complete Pirate character setup" | x | x | x |
 
-**Screenshot:** `Media/Screenshots/2026-02-07_.png`
+**Screenshot:** `Media/Screenshots/2026-02-08_PirateSetupComplete.png`
 
 **Notizen:**
+- Pirate Character komplett integriert: FBX, Avatar, Materials, Animations
+- Material Remapping schlug fehl → Manuelles Assignment auf SkinnedMeshRenderer
+- PirateAvatar GUID: 619359b845787a443af41cf1ed1cfed0
+- 13 Animations organisiert: Idle/, Walk/, Crouch/, Death/, Spell/, Others/
+- Animator: 4 Movement States mit Speed/IsCrouching Parameters
+- CameraTarget: Leeres GameObject unter Head Bone (Pirate_Skeleton/Spine/Spine1/Spine2/Neck/Head)
+- **Core Loop Test erfolgreich:** Movement, Crouch, Camera, Animations funktionieren
+- **Backlog Items:** Exit Trigger Hang, Cave Textures Neon-Yellow, Crouch Transitions ruckelig
+- **LESSONS LEARNED:** DEBUGGING: Always Check Live Setup First (ask user, don't read old files)
+- Git Commit: bd472c0 "Complete Pirate character setup - Phase 1 animations working"
 
+---
+
+### 09.02.2026 (Sonntag) - Session 9
+| Aufgabe | geplant | in Bearbeitung | erledigt |
+|---------|:-------:|:--------------:|:--------:|
+| MC_Controller: 4 Spell States hinzufügen (Move, Daze, Attack, Fear) | x | x | x |
+| MC_Controller: 2 Death States hinzufügen (Drain, Snakes) | x | x | x |
+| Animator: 7 Parameter (Speed, IsCrouching, 4 Spell Triggers, IsDead) | x | x | x |
+| TuneController v2.3→v2.4: Spell Animation Integration | x | x | x |
+| HealthSystem v1.2.1→v1.3: Death Animation Integration | x | x | x |
+| Spell Animations testen (Tune 1-4) | x | x | x |
+| Death Animation testen (Death_by_Drain) | x | x | x |
+| GDD v1.4→v1.5: Player Character + Animations dokumentieren | x | x | x |
+| STATE.md + BACKLOG.md aktualisieren | x | x | x |
+| Arbeitsprotokoll Session 8 + 9 nachtragen | x | x | x |
+| Alle Dokumente auf "First-Person" Konsistenz prüfen | x | x | x |
+
+**Screenshot:** `Media/Screenshots/2026-02-09_MCAnimationsComplete.png`
+
+**Notizen:**
+- **MC Animations komplett:** 10 States total (4 Movement, 4 Spell, 2 Death)
+- **Spell Animations:** Triggered by TuneController v2.4 bei Success
+  - Tune 1 (Move): Spell Casting
+  - Tune 2 (Daze): Wide Arm Spell Casting
+  - Tune 3 (Attack): Standing 2H Cast Spell
+  - Tune 4 (Fear): Magic Spell Casting
+- **Death Animations:** Script-basiert via `animator.Play()` (Option B)
+  - Death_by_Drain: Standing React Death Forward
+  - Death_by_Snakes: Standing React Death Left (noch nicht testbar, Snakes machen kein Damage)
+- **Testing:** Alle 4 Spell Animations funktionieren, Death_by_Drain funktioniert
+- **Camera View:** First-person mit sichtbaren Armen + Füßen (full body model)
+- **GDD v1.5:** Player Character Section erweitert mit allen Animations
+- **Neue Backlog Items:** Camera Position bei Crouch, Death_by_Snakes Testing
+- **Phase 1 Status:** KOMPLETT → Übergang zu Phase 2 (Enemy System + Snake Animations)
 
 ---
 

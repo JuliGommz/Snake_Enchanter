@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 2.3 - FIX LAMBDA-LEAK + PROPER UNSUBSCRIBE
+* Version: 2.4 - SPELL ANIMATION INTEGRATION
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -42,6 +42,7 @@
 * - v2.1: New Input System only (project rule)
 * - v2.2: TuneSuccessWithId event for snake targeting
 * - v2.3: Fix lambda-leak (B-001), proper unsubscribe in DisableInput
+* - v2.4: Spell animation integration (triggers SpellMove/Daze/Attack/Fear)
 ====================================================================
 */
 
@@ -113,6 +114,9 @@ namespace SnakeEnchanter.Tunes
         // Reference to health system for damage
         private Player.HealthSystem _healthSystem;
 
+        // Reference to animator for spell animations
+        private Animator _animator;
+
         // Input System actions
         private InputAction _tune1Action;
         private InputAction _tune2Action;
@@ -183,6 +187,13 @@ namespace SnakeEnchanter.Tunes
             if (_healthSystem == null)
             {
                 _healthSystem = GetComponentInParent<Player.HealthSystem>();
+            }
+
+            // Get Animator component (looks in children for Pirate model)
+            _animator = GetComponentInChildren<Animator>();
+            if (_animator == null)
+            {
+                Debug.LogWarning("TuneController: No Animator found! Spell animations will not play.");
             }
 
             // Cache delegates to enable proper unsubscription (B-001 fix)
@@ -464,6 +475,26 @@ namespace SnakeEnchanter.Tunes
                     // Success - Snake charmed, healing via event
                     GameEvents.TuneSuccess();
                     GameEvents.TuneSuccessWithId(tuneNumber);
+
+                    // Trigger spell animation based on tune number
+                    if (_animator != null)
+                    {
+                        string triggerName = tuneNumber switch
+                        {
+                            1 => "SpellMove",
+                            2 => "SpellDaze",
+                            3 => "SpellAttack",
+                            4 => "SpellFear",
+                            _ => null
+                        };
+
+                        if (triggerName != null)
+                        {
+                            _animator.SetTrigger(triggerName);
+                            Debug.Log($"TuneController: Triggered animation '{triggerName}'");
+                        }
+                    }
+
                     Debug.Log($"TuneController: Tune {tuneNumber} SUCCESS! | Position: {finalPosition:F2} in Zone [{_activeZoneStart:F2}-{_activeZoneEnd:F2}]");
                     break;
 
