@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-06
-* Version: 1.7 - CINEMACHINE FINAL
+* Version: 1.8 - SINGLE MOVE FIX
 * 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -69,7 +69,7 @@ namespace SnakeEnchanter.Player
 
         [Header("Movement")]
         [Tooltip("Bewegungsgeschwindigkeit (m/s)")]
-        [SerializeField] private float _moveSpeed = 5f;
+        [SerializeField] private float _moveSpeed = 0.1f;
 
         [Tooltip("Gravitationskraft (negativ = nach unten)")]
         [SerializeField] private float _gravity = -9.81f;
@@ -79,7 +79,7 @@ namespace SnakeEnchanter.Player
         [SerializeField] private float _crouchHeight = 1.0f;
 
         [Tooltip("Bewegungsgeschwindigkeit beim Ducken")]
-        [SerializeField] private float _crouchSpeed = 2.5f;
+        [SerializeField] private float _crouchSpeed = 0.5f;
 
         [Tooltip("Geschwindigkeit der Crouch-Transition (höher = schneller)")]
         [SerializeField] private float _crouchTransitionSpeed = 8f;
@@ -221,9 +221,8 @@ namespace SnakeEnchanter.Player
         {
             HandleGroundCheck();
             HandleCrouch();
-            HandleMovement();
+            HandleMovementAndGravity();
             HandleCameraLook();
-            ApplyGravity();
             UpdateAnimations();
         }
 
@@ -380,31 +379,8 @@ namespace SnakeEnchanter.Player
         #region Movement
 
         /// <summary>
-        /// Bewegung relativ zur Kamera-Richtung.
-        /// WASD/Arrows bewegen Player in Richtung der Kamera-Blickrichtung.
+        /// Prüft ob der Player auf dem Boden steht.
         /// </summary>
-        private void HandleMovement()
-        {
-            if (_playerCamera == null) return;
-
-            Vector3 forward = _playerCamera.transform.forward;
-            Vector3 right = _playerCamera.transform.right;
-
-            forward.y = 0f;
-            right.y = 0f;
-            forward.Normalize();
-            right.Normalize();
-
-            Vector3 moveDirection = right * _moveInput.x + forward * _moveInput.y;
-
-            if (moveDirection.sqrMagnitude > 0.01f)
-            {
-                moveDirection.Normalize();
-                float currentSpeed = _isCrouching ? _crouchSpeed : _moveSpeed;
-                _controller.Move(moveDirection * currentSpeed * Time.deltaTime);
-            }
-        }
-
         private void HandleGroundCheck()
         {
             _isGrounded = _controller.isGrounded;
@@ -415,14 +391,43 @@ namespace SnakeEnchanter.Player
             }
         }
 
-        private void ApplyGravity()
+        /// <summary>
+        /// Kombiniert horizontale Bewegung (WASD relativ zur Kamera) mit Gravity
+        /// in einem einzigen CharacterController.Move() Aufruf.
+        /// WICHTIG: Nur EIN Move() pro Frame, damit _controller.velocity korrekt ist!
+        /// </summary>
+        private void HandleMovementAndGravity()
         {
-            _velocity.y += _gravity * Time.deltaTime;
+            // --- Horizontal Movement ---
+            Vector3 horizontalMove = Vector3.zero;
 
-            // Clamp terminal velocity
+            if (_playerCamera != null)
+            {
+                Vector3 forward = _playerCamera.transform.forward;
+                Vector3 right = _playerCamera.transform.right;
+
+                forward.y = 0f;
+                right.y = 0f;
+                forward.Normalize();
+                right.Normalize();
+
+                Vector3 moveDirection = right * _moveInput.x + forward * _moveInput.y;
+
+                if (moveDirection.sqrMagnitude > 0.01f)
+                {
+                    moveDirection.Normalize();
+                    float currentSpeed = _isCrouching ? _crouchSpeed : _moveSpeed;
+                    horizontalMove = moveDirection * currentSpeed * Time.deltaTime;
+                }
+            }
+
+            // --- Gravity ---
+            _velocity.y += _gravity * Time.deltaTime;
             _velocity.y = Mathf.Max(_velocity.y, -20f);
 
-            _controller.Move(_velocity * Time.deltaTime);
+            // --- Single Move() call: horizontal + vertical combined ---
+            Vector3 finalMove = horizontalMove + _velocity * Time.deltaTime;
+            _controller.Move(finalMove);
         }
 
         #endregion
