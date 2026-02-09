@@ -1,6 +1,6 @@
 # Snake Enchanter - Projektkontext
 
-> **⚠️ NEUE SESSION?** Lies zuerst `STATE.md` für den aktuellen Stand!
+> **⚠️ NEUE SESSION?** Lies `STATE.md` **KOMPLETT** bevor du eine einzige Frage stellst oder Vorschläge machst. Alles was du wissen musst steht dort. Frag NICHT nach Kontext — arbeite.
 
 ## Projekt-Übersicht
 - **Name:** Snake Enchanter
@@ -96,10 +96,10 @@ Assets/
 **Cinemachine steuert Position + Yaw, PlayerController steuert Pitch!**
 - **Main Camera:** CinemachineBrain (auto-managed)
 - **CM_PlayerCamera:** CinemachineCamera
-  - Follow = CameraTarget (unter animiertem Head Bone)
-  - Rotation = "Rotate With Follow Target" (folgt Player Body Yaw)
-- **CameraHeadTracker.cs:** Position-only Tracking des Head Bones (LateUpdate)
-- **PlayerController v1.7:** Nur Pitch (Mouse Y) + Body Yaw (Mouse X)
+  - Tracking Target = CameraTarget (leeres GameObject unter Head Bone)
+  - Kein eigenes Script nötig — Cinemachine übernimmt Follow, Offset, Damping
+- **CameraTarget:** Leeres GameObject unter Head Bone im Skeleton (kein Script!)
+- **PlayerController v1.8:** Nur Pitch (Mouse Y) + Body Yaw (Mouse X)
 - NIEMALS Kamera-Position per Script überschreiben — Cinemachine besitzt die Position!
 
 ---
@@ -120,8 +120,10 @@ Assets/
 - GET `/api/player-stats` - Aggregierte Stats
 
 ## Assets
+- **Player Avatar:** Pirate Pack (`_Project/Animations/Pirate/`) — FBX + Materials + Texturen + 14 Mixamo Animations
 - **Snakes:** Toon Snakes Pack (Meshtint Studio)
-- **Environment:** ProBuilder oder Modular Ruins
+- **Environment:** Caves Parts Set + Dwarven Pack
+- **UI:** Steampunk UI Pack (Gentleland), Font: Arvo SDE
 - **Audio:** Lizenzfreie Flötenmelodien (5-12s pro Tune)
 
 ---

@@ -1,85 +1,167 @@
 # PROJECT STATE - Snake Enchanter
-> **WICHTIG FÜR NEUE SESSIONS:** Diese Datei enthält den aktuellen Projektstand.
-> Lies diese Datei ZUERST bevor du mit der Arbeit beginnst.
 
-**Letzte Aktualisierung:** 2026-02-07 (Session 6)
-**Letzte Session:** UI Polish (v2.1/v3.1), Cinemachine Integration, Setup Review, Doku-Update
+**Letzte Aktualisierung:** 2026-02-09 (Session 8)
+
+---
+
+## 🔴 DEIN AUFTRAG FÜR DIESE SESSION
+
+### Was ist das Problem?
+Die Pirate-FBX (`Assets/_Project/Animations/Pirate/Mesh/Pirate.FBX`) hat `materialImportMode: 2` (embedded) und `externalObjects: {}`. Das heißt: Unity erzeugt eigene interne Materials beim Import und ignoriert unsere 8 externen `.mat` Dateien in `Assets/_Project/Animations/Pirate/Materials/`. Der Pirate wird deshalb mit falschen/grauen Materials gerendert.
+
+### Was ist bereits fertig?
+- ✅ FBX importiert, Humanoid Rig konfiguriert (`avatarSetup: 1`, `animationType: 3`)
+- ✅ 8 `.mat` Dateien im Ordner `Materials/` — alle URP/Lit Shader, alle Texture-GUIDs korrekt
+- ✅ 15 Texturen im Ordner `Textures/` importiert
+- ✅ 14 Mixamo-Animation FBX Dateien im Ordner `Animations/`
+
+### Was musst du tun?
+Die FBX muss die 8 externen `.mat` Dateien statt der embedded Materials nutzen. Entweder über Unity FBX Import Settings (Materials Tab → Search and Remap) oder durch manuelles Zuweisen auf dem SkinnedMeshRenderer in der Scene.
+
+### Was darfst du NICHT tun?
+- **NIEMALS `Pirate.FBX.meta` per Text-Editor editieren** — das hat in Session 7 den Humanoid Rig zerstört
+- **NICHT nochmal versuchen** was schon gescheitert ist (6 Versuche dokumentiert unten)
+- **NICHT nach Kontext fragen** — alles steht in dieser Datei
 
 ---
 
 ## AKTUELLER STAND
 
+### Pirate Character Setup — 3 Probleme, 1 gelöst, 2 offen
+
+Die FBX (`_Project/Animations/Pirate/Mesh/Pirate.FBX`) ist importiert mit Humanoid Rig. 8 Material-Dateien existieren im Ordner `Materials/`. 15 Texturen in `Textures/`. 14 Mixamo-Animations in `Animations/`. Pirate ist **NOCH NICHT in der Scene** — erst nach Material-Fix.
+
+#### ~~Problem 1: FBX Rig~~ ✅ GELÖST
+- `avatarSetup: 1`, `animationType: 3` — Humanoid Rig ist gesetzt
+- FBX GUID: `acd21bb244ba21b4cb8435a26823d8d0`
+
+#### Problem 2: Materials werden nicht vom FBX genutzt
+- 8 externe `.mat` Dateien existieren und sind **korrekt** (URP/Lit Shader, richtige Texture-GUIDs)
+- FBX ignoriert sie: `externalObjects: {}`, `materialImportMode: 2` (embedded)
+- **Muss gelöst werden** — entweder über FBX Import Settings oder manuell auf SkinnedMeshRenderer
+
+**Was NICHT funktioniert hat (6 Versuche in Session 7):**
+1. Texture GUIDs in .mat fixen → ❌ FBX nutzte embedded Materials
+2. FBX.meta externalObjects manuell editieren → ❌ **Zerstört Humanoid Rig!** NIEMALS machen
+3. Frischer Reimport → Rig + Materials Reset (aktueller Stand)
+4. URP Conversion via Unity Menu → ❌ Shader blieb Standard
+5. .mat Dateien komplett neu geschrieben → ✅ Materials jetzt korrekt
+6. materialImportMode auf Legacy → ❌ Search and Remap fand nichts (materialSearch war "Local" statt "Recursive-Up" oder "Project Wide")
+
+**Empfohlene Lösungsansätze:**
+- **A:** FBX Inspector → Materials → Search: "Project Wide" oder "Recursive-Up" → "Search and Remap" → Apply
+- **B:** Pirate in Scene draggen → SkinnedMeshRenderer → Materials manuell per Drag&Drop zuweisen (nur Instance, nicht FBX-weit)
+
+#### Problem 3: Animations referenzieren alten Avatar
+- 14 Mixamo-Animations haben `avatarSetup: 2` (Copy From Other Avatar)
+- Referenzieren GUID `e885ce14dfad3a642bd300e6c2cfe68f` — das ist der **alte** Pirate Avatar (vor Reimport)
+- **Müssen nach Rig-Setup (Problem 1) auf den NEUEN PirateAvatar umgestellt werden**
+
+#### Was FUNKTIONIERT:
+- ✅ 8 `.mat` Dateien: URP/Lit Shader (`933532a4fcc9baf4fa0491de14d08ed7`), korrekte Texture-GUIDs
+- ✅ 15 Texturen importiert in `Pirate/Textures/`
+- ✅ 14 Mixamo Animation FBX Dateien vorhanden
+
+---
+
+## NÄCHSTE SCHRITTE (in Reihenfolge)
+
+1. ✅ **Pirate.FBX Rig → Humanoid** — erledigt (`avatarSetup: 1`)
+2. 🔴 **Material Remapping** lösen (Search and Remap mit "Project Wide", oder manuell)
+3. 🔴 **14 Animations** auf neuen PirateAvatar umstellen (Copy From → neuer Avatar)
+4. ⬜ **MC_Controller Motions** ersetzen — aktuell referenziert alte Cowboy-Clips:
+   - Idle → `Old Man Idle.fbx` (`df1d5f44737c766479c0d441f4970acf`) → **Breathing Idle.fbx** (`8da9643668d27504a8573470828cfa46`)
+   - Walk → `Orc Walk.fbx` (`21d25341ad143a942b5981ca014d0cee`) → **Walking.fbx** (`97f286d10c335e74eaf08b4278baae1b`)
+   - Crouch Idle → `Crouch Idle.fbx` (`43d77b93cf99fab4d97b3cea8358eabe`) → **Crouch Idle.fbx** (Pirate)
+   - Crouch Walk → `Crouch Walk Forward.fbx` (`646013ad6e5f857459594adfeaf02225`) → **Crouched Walking.fbx** (Pirate)
+5. ⬜ **Pirate in Scene** — als Player Child, Animator (MC_Controller, PirateAvatar, Root Motion OFF)
+6. ⬜ **CameraTarget** — leeres GameObject unter Pirate Head Bone → CM_PlayerCamera Tracking Target
+7. ⬜ **Cowboy Cleanup** — MC_Mixamo/ Ordner + alte Cowboy FBX entfernen
+8. ⬜ **Play-Test Core Loop**
+
+---
+
+## PROJEKT-ÜBERBLICK
+
 ### Phase: 1 - SPIELBAR (von 4)
-### Status: UI Polish fertig (v2.1/v3.1), Cinemachine integriert, Animationen BROKEN nach Avatar-Wechsel
+### Branch: `feature/animations-complete`
 
-### Fortschritt Phase 1:
-- [x] 1.1 Unity Projekt Setup
-- [x] 1.2 Git/GitHub Setup
-- [x] 1.3 Dokumentation & Struktur
-- [x] 1.4 Player Controller (First-Person, New Input System, Crouch) ✅
-- [x] 1.5 Greybox Level Setup ✅
-- [x] 1.6 Tune Input (ADR-008 Slider, New Input System) ✅
-- [x] 1.7 Timing Window (Triggerzone Evaluation) ✅
-- [x] 1.8 Health System (HP, Drain, Damage) ✅
-- [x] 1.9 Win Condition (ExitTrigger in Scene) ✅
-- [x] 1.10 Cave Map aufbauen (Caves Parts Set + Dwarven Pack) ✅
-- [x] 1.11 Player Sprite einbinden (statisch, First-Person) ✅
-- [x] 1.12 Toon Snakes Pack importieren ✅ 6 Prefabs (Cobra/Snake x 3 Farben)
-- [x] 1.13 Snake AI (Basic) ✅ Script + Unity-Integration fertig
-- [x] 1.14 TuneConfig ScriptableObjects anlegen ✅ 4 SOs erstellt (Move/Sleep/Attack/Freeze)
-- [x] 1.15 Player/Animation Setup debuggen ✅ GELÖST (heightFromFeet, Animator auf Child, Old Man Idle)
-- [x] 1.16 UI: HealthBar + TuneSlider ✅ v3.1/v2.1 fertig + in Unity getestet + Steampunk Theme
-- [x] 1.17 Cinemachine Integration ✅ CM_PlayerCamera + CameraHeadTracker
-- [ ] 1.18 Animationen reparieren (broken nach Avatar/Cinemachine-Umbau)
-- [ ] 1.19 Play-Test Core Loop
+### Was fertig ist:
+- ✅ Player Controller v1.8 (New Input System, Crouch, Cinemachine Pitch-only)
+- ✅ Health System v1.2.1 (Drain, Events, Namespace-Fix)
+- ✅ Tune System (TuneController v2.3, 4 TuneConfig SOs)
+- ✅ Snake AI v1.1 + 6 Toon Snake Prefabs in Scene
+- ✅ Cave Map (Caves Parts Set + Dwarven Pack)
+- ✅ Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1 (Steampunk Theme)
+- ✅ Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
+- ✅ Win Condition (ExitTrigger)
+- ✅ Game Loop (GameManager v1.1.1)
 
-### Scripts Status:
-| Script | Version | Namespace | Status |
-|--------|---------|-----------|--------|
-| PlayerController.cs | **v1.7** | SnakeEnchanter.Player | ✅ Cinemachine Final, Pitch-only, Auto Camera.main |
-| CameraHeadTracker.cs | **v1.0** | SnakeEnchanter.Player | ✅ NEU — Position-only Head Bone Tracking |
-| HealthSystem.cs | **v1.2.1** | SnakeEnchanter.Player | ✅ Drain 0.1 HP/sec, deaktiviert für Dev |
-| TuneController.cs | **v2.3** | SnakeEnchanter.Tunes | ✅ B-001 Lambda-Leak fix + proper unsubscribe |
-| TuneConfig.cs | v1.0 | SnakeEnchanter.Tunes | ✅ ScriptableObject |
-| ExitTrigger.cs | v1.0 | SnakeEnchanter.Level | ✅ Done |
-| GameEvents.cs | **v1.1** | SnakeEnchanter.Core | ✅ + OnTuneSuccessWithId |
-| SnakeAI.cs | **v1.1** | SnakeEnchanter.Snakes | ✅ B-002 deprecated API fix |
-| GameManager.cs | **v1.1.1** | SnakeEnchanter.Core | ✅ Game Loop, Mode, Session Tracking |
-| HealthBarUI.cs | **v3.1** | SnakeEnchanter.UI | ✅ Gradient (continuous), Pulse, Debuff, Frame, Steampunk |
-| TuneSliderUI.cs | **v2.1** | SnakeEnchanter.UI | ✅ Segmente, Marker, Frame, OnValidate, KeepAspect |
-| CanvasUICreator.cs | **v2.0** | SnakeEnchanter.Editor | ✅ Neue Hierarchie + Auto-Wiring |
-| TuneConfigCreator.cs | **v1.0** | SnakeEnchanter.Editor | ✅ Editor Menu Tool |
+### Was NICHT fertig ist:
+- ❌ Pirate Character Setup (Material + Rig + Animations — siehe oben!)
+- ❌ Pirate noch nicht in Scene
+- ❌ MC_Controller referenziert noch Cowboy-Clips
+- ❌ CameraTarget noch nicht erstellt
+- ❌ Play-Test Core Loop
 
-### Unity Scene Status (GameLevel.unity):
-| GameObject | Components | Status |
-|------------|------------|--------|
-| Player | CharacterController, PlayerController v1.7, HealthSystem v1.2.1, TuneController v2.2 | ✅ Komplett |
-| Cowboy (Child) | Animator (MC_Controller), Avatar | ⚠️ Animationen broken nach Avatar-Wechsel |
-| CameraTarget | CameraHeadTracker v1.0 — unter Head Bone | ✅ Position-only Tracking |
-| Main Camera | Camera, CinemachineBrain | ✅ Cinemachine-gesteuert |
-| CM_PlayerCamera | CinemachineCamera, Follow=CameraTarget, Rotate With Follow Target | ✅ Cinemachine v3.x |
-| ExitTrigger | BoxCollider (IsTrigger), ExitTrigger.cs | ✅ Platziert |
-| Cave Map | Caves Parts Set + Dwarven Pack Prefabs | ✅ Fertig |
-| Input Actions | SnakeEnchanter.inputactions (inkl. Crouch) | ✅ Funktioniert |
-| GameManager | GameManager.cs | ✅ Angelegt |
-| Snake(s) | Toon Cobra/Snake Prefabs + SnakeAI + BoxCollider | ✅ Platziert |
-| Canvas (UI) | HealthBarUI v3.1, TuneSliderUI v2.1, Steampunk Theme, Arvo SDE Font | ✅ Fertig + getestet |
+### Scripts (alle funktionieren):
+| Script | Version | Status |
+|--------|---------|--------|
+| PlayerController.cs | v1.8 | ✅ |
+| HealthSystem.cs | v1.2.1 | ✅ |
+| TuneController.cs | v2.3 | ✅ |
+| TuneConfig.cs | v1.0 | ✅ |
+| GameEvents.cs | v1.1 | ✅ |
+| GameManager.cs | v1.1.1 | ✅ |
+| SnakeAI.cs | v1.1 | ✅ |
+| HealthBarUI.cs | v3.1 | ✅ |
+| TuneSliderUI.cs | v2.1 | ✅ |
+| ExitTrigger.cs | v1.0 | ✅ |
+| CanvasUICreator.cs | v2.0 | ✅ Editor |
+| TuneConfigCreator.cs | v1.0 | ✅ Editor |
 
-### TuneConfig ScriptableObjects:
-| Asset | Key | Duration | Zone | Effect |
-|-------|-----|----------|------|--------|
-| Tune1_Move.asset | 1 | 3s | 40-65% | Move |
-| Tune2_Sleep.asset | 2 | 4s | 35-60% | Sleep |
-| Tune3_Attack.asset | 3 | 5s | 30-55% | Attack |
-| Tune4_Freeze.asset | 4 | 6s | 25-50% | Freeze |
+### Scene (GameLevel.unity):
+| GameObject | Status |
+|------------|--------|
+| Player (CharacterController, PlayerController, HealthSystem, TuneController) | ✅ |
+| Main Camera (CinemachineBrain) | ✅ |
+| CM_PlayerCamera (CinemachineCamera) | ⏳ Target muss zugewiesen werden |
+| Cave Map | ✅ |
+| ExitTrigger | ✅ |
+| GameManager | ✅ |
+| Snake(s) | ✅ |
+| Canvas (UI) | ✅ |
+| **Pirate (Player Child)** | ❌ **Noch nicht in Scene** |
+| **CameraTarget (unter Head Bone)** | ❌ **Noch nicht erstellt** |
 
-### Animator Controller (MC_Controller):
-| Parameter | Type | Usage |
-|-----------|------|-------|
-| Speed | Float | Walk: >0.1, Idle: <=0.1 |
-| IsCrouching | Bool | Crouch Walk Forward/Back |
+---
 
-**States:** Idle (default) → Walk → Crouch Walk Forward / Crouch Walk Back
+## PIRATE ASSET-STRUKTUR
+
+```
+_Project/Animations/Pirate/
+├── Mesh/Pirate.FBX          ← Rig: Humanoid ✅ (avatarSetup: 1)
+├── Materials/                ← 8 .mat Dateien (URP/Lit ✅, Textur-GUIDs ✅)
+│   ├── Pirate_Body_01.mat   (guid: 566f2752e6db9b9469b563c6ceeef514)
+│   ├── Pirate_Body_02.mat   (guid: e9d4cce31875e084eb2eb72a25ce0ad2)
+│   ├── Pirate_Cloth.mat     (guid: 1f3da8825332d264699bc01860394e8f)
+│   ├── Pirate_Hair_01.mat   (guid: d7b3562339e6a034a95a0a81d53ece9b)
+│   ├── Pirate_Hair_02.mat   (guid: f71f285f86caee547ad5d4269ef36080)
+│   ├── Pirate_Hair_03.mat   (guid: a7291cf1865f4654d8753bb178e8c7e1)
+│   ├── Pirate_Details_Weapon.mat (guid: a372295a356185a44a49e36afb662e19)
+│   └── Stand.mat            (guid: 13651f48f0f43864192d0edcfff21268)
+├── Textures/                 ← 15 .tga Dateien (Albedo, Normals, Metallic, AO)
+│   ├── Pirate_Body/          (5 Texturen)
+│   ├── Pirate_Cloth/         (4 Texturen)
+│   └── Pirate_Hair/          (6 Texturen)
+└── Animations/               ← 14 Mixamo FBX (avatarSetup: 2, alter Avatar!)
+    ├── Idle/Breathing Idle.fbx
+    ├── Walk/Walking.fbx, Injured Walk.fbx
+    ├── Idle/Crouch Idle.fbx, Crouch Idle_1.fbx, Crouch Idle 02 Looking Around.fbx
+    ├── Crouch/Crouched Walking.fbx
+    ├── Spell/Magic Spell Casting.fbx + 4 weitere
+    └── Death/Standing React Death Forward.fbx + 1 weitere
+```
 
 ---
 
@@ -87,271 +169,36 @@
 
 ```
 Branch: feature/animations-complete (aktiv)
-Letzter Commit: dae0b75 Remove orphaned 3D_Assets.meta after folder restructure
+Letzter Commit: b47d810 Code review cleanup
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
-Uncommitted Changes: NEIN (clean state)
-Main: dae0b75 (up-to-date, feature/canvas-ui wurde gemergt + gelöscht)
+Uncommitted Changes: JA (viele — Pirate Assets, Material-Edits, gelöschte Cowboy-Dateien)
 ```
 
 ---
 
-## ⚠️ OFFENE PROBLEME
+## OFFENE NEBENPROBLEME
 
-### 1. ~~Player/Animation Setup~~ ✅ GELÖST (Session 4) → ⚠️ BROKEN (Session 5)
-- Session 4: Gelöst (heightFromFeet, Animator auf Child, Old Man Idle)
-- **Session 5: Animationen broken nach Cinemachine-Umbau + Avatar-Wechsel**
-- User hat Player Avatar geändert und alles neu zugewiesen
-- **Zu prüfen in Unity:**
-  - Animator-Komponente auf Cowboy (Child), NICHT auf Player
-  - Avatar = vom gleichen FBX wie das Mesh (z.B. Cowboy@Idle)
-  - Apply Root Motion = **UNCHECKED**
-  - PlayerController findet Animator via GetComponentInChildren
-  - MC_Controller.controller zugewiesen mit Speed + IsCrouching Parametern
-
-### 2. Snake MoveAwayTarget
-- Beide Snakes liefen zum gleichen Punkt (übereinander)
-- Jede Snake braucht ein individuelles MoveAwayTarget (Empty GameObject)
-- Alternativ: Feature für Phase 1 Boceto deaktivieren
-
-### 3. ~~Canvas UI~~ ✅ v3.1/v2.1 FERTIG + getestet
-- Steampunk Theme mit Pergament-Rahmen, Arvo SDE Font
-- HealthBarUI v3.1: Gradient (continuous), Pulse, Debuff, Frame
-- TuneSliderUI v2.1: OnValidate, MarkerSize, FrameSliced, KeepAspect
+### Snake MoveAwayTarget
+- Beide Snakes laufen zum gleichen Punkt (stacken sich)
+- Jede Snake braucht individuelles MoveAwayTarget
+- Niedrige Priorität — kann für Phase 1 deaktiviert werden
 
 ---
 
-## 📋 BACKLOG (Phase 2+)
+## REGELN (NICHT VERHANDELBAR)
 
-### ~~B-001: TuneController Lambda-Leak~~ ✅ FIXED (v2.3)
-- Cached delegates in Awake(), proper unsubscribe in DisableInput()
+### Input System
+AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
 
-### ~~B-002: SnakeAI deprecated FindObjectsOfType~~ ✅ FIXED (v1.1)
-- Replaced with FindObjectsByType<SnakeAI>(FindObjectsSortMode.None)
+### Kamera-System (Cinemachine v3.x)
+- Cinemachine besitzt Kamera-Position. NIEMALS per Script überschreiben.
+- PlayerController steuert NUR Pitch (Mouse Y) + Body Yaw (Mouse X)
+- CameraHeadTracker.cs wurde GELÖSCHT — war redundant
 
----
+### Animation
+- KEINE Flöte (zu komplex) → Spell Animation stattdessen
 
-## NÄCHSTE AKTION
-
-**Ziel:** Animationen reparieren, dann Core Loop testen
-
-1. ✅ **Canvas UI v3.1/v2.1** — Fertig + getestet + Steampunk Theme (feature/canvas-ui → main gemergt)
-2. ⬜ **Animationen reparieren** — Avatar/Cinemachine-Umbau hat Anims broken (feature/animations-complete)
-3. ⬜ **Spell Cast + Death** zum Animator hinzufügen (IsCasting, IsDead Parameter)
-4. ⬜ **Play-Test Core Loop** — Bewegen → Schlange → Tune → Effekt → Win/Lose
-5. ⬜ **Phase 1 abschließen** — Alles spielbar?
-
----
-
-## ⚠️ WICHTIGE ÄNDERUNGEN SESSION 4 (05.02)
-
-### Toon Snakes Pack Integration:
-- 6 Prefabs importiert: Toon Cobra/Snake x Green/Purple/Magenta
-- 14 Cobra-Animationen: Idle, Slither(6), BiteAttack, BreathAttack, ProjectileAttack, CastSpell, TakeDamage, Die
-- FX Prefabs: Poison Breath, Poison Projectile, Poison Projectile Impact
-- Materials: URP/Lit Shader (korrekt)
-
-### HealthSystem v1.2.1 Fixes:
-- Drain Rate: 2.5 → 0.1 HP/sec (30HP für 5 Minuten)
-- Passive Drain: Default deaktiviert (_enablePassiveDrain = false)
-- Event Flood Fix: _lastReportedHealth verhindert 60x/sec Event-Spam
-- Advanced Drain: 0.115 HP/sec (15% schneller als Simple)
-- Namespace-Fix + Unity 2023 API (FindFirstObjectByType)
-
-### GameManager v1.1.1:
-- Drain Rates entfernt (delegiert an HealthSystem — Single Source of Truth)
-- Namespace-Fix + Unity 2023 API
-
-### Neue Mixamo-Animationen (16 Stück):
-- Crouch: Walk Back, Walk Forward, Walk Left, Walk Right, Standing To Crouched, Crouched To Standing
-- Spell: Magic Spell Casting, Spell Casting(1), Two Hand Spell Casting, Wide Arm Spell Casting
-- Sonstige: Jump, Injured Idle, Sitting, Sitting Dazed, Standing Up, Taking Item
-
-### MC_Controller (Animator Controller) neu aufgebaut:
-- Verschoben von MC_Mixamo/ nach Animations/ (Root)
-- 4 States: Idle, Walk, Crouch Walk Forward, Crouch Walk Back
-- 2 Parameter: Speed (Float), IsCrouching (Bool)
-- Transitions mit 0.25s Duration
-
-### TuneConfig ScriptableObjects erstellt:
-- 4 Assets via Editor-Tool (Menu → SnakeEnchanter → Create Tune Configs)
-- Alle GDD-Werte korrekt konfiguriert
-- Simple Mode Bonus: +10% Zone (außer Freeze: 0%)
-
-### Snake-Integration:
-- Snakes in Scene platziert mit SnakeAI + BoxCollider (IsTrigger)
-- Proximity-basiertes Targeting funktioniert (_commandRange = 8f)
-- MoveAwayTarget-Problem: Snakes stacken sich (individuell nötig)
-
-### TagManager:
-- "Enemy" Tag hinzugefügt
-
----
-
-## ⚠️ WICHTIGE ÄNDERUNGEN SESSION 5 (06.02)
-
-### Git Branch-Strategie:
-- Feature-Branches: `feature/<kurzer-name>` von main
-- Dokumentiert in CLAUDE.md unter "Arbeitsweise"
-- Aktive Branches: `feature/canvas-ui`, `feature/animations-complete`
-
-### Canvas UI v2.0 (Genshin-Style):
-**HealthBarUI v2.0:**
-- Gradient Farbsystem: Rot(0%) → Gelb(50%) → Grün(100%) via `Gradient.Evaluate()`
-- Puls-Effekt: Alpha-Oszillation, beschleunigt unter 30% HP
-- Debuff-Text immer sichtbar ("☠ Giftiger Nebel — HP sinkt")
-- Keine Zahlen mehr (nur visuell, GDD 6.2)
-- Position: Top-Center, 500x50
-
-**TuneSliderUI v2.0:**
-- Segmentierte Blöcke (15 Segmente, nicht solid fill)
-- 3 Farbzonen: Gelb=Safe(nichts passiert), Orange=Success(Schlange gecharmt), Grau=Danger(Schlange greift an)
-- Marker-Sprite (Musiknote/Flöte) bewegt sich entlang Segmenten
-- Frame-Image für visuellen Rahmen
-- Alle Farben, Dimensionen, Sprites per Inspector konfigurierbar
-
-**CanvasUICreator v2.0:**
-- Neue Hierarchie: SliderFrame, SegmentContainer, Marker
-- Auto-Wiring aller neuen SerializeField-Referenzen
-- DebuffText statt HealthText, Top-Center statt Top-Left
-
-### Projektstruktur-Erweiterung:
-```
-Assets/_Project/Scripts/Editor/CanvasUICreator.cs (NEU v2.0)
-Assets/Documentation/Media/Screenshots/Cooking-Slider-Example.png (Referenz)
-```
-
----
-
-## ⚠️ WICHTIGE ÄNDERUNGEN SESSION 5 NACHTRAG (06.02 spät)
-
-### UI Polish:
-- **TuneSliderUI v2.1:** OnValidate() für live Inspector-Updates, MarkerSize fix, Frame Image.Type=Sliced, KeepAspect
-- **HealthBarUI v3.1:** Gradient continuous update (war nur bei Event), Steampunk Theme, Frame + Texture
-- **CanvasUICreator:** SliderFrame extends beyond SliderArea (-6/-6 bis 6/6)
-- **Steampunk UI Pack** (Gentleland) importiert für Rahmen-Sprites, Font: Arvo SDE
-
-### Cinemachine v3.x Integration:
-- **CM_PlayerCamera:** CinemachineCamera, Follow=CameraTarget, Rotate With Follow Target
-- **CameraHeadTracker v1.0:** Position-only tracking des animierten Head Bones (LateUpdate)
-- **PlayerController v1.7:** Cinemachine Final — Camera.main Auto-Find, Pitch-only Steuerung
-- Body Rotation (Yaw) → PlayerController, Cinemachine folgt via "Rotate With Follow Target"
-- Camera Position → Cinemachine Follow (folgt CameraTarget unter Head)
-
-### Setup-Review:
-- Alle 12 Scripts validiert — kein überflüssiges Script
-- Backlog: B-001 Lambda-Leak, B-002 deprecated API
-
-### Git:
-- feature/canvas-ui → main gemergt (fast-forward) + Branch gelöscht
-- feature/animations-complete erstellt + main gemergt
-
----
-
-## ⚠️ WICHTIGE REGELN (NICHT VERHANDELBAR)
-
-### Input System (ADR-006):
-```
-AUSSCHLIESSLICH Unity New Input System!
-- NIEMALS UnityEngine.Input (Legacy)
-- IMMER UnityEngine.InputSystem
-```
-
-### Kamera-System (Cinemachine v3.x):
-```
-Main Camera = Cinemachine Brain (auto-managed)
-CM_PlayerCamera = CinemachineCamera mit:
-  - Follow = CameraTarget (unter Head Bone, via CameraHeadTracker)
-  - Rotation = "Rotate With Follow Target" (folgt Player Yaw)
-PlayerController v1.7 steuert NUR:
-  - Player Body Rotation (Yaw/Y-Achse, Mouse X)
-  - Camera Pitch (X-Achse, Mouse Y, direkt auf Camera.main)
-NIEMALS Kamera-Position per Script überschreiben!
-```
-
-### Animation-Entscheidung:
-- **KEINE Flöte** (Animation zu komplex)
-- **Spell Animation** stattdessen (Cast_Spell.anim vorhanden)
-
----
-
-## KONTEXT FÜR NEUE SESSION
-
-### Projektstruktur:
-```
-Snake_Enchanter/
-├── Assets/
-│   ├── _Project/
-│   │   ├── Scripts/
-│   │   │   ├── Core/{GameEvents v1.1, GameManager v1.1.1}.cs
-│   │   │   ├── Player/{PlayerController v1.7, HealthSystem v1.2.1, CameraHeadTracker v1.0}.cs
-│   │   │   ├── TuneSystem/{TuneController v2.3, TuneConfig}.cs
-│   │   │   ├── Snakes/SnakeAI.cs
-│   │   │   ├── UI/{HealthBarUI v3.1, TuneSliderUI v2.1}.cs
-│   │   │   ├── Level/ExitTrigger.cs
-│   │   │   └── Editor/{CanvasUICreator v2.0, TuneConfigCreator}.cs
-│   │   ├── ScriptableObjects/TuneConfigs/ (4 TuneConfig SOs)
-│   │   ├── 3D_Assets/
-│   │   │   ├── Cave/ (7 modulare Cave-Teile)
-│   │   │   └── Snakes/ (Toon Snakes Pack — 6 Prefabs, 14 Anims je Typ)
-│   │   ├── Animations/
-│   │   │   ├── MC_Controller.controller (Idle, Walk, Crouch)
-│   │   │   └── MC_Mixamo/ (26 FBX + 2 .anim)
-│   │   ├── Data/SnakeEnchanter.inputactions (inkl. Crouch)
-│   │   └── Scenes/{GameLevel, MainMenu}.unity
-│   ├── Documentation/GDD/GDD_v1.4_SnakeEnchanter.txt
-│   ├── External_Assets/ (Caves Parts Set, Dwarven Pack, etc.)
-│   └── Plugins/ (Toon Snakes Pack — Meshtint Studio)
-├── CLAUDE.md (Projektkontext + REGELN)
-└── STATE.md (diese Datei)
-```
-
-### Wichtige Dateien zum Einlesen:
-1. `STATE.md` (diese Datei)
-2. `CLAUDE.md` (Projektkontext + PROJEKT-REGELN)
-3. `Assets/Documentation/ProjectStandards/01.Architecture_Decisions.txt` (ADRs)
-4. `Assets/Documentation/GDD/GDD_v1.4_SnakeEnchanter.txt`
-
----
-
-## SESSION HISTORY
-
-| Datum | Was gemacht | Ergebnis |
-|-------|-------------|----------|
-| 03.02.2026 | Projekt-Setup, Git, Dokumentation, 4-Phasen-Modell | Bereit für Phase 1 Code |
-| 03.02.2026 | ProjectStandards bereinigt (11→7), ADRs für Snake Enchanter | Struktur steht |
-| 03.02.2026 | Perplexity Session: Core Scripts v1 erstellt | 5 Scripts done |
-| 03.02.2026 | Expert Audit: TuneController auf ADR-008 Slider umgeschrieben | v2.0 compliant |
-| 03.02.2026 | GDD v1.4: Slider-System vollständig dokumentiert | Doku aktuell |
-| 03.02.2026 | **New Input System Migration** - PlayerController v1.2, TuneController v2.1 | ✅ Funktioniert |
-| 03.02.2026 | Unity Integration: Player Setup, ExitTrigger, Input Actions zugewiesen | ✅ Scene ready |
-| 03.02.2026 | Animation-Check: MC_Mixamo vorhanden, Spell statt Flute | Entscheidung |
-| 04.02.2026 | **PlayerController v1.3→v1.5**: Crouch, Camera-Fix, Pitch Limits | ✅ v1.5 stabil |
-| 04.02.2026 | **Crouch Action** in InputActions + Binding (LeftCtrl) | ✅ Funktioniert |
-| 04.02.2026 | **Config Update**: Third-Person → First-Person | ✅ Konsistent |
-| 04.02.2026 | **Cave Assets** inventarisiert, Collider geprüft (alle vorhanden) | ✅ Bereit |
-| 04.02.2026 | **Cave Map + Player Sprite** fertig gebaut in Unity | ✅ Done |
-| 04.02.2026 | **5 neue Scripts**: SnakeAI, GameManager, HealthBarUI, TuneSliderUI, TuneConfigCreator | ✅ Geschrieben |
-| 04.02.2026 | **GameEvents v1.1**: OnTuneSuccessWithId hinzugefügt | ✅ Snake-Tune-Zuordnung |
-| 04.02.2026 | **TuneController v2.2**: Feuert TuneSuccessWithId | ✅ Kompatibel |
-| **05.02.2026** | **Toon Snakes Pack** importiert + in Scene platziert | ✅ 6 Prefabs |
-| **05.02.2026** | **Snake-Sichtbarkeit** debuggt (mit Dozent gelöst) | ✅ Fixed |
-| **05.02.2026** | **TuneConfigs** erstellt (4 ScriptableObjects via Editor-Tool) | ✅ Done |
-| **05.02.2026** | **GameManager + SnakeAI** in Scene integriert | ✅ Funktioniert |
-| **05.02.2026** | **HealthSystem v1.2.1**: Drain-Fix, Event-Flood-Fix, Namespace-Fix | ✅ Stabil |
-| **05.02.2026** | **16 Mixamo-Animationen** importiert, MC_Controller neu aufgebaut | ✅ Importiert |
-| **05.02.2026** | **Player/Animation Problem** gelöst — heightFromFeet, Animator auf Child, Old Man Idle | ✅ GELÖST |
-| **06.02.2026** | **Git Branch-Strategie** eingeführt: feature/<name> Workflow | ✅ Dokumentiert in CLAUDE.md |
-| **06.02.2026** | **CanvasUICreator v1.0** erstellt (Editor Menu Tool) | ✅ Commit efd06b9 |
-| **06.02.2026** | **Canvas UI v2.0**: Genshin-Style Customization geplant + implementiert | ✅ 3 Dateien |
-| **06.02.2026** | **HealthBarUI v2.0**: Gradient, Pulse, Debuff-Text, kein HP-Text | ✅ Fertig |
-| **06.02.2026** | **TuneSliderUI v2.0**: Segmente, Marker, Frame, 3 Zonen-Farben | ✅ Fertig |
-| **06.02.2026** | **CanvasUICreator v2.0**: Neue Hierarchie + Auto-Wiring | ✅ Commit 7e71b13 |
-| **06.02.2026** | **TuneSliderUI v2.1**: MarkerSize, FrameSliced, OnValidate, KeepAspect | ✅ Commit b8c03e4 |
-| **06.02.2026** | **CanvasUICreator**: SliderFrame extends beyond SliderArea | ✅ Commit 302c9cb |
-| **06.02.2026** | **HealthBarUI v3.1**: Gradient continuous update fix | ✅ Steampunk Theme |
-| **06.02.2026** | **Cinemachine v3.x** integriert: CM_PlayerCamera + CameraHeadTracker | ✅ PlayerController v1.7 |
-| **06.02.2026** | **Steampunk UI Pack** importiert, Player Avatar geändert | ✅ Visuelles Update |
-| **06.02.2026** | **Setup-Review** aller 12 Scripts: Keine Redundanz, Standards OK | ✅ B-001, B-002 geloggt |
-| **06.02.2026** | **Commit Session 5**: UI polish, Cinemachine, asset restructure | ✅ Commit 01c0329 |
-| **06.02.2026** | **feature/canvas-ui → main** gemergt + Branch gelöscht | ✅ Fast-forward |
-| **06.02.2026** | **feature/animations-complete** erstellt, main gemergt | ⚠️ Anims broken |
+### Lessons Learned (Session 7)
+- ❌ **NIEMALS FBX.meta manuell editieren** — Unity überschreibt Humanoid Rig-Daten
+- ✅ `.mat` Dateien per Text-Editor schreiben ist sicher
+- ❌ `materialSearch: 1` (Local) findet Materials in Unterordnern nicht → "Project Wide" verwenden
