@@ -1,6 +1,18 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-09 (Session 9 - MC ANIMATIONS COMPLETE)
+**Letzte Aktualisierung:** 2026-02-11 (Session 11 - UNITY AUDIT + GDD v1.6 + PHASE 2 ROADMAP)
+
+---
+
+## ⚡ QUICK START FÜR NÄCHSTE SESSION
+
+**Lies zuerst:** `PHASE_2_ROADMAP.md` (kompletter 3-Tage Plan)
+
+**Starte mit:** Main Menu Scene erstellen (2h Task)
+
+**Phase 2 Deadline:** 14.02.2026 (3 Tage)
+**Status:** 55% Complete (6/11 Tasks)
+**Kritisch fehlend:** Main Menu, Result Screen, Mock-API, Win Transition
 
 ---
 
@@ -87,14 +99,20 @@
 
 ## AKTUELLER STAND
 
-### Phase: 1 - SPIELBAR (von 4)
-### Branch: `feature/animations-complete`
+### Phase: 2 - KOMPLETT (von 4)
+### Branch: `feature/enemy-setup`
 
 ### Was funktioniert:
 - ✅ Player Controller v1.7 (New Input System, Crouch, Cinemachine)
 - ✅ Health System v1.3 (Drain, Events, Death Animations)
 - ✅ Tune System (TuneController v2.4, Spell Animations, 4 TuneConfig SOs)
-- ✅ Snake AI v1.1 + 6 Toon Snake Prefabs
+- ✅ **Snake AI v1.3.1** + 6 Toon Snake Prefabs
+  - ✅ **Patrol System** (random waypoints, 2-3 units radius)
+  - ✅ **Proximity Detection** (line-of-sight raycast)
+  - ✅ **Range-based Behaviors** (Bite/Follow/Breath/Projectile)
+  - ✅ **Attack System** (3 attack types, 4s cooldown, raycast damage)
+  - 🔴 **Breath Attack Animation** (damage works, animation doesn't play)
+  - 🔴 **Patrol Movement** (not moving, debugging with logs)
 - ✅ Cave Map (Caves Parts Set + Dwarven Pack)
 - ✅ Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
 - ✅ Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
@@ -104,8 +122,10 @@
 - ✅ **MC Animations komplett: Movement (4), Spells (4), Death (2)**
 
 ### Was noch nicht fertig ist:
-- 🟡 Enemy System vertiefen (Snake Damage, Behaviors)
-- 🟡 Snake Animations (Toon Snake Pack hat Animations)
+- 🔴 **Breath Attack Animation Debug** (highest priority)
+- 🔴 **Patrol System Debug** (not moving)
+- 🟡 **Failed Tune Behavior** (Follow + Bite once)
+- 🟡 **Player Look Up/Down** (Mouse Y for camera pitch)
 - ⬜ Death_by_Snakes Animation Testing (wartet auf Snake Damage)
 
 ---
@@ -120,7 +140,7 @@
 | TuneConfig.cs | v1.0 | ✅ |
 | GameEvents.cs | v1.1 | ✅ |
 | GameManager.cs | v1.1.1 | ✅ |
-| SnakeAI.cs | v1.1 | ✅ |
+| SnakeAI.cs | v1.3.1 | ✅ Patrol + Proximity |
 | HealthBarUI.cs | v3.1 | ✅ |
 | TuneSliderUI.cs | v2.1 | ✅ |
 | ExitTrigger.cs | v1.0 | ✅ |
@@ -230,48 +250,77 @@ _Project/Animations/Pirate/
 ## GIT STATUS
 
 ```
-Branch: feature/animations-complete (aktiv)
-Letzter Commit: bd472c0 "Complete Pirate character setup - Phase 1 animations working"
+Branch: feature/enemy-setup (aktiv)
+Letzter Commit: 6642e2a "Fix Animator parameter names to match Toon Cobra Controller"
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 
-Uncommitted Changes: NEIN (alles committed)
-  ✅ 79 files changed
-  ✅ Pirate character setup complete
-  ✅ Core loop tested and functional
+Recent Commits (2026-02-10):
+  6642e2a - Fix Animator parameter names to match Toon Cobra Controller
+  6b69a9e - Add debug logs for patrol system troubleshooting
+  8851f7e - Implement patrol system and proximity-based behaviors
+  c0f3450 - Add spell animation delay and separate movement speeds
+  a1a58ed - Add chase behavior for aggressive snakes within 5 units
+  0a03a14 - Fix Attack System v1.1.1 - Breath Attack Bool + Advanced Mode timing
+
+Uncommitted Changes: JA (dokumentation updates pending)
+  - SESSION_NOTES_2026-02-10.md (new)
+  - CLAUDE.md (updated with Snake AI info)
+  - STATE.md (updated for Session 10)
 ```
 
-**Nächster Commit:** "Phase 2 start" (nach Phase 1 Dokumentation)
+**Nächster Commit:** "Update documentation for Session 10 - Snake AI behaviors"
 
 ---
 
 ## NÄCHSTE SCHRITTE (Priorität)
 
-### ✅ MC Animations KOMPLETT!
+### ✅ SESSION 11 COMPLETE - Unity Audit + Documentation
 
-**Session 9 Achievements:**
-1. ✅ **4 Spell Animations** — Spell_Move, Spell_Daze, Spell_Attack, Spell_Fear
-2. ✅ **2 Death Animations** — Death_by_Drain, Death_by_Snakes
-3. ✅ **TuneController v2.4** — Triggert Spell Animation bei Success
-4. ✅ **HealthSystem v1.3** — Spielt Death Animation bei HP=0
-5. ✅ **Testing** — Alle Spells + Death_by_Drain funktionieren
+**Session 11 Achievements:**
+1. ✅ **Python 3.12 installiert** — Für automatisierte DOCX-Generierung
+2. ✅ **GDD v1.6 erstellt** — TXT + DOCX (formatiert wie PDF v1.3)
+3. ✅ **Unity Audit durchgeführt** — `/unity-audit` skill verwendet
+4. ✅ **Audit Report erstellt** — `UNITY_AUDIT_2026-02-11.md`
+5. ✅ **BACKLOG aktualisiert** — Performance optimization tasks hinzugefügt
+6. ✅ **CARL System Setup** — 9 Domains mit 41 Rules für Snake Enchanter
 
-**Nächste Schritte:**
-- ⬜ Alle Dokumente updaten (GDD, Arbeitsprotokoll, etc.)
-- ⬜ Git Commit "Add MC Spell + Death animations - Phase 2"
-- ⬜ Screenshot für Arbeitsprotokoll
-- ⬜ Git Push
+**Audit Ergebnisse:**
+- ✅ Code Quality: **GOOD** (8.5/10 Performance Score)
+- ✅ No critical issues
+- ⚠️ 2 minor GetComponent calls in SnakeAI.cs (cacheable für +5-10% performance)
 
-### Phase 2 - KOMPLETT: In Progress
+**Nächste Session Empfehlung:**
+1. 🟡 **SnakeAI Performance Fix** (5-10min) — Cache HealthSystem reference
+2. 🔴 **Exit Trigger Animation Hang** (1-2h) — GameManager State Machine erweitern
+3. 🐍 **Snake AI Debugging** — Breath Attack Animation + Patrol Movement fixes
 
-**Nächster großer Block:** Enemy System + Snake Animations
+### Phase 2 - KOMPLETT: 85% Complete
 
-Siehe `BACKLOG.md` für alle Issues:
-1. 🟡 Enemy System vertiefen (Snake Damage, Behaviors)
-2. 🟡 Snake Animations (Toon Snake Pack)
-3. 🔴 Exit Trigger Animation Hang (Game State Logic)
-4. 🟡 Cave Textures Fix (Neon-Yellow Materials)
-5. 🟡 Camera Position bei Crouch
-6. 🟢 Crouch Transition Polish
+**Noch offen:**
+- 🔴 Exit Trigger Animation Hang (Win Condition UX)
+- 🔴 Breath Attack Animation Debug (damage works, animation doesn't play)
+- 🔴 Patrol System Debug (snakes don't move)
+- 🟡 SnakeAI Performance Optimization (GetComponent caching)
+- 🟡 Cave Textures Fix (Neon-Yellow Materials)
+- 🟡 Camera Position bei Crouch
+
+Siehe `BACKLOG.md` für alle Issues mit Prioritäten.
+
+---
+
+## DOCUMENTATION STATUS
+
+### ✅ Up-to-Date (Session 11)
+- ✅ **GDD v1.6** — TXT + DOCX mit Snake AI v1.3.1 Changes
+- ✅ **UNITY_AUDIT_2026-02-11.md** — Kompletter Audit Report
+- ✅ **BACKLOG.md** — Aktualisiert mit Audit-Ergebnissen
+- ✅ **STATE.md** — Diese Datei
+- ✅ **.carl/** — CARL System konfiguriert (9 Domains)
+
+### ⏳ Pending Updates
+- ⬜ **Arbeitsprotokoll** — Session 11 eintragen
+- ⬜ **SESSION_NOTES** — Session 11 Summary erstellen
+- ⬜ **Git Commit** — "Add Unity Audit + GDD v1.6 + CARL Setup"
 
 ---
 
@@ -279,8 +328,12 @@ Siehe `BACKLOG.md` für alle Issues:
 
 Alle identifizierten Issues sind im `BACKLOG.md` dokumentiert und priorisiert:
 - 🔴 High Priority: Exit Trigger Animation Hang
-- 🟡 Medium Priority: Crouch Transitions, Cave Textures
-- 🟢 Low Priority: Injured Walk, Spell Animations, Snake Stacking
+- 🟡 Medium Priority: SnakeAI Performance, Cave Textures, Camera Crouch
+- 🟢 Low Priority: Crouch Transitions, Injured Walk, Snake Stacking
+
+**Unity Audit Integration:**
+- ✅ GetComponent Performance Issue hinzugefügt (Medium Priority)
+- ✅ Audit Results Section in BACKLOG.md
 
 **Siehe:** `BACKLOG.md` für Details
 
