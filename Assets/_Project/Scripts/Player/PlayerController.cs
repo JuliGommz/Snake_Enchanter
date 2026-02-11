@@ -222,8 +222,14 @@ namespace SnakeEnchanter.Player
             HandleGroundCheck();
             HandleCrouch();
             HandleMovementAndGravity();
-            HandleCameraLook();
             UpdateAnimations();
+        }
+
+        private void LateUpdate()
+        {
+            // Camera Look MUSS in LateUpdate sein, NACH Cinemachine!
+            // Cinemachine setzt Yaw (horizontal rotation), wir setzen Pitch (vertical)
+            HandleCameraLook();
         }
 
         #endregion
