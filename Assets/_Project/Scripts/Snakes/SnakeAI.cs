@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.5 - Fix Raycast LayerMask (Session 14)
+* Version: 1.3.6 - Environment Tag System (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -65,6 +65,9 @@
 *         (~DefaultLayer blocked EVERYTHING), now uses Physics.Raycast default (all layers)
 *         with tag-based filtering (ignore Player/Snake), added MoveAwayTarget null check,
 *         improved MovedAway state logic clarity (2026-02-13)
+* - v1.3.6: Environment tag system (Session 14) — Simplified collision detection to use
+*         positive tag check (CompareTag("Environment") = block), all other tags passthrough,
+*         cleaner semantic ("Environment blocks movement"), Unity Best Practice 2026 (2026-02-13)
 ====================================================================
 */
 
@@ -615,17 +618,17 @@ namespace SnakeEnchanter.Snakes
             float distance = speed * Time.deltaTime;
 
             // Raycast to check for obstacles ahead
-            // Use Physics.DefaultRaycastLayers which includes Default + most environment layers
             RaycastHit hit;
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, distance + 0.3f))
             {
-                // Ignore Player and other Snakes - only block on environment
-                if (!hit.collider.CompareTag("Player") && !hit.collider.CompareTag("Snake"))
+                // Block ONLY on Environment tag (walls, floors, obstacles)
+                if (hit.collider.CompareTag("Environment"))
                 {
                     // Environment obstacle detected - don't move
                     Debug.Log($"SnakeAI ({_snakeName}): Movement blocked by {hit.collider.name} at distance {hit.distance:F2}");
                     return false;
                 }
+                // Everything else (Player, Snake, MoveAwayTarget, Untagged) = passthrough
             }
 
             // Safe to move
