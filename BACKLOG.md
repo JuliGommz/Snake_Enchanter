@@ -1,10 +1,25 @@
 # BACKLOG - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-09 (Session 8)
+**Letzte Aktualisierung:** 2026-02-13 (Session 14)
 
 ---
 
 ## 🔴 HIGH PRIORITY
+
+### Player Spell Animation Timing
+- **Problem:** Spell Animations werden NACH dem Loslassen der Taste getriggert (zu spät)
+- **Erwartet:** Animation startet WÄHREND die Taste gedrückt wird
+- **Aktuell:** Animation triggert bei Key Release statt Key Press
+- **Betroffen:** Alle 4 Spell Animations (Tune 1-4)
+- **Benötigt:** TuneController Event-Timing anpassen
+  - Animation sollte bei Slider-Start triggern (Key Down)
+  - Nicht bei Slider-Ende (Key Release)
+- **Phase:** 2 (Komplett) - Animation Polish
+- **Aufwand:** 20-30min (TuneController.cs Zeile ~150 anpassen)
+
+---
+
+## 🔴 HIGH PRIORITY (Continued)
 
 ### Exit Trigger Animation Hang
 - **Problem:** Animation bleibt beim Erreichen des Exit Triggers hängen

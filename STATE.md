@@ -1,6 +1,6 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-11 (Session 11 - UNITY AUDIT + GDD v1.6 + PHASE 2 ROADMAP)
+**Letzte Aktualisierung:** 2026-02-13 (Session 14 - CAMERA PITCH FIXED via Git Reset)
 
 ---
 
@@ -120,8 +120,10 @@
 - ✅ Game Loop (GameManager v1.1.1)
 - ✅ **Pirate Character komplett setup**
 - ✅ **MC Animations komplett: Movement (4), Spells (4), Death (2)**
+- ✅ **Camera Pitch (Look Up/Down)** → Session 14 Fix via Git Reset
 
 ### Was noch nicht fertig ist:
+- 🔴 **Spell Animation Timing** (triggert bei Key Release statt Key Press)
 - 🔴 **Breath Attack Animation Debug** (highest priority)
 - 🔴 **Patrol System Debug** (not moving)
 - 🟡 **Failed Tune Behavior** (Follow + Bite once)
