@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.7 - Proper Tag-based Collision (Session 14)
+* Version: 1.3.8 - Fix Player Collision (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -72,6 +72,9 @@
 *         EXCEPT Player (user feedback: snakes should not overlap, MoveAwayTarget should block),
 *         reduced threshold to 0.5f (from 1.5f) for precise stopping at targets, tag-based
 *         system now prevents snake stacking like in user's previous project (2026-02-13)
+* - v1.3.8: Fix Player collision bug (Session 14) — CRITICAL: Player must BLOCK not passthrough
+*         (user feedback: snakes attack player, must stop near player for bite range), removed
+*         Player passthrough logic, ALL objects now block movement correctly (2026-02-13)
 ====================================================================
 */
 
@@ -616,11 +619,12 @@ namespace SnakeEnchanter.Snakes
         /// Uses raycast to check for obstacles.
         /// Returns true if movement was successful, false if blocked.
         ///
-        /// Tag-based blocking:
+        /// Tag-based blocking (EVERYTHING blocks):
         /// - Environment: BLOCKS (walls, floors)
         /// - Snake: BLOCKS (prevent snake overlap)
         /// - MoveAwayTarget: BLOCKS (snake stops at target)
-        /// - Player: PASSTHROUGH (snake can follow player)
+        /// - Player: BLOCKS (snake stops near player for attack)
+        /// - Untagged: BLOCKS (default safe behavior)
         /// </summary>
         private bool MoveTowardsSafe(Vector3 targetPosition, float speed)
         {
@@ -631,21 +635,10 @@ namespace SnakeEnchanter.Snakes
             RaycastHit hit;
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, distance + 0.3f))
             {
-                // Check what we hit via Tag
-                string hitTag = hit.collider.tag;
-
-                // PASSTHROUGH: Only Player can be passed through
-                if (hitTag == "Player")
-                {
-                    // Allow movement (snake can follow player)
-                }
-                // BLOCK: Everything else blocks movement
-                else
-                {
-                    // Log what blocked us
-                    Debug.Log($"SnakeAI ({_snakeName}): Movement blocked by {hit.collider.name} (Tag: {hitTag}) at distance {hit.distance:F2}");
-                    return false;
-                }
+                // ALL objects block movement (including Player)
+                // This is correct: Snake stops near Player to attack, doesn't phase through
+                Debug.Log($"SnakeAI ({_snakeName}): Movement blocked by {hit.collider.name} (Tag: {hit.collider.tag}) at distance {hit.distance:F2}");
+                return false;
             }
 
             // Safe to move

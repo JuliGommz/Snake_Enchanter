@@ -129,14 +129,15 @@ Nach dem Tagging folgendes prüfen:
 3. Snake sollte an Wand stoppen
 4. Console: `"Movement blocked by Caves_X2_wall at distance X"`
 
-**Test 2: Snake Passthrough**
+**Test 2: Snake Collision**
 1. Zwei Snakes nah zusammen platzieren
-2. Move Away auf beide casten
-3. Snakes sollten durch einander gleiten (kein Block)
+2. Move Away auf beide casten zum gleichen Target
+3. Snakes sollten sich gegenseitig blockieren (keine Überlappung)
 
-**Test 3: Player Passthrough**
-1. Player neben Snake stellen
-2. Snake sollte NICHT durch Player blockiert werden (Follow sollte funktionieren)
+**Test 3: Player Collision (Attack Range)**
+1. Player neben Snake stellen (nah ran)
+2. Snake sollte Player folgen und bei ~0.5 units STOPPEN (Player-Collider blockt)
+3. Snake triggert dann Bite Attack (Animation + Damage)
 
 ---
 
@@ -147,8 +148,10 @@ Nach dem Tagging folgendes prüfen:
 | `Environment` | Walls, Floors, Props | **BLOCKIERT** Snake Movement |
 | `Snake` | Toon Snake/Cobra Prefabs | **BLOCKIERT** (verhindert Snake-Stacking) |
 | `MoveAwayTarget` | Target GameObjects (mit Collider!) | **BLOCKIERT** (Snake stoppt am Target) |
-| `Player` | Player GameObject | **PASSTHROUGH** (Snakes können Player folgen) |
-| `Untagged` | Andere Objects | **BLOCKIERT** (sicher ist sicher) |
+| `Player` | Player GameObject | **BLOCKIERT** (Snake stoppt für Attack) |
+| `Untagged` | Andere Objects | **BLOCKIERT** (Default Safe Behavior) |
+
+**Wichtig:** ALLE Objekte blockieren Snake Movement. Snakes stoppen wenn sie etwas treffen (kein Passthrough).
 
 ---
 
