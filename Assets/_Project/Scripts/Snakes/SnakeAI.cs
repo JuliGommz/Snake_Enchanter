@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.6 - Environment Tag System (Session 14)
+* Version: 1.3.7 - Proper Tag-based Collision (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -68,6 +68,10 @@
 * - v1.3.6: Environment tag system (Session 14) — Simplified collision detection to use
 *         positive tag check (CompareTag("Environment") = block), all other tags passthrough,
 *         cleaner semantic ("Environment blocks movement"), Unity Best Practice 2026 (2026-02-13)
+* - v1.3.7: Proper tag-based collision (Session 14) — Fixed collision logic to block on ALL tags
+*         EXCEPT Player (user feedback: snakes should not overlap, MoveAwayTarget should block),
+*         reduced threshold to 0.5f (from 1.5f) for precise stopping at targets, tag-based
+*         system now prevents snake stacking like in user's previous project (2026-02-13)
 ====================================================================
 */
 
@@ -508,8 +512,8 @@ namespace SnakeEnchanter.Snakes
 
                         float distanceToTarget = Vector3.Distance(transform.position, _moveAwayTarget.position);
 
-                        // Check if close enough to target (increased threshold for collider size)
-                        if (distanceToTarget < 1.5f)
+                        // Check if reached target (precise threshold - MoveAwayTarget has collider that stops snake)
+                        if (distanceToTarget < 0.5f)
                         {
                             _isMoving = false;
                             // Transition back to Idle after reaching target
@@ -609,8 +613,14 @@ namespace SnakeEnchanter.Snakes
 
         /// <summary>
         /// Moves snake toward target with collision detection.
-        /// Uses raycast to prevent moving through walls.
+        /// Uses raycast to check for obstacles.
         /// Returns true if movement was successful, false if blocked.
+        ///
+        /// Tag-based blocking:
+        /// - Environment: BLOCKS (walls, floors)
+        /// - Snake: BLOCKS (prevent snake overlap)
+        /// - MoveAwayTarget: BLOCKS (snake stops at target)
+        /// - Player: PASSTHROUGH (snake can follow player)
         /// </summary>
         private bool MoveTowardsSafe(Vector3 targetPosition, float speed)
         {
@@ -621,14 +631,21 @@ namespace SnakeEnchanter.Snakes
             RaycastHit hit;
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, distance + 0.3f))
             {
-                // Block ONLY on Environment tag (walls, floors, obstacles)
-                if (hit.collider.CompareTag("Environment"))
+                // Check what we hit via Tag
+                string hitTag = hit.collider.tag;
+
+                // PASSTHROUGH: Only Player can be passed through
+                if (hitTag == "Player")
                 {
-                    // Environment obstacle detected - don't move
-                    Debug.Log($"SnakeAI ({_snakeName}): Movement blocked by {hit.collider.name} at distance {hit.distance:F2}");
+                    // Allow movement (snake can follow player)
+                }
+                // BLOCK: Everything else blocks movement
+                else
+                {
+                    // Log what blocked us
+                    Debug.Log($"SnakeAI ({_snakeName}): Movement blocked by {hit.collider.name} (Tag: {hitTag}) at distance {hit.distance:F2}");
                     return false;
                 }
-                // Everything else (Player, Snake, MoveAwayTarget, Untagged) = passthrough
             }
 
             // Safe to move

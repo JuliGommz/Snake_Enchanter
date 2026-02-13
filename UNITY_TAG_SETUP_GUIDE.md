@@ -82,15 +82,24 @@ Snake Movement soll nur durch Environment-GameObjects (Wände, Böden) blockiert
 
 ---
 
-## 🎮 SCHRITT 5: MoveAwayTargets (optional)
+## 🎮 SCHRITT 5: MoveAwayTargets (WICHTIG!)
 
-**Falls du separate Targets für Move Away Spell hast:**
+**GameObject:** Leere GameObjects (mit Collider!) wo Snakes hin-charmed werden
 
-**GameObject:** Leere GameObjects wo Snakes hin-charmed werden
+**Tag:** `MoveAwayTarget` (**PFLICHT**)
 
-**Tag:** `MoveAwayTarget` (optional, nicht zwingend)
-- Snakes passieren durch diese Targets (kein Block)
-- Keine spezielle Behandlung nötig
+**Setup:**
+1. MoveAwayTarget GameObjects im Hierarchy finden
+2. Inspector → **Add Component** → **Box Collider** (falls nicht vorhanden)
+3. Collider Settings:
+   - Is Trigger: **NO** (unchecked)
+   - Size: ~1x1x1 (oder passend zur Snake-Größe)
+4. Tag auf `MoveAwayTarget` setzen
+
+**Warum wichtig:**
+- Snake stoppt wenn sie MoveAwayTarget-Collider trifft
+- Ohne Collider: Snake läuft einfach durch (unendlich)
+- Tag-basierte Erkennung: Snake weiß "ich bin am Ziel"
 
 ---
 
@@ -135,10 +144,11 @@ Nach dem Tagging folgendes prüfen:
 
 | Tag | GameObject Typ | Zweck |
 |-----|---------------|-------|
-| `Environment` | Walls, Floors, Props | **Blockiert** Snake Movement |
-| `Snake` | Toon Snake/Cobra Prefabs | Passthrough (Snakes ignorieren Snakes) |
-| `Player` | Player GameObject | Passthrough (Snakes können Player folgen) |
-| `Untagged` | Andere Objects | Passthrough (Default) |
+| `Environment` | Walls, Floors, Props | **BLOCKIERT** Snake Movement |
+| `Snake` | Toon Snake/Cobra Prefabs | **BLOCKIERT** (verhindert Snake-Stacking) |
+| `MoveAwayTarget` | Target GameObjects (mit Collider!) | **BLOCKIERT** (Snake stoppt am Target) |
+| `Player` | Player GameObject | **PASSTHROUGH** (Snakes können Player folgen) |
+| `Untagged` | Andere Objects | **BLOCKIERT** (sicher ist sicher) |
 
 ---
 
