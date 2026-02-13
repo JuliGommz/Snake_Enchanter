@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.4 - Collision Fix (Session 14)
+* Version: 1.3.5 - Fix Raycast LayerMask (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -61,6 +61,10 @@
 * - v1.3.4: Collision fix (Session 14) — Removed OverlapSphere (caused self-detection),
 *         simplified MoveTowardsSafe to only raycast for environment (not snakes),
 *         snakes can now pass through each other, reduced debug spam (2026-02-13)
+* - v1.3.5: Fix raycast LayerMask bug (Session 14) — CRITICAL: Fixed inverted layerMask
+*         (~DefaultLayer blocked EVERYTHING), now uses Physics.Raycast default (all layers)
+*         with tag-based filtering (ignore Player/Snake), added MoveAwayTarget null check,
+*         improved MovedAway state logic clarity (2026-02-13)
 ====================================================================
 */
 
@@ -490,8 +494,15 @@ namespace SnakeEnchanter.Snakes
                     break;
 
                 case SnakeState.MovedAway:
-                    if (_isMoving && _moveAwayTarget != null)
+                    if (_moveAwayTarget != null)
                     {
+                        // Only move if spell animation delay has passed
+                        if (!_isMoving)
+                        {
+                            // Waiting for spell animation delay (3.5s)
+                            break;
+                        }
+
                         float distanceToTarget = Vector3.Distance(transform.position, _moveAwayTarget.position);
 
                         // Check if close enough to target (increased threshold for collider size)
@@ -505,8 +516,20 @@ namespace SnakeEnchanter.Snakes
                         else
                         {
                             // Smooth move to target position (with collision detection)
-                            MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
+                            bool moved = MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
+
+                            // Safety: If blocked for too long, give up and return to Idle
+                            if (!moved)
+                            {
+                                // Increment stuck counter or add timeout here if needed
+                            }
                         }
+                    }
+                    else
+                    {
+                        // No target set - return to Idle
+                        Debug.LogWarning($"SnakeAI ({_snakeName}): MovedAway state but no MoveAwayTarget! Returning to Idle.");
+                        SetState(SnakeState.Idle);
                     }
                     break;
 
@@ -591,15 +614,16 @@ namespace SnakeEnchanter.Snakes
             Vector3 direction = (targetPosition - transform.position).normalized;
             float distance = speed * Time.deltaTime;
 
-            // Raycast to check for obstacles ahead (ignore self and other snakes)
-            int layerMask = ~(_playerLayer | LayerMask.GetMask("Default")); // Exclude player and default layer (snakes)
+            // Raycast to check for obstacles ahead
+            // Use Physics.DefaultRaycastLayers which includes Default + most environment layers
             RaycastHit hit;
-            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, distance + 0.3f, layerMask))
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, distance + 0.3f))
             {
-                // Only block if obstacle is environment (not self, not other snakes)
-                if (!hit.collider.CompareTag("Snake"))
+                // Ignore Player and other Snakes - only block on environment
+                if (!hit.collider.CompareTag("Player") && !hit.collider.CompareTag("Snake"))
                 {
                     // Environment obstacle detected - don't move
+                    Debug.Log($"SnakeAI ({_snakeName}): Movement blocked by {hit.collider.name} at distance {hit.distance:F2}");
                     return false;
                 }
             }
