@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.1 - Patrol + Proximity + Attack System (Session 14 Restored)
+* Version: 1.3.2 - Bug Fixes (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -51,6 +51,9 @@
 *         Breath 4-7, Projectile 8+), patrol stops when player visible (2026-02-10)
 * - v1.3.1: Restored from Git (Session 14) — Full feature set recovered after
 *         accidental v1.0 revert (2026-02-13)
+* - v1.3.2: Bug fixes (Session 14) — Fixed Move Away infinite movement (added state
+*         transition to Idle), added MoveTowardsSafe() helper for collision detection
+*         via raycast, prevents phasing through walls (2026-02-13)
 ====================================================================
 */
 
@@ -405,12 +408,9 @@ namespace SnakeEnchanter.Snakes
                 _isPatrolling = true;
             }
 
-            // Move toward patrol target
+            // Move toward patrol target (with collision detection)
             float patrolSpeed = _moveSpeed * 0.75f; // 25% slower than normal movement
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                _currentPatrolTarget,
-                patrolSpeed * Time.deltaTime);
+            MoveTowardsSafe(_currentPatrolTarget, patrolSpeed);
 
             // Rotate toward target
             Vector3 directionToTarget = (_currentPatrolTarget - transform.position).normalized;
@@ -481,15 +481,14 @@ namespace SnakeEnchanter.Snakes
                 case SnakeState.MovedAway:
                     if (_isMoving && _moveAwayTarget != null)
                     {
-                        // Smooth move to target position
-                        transform.position = Vector3.MoveTowards(
-                            transform.position,
-                            _moveAwayTarget.position,
-                            _moveSpeed * Time.deltaTime);
+                        // Smooth move to target position (with collision detection)
+                        MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
 
                         if (Vector3.Distance(transform.position, _moveAwayTarget.position) < 0.1f)
                         {
                             _isMoving = false;
+                            // Transition back to Idle after reaching target
+                            SetState(SnakeState.Idle);
                         }
                     }
                     break;
@@ -559,12 +558,32 @@ namespace SnakeEnchanter.Snakes
         {
             if (_playerTransform == null) return;
 
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                _playerTransform.position,
-                _chaseSpeed * Time.deltaTime);
+            // Move toward player (with collision detection)
+            MoveTowardsSafe(_playerTransform.position, _chaseSpeed);
 
             LookAtPlayer();
+        }
+
+        /// <summary>
+        /// Moves snake toward target with collision detection.
+        /// Uses raycast to prevent moving through walls.
+        /// Returns true if movement was successful, false if blocked.
+        /// </summary>
+        private bool MoveTowardsSafe(Vector3 targetPosition, float speed)
+        {
+            Vector3 direction = (targetPosition - transform.position).normalized;
+            float distance = speed * Time.deltaTime;
+
+            // Raycast to check for obstacles
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, distance + 0.1f, ~_playerLayer))
+            {
+                // Obstacle detected - don't move
+                return false;
+            }
+
+            // Safe to move
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, distance);
+            return true;
         }
 
         /// <summary>
