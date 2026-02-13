@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.2 - Bug Fixes (Session 14)
+* Version: 1.3.3 - Collision & Patrol Debug (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -54,6 +54,10 @@
 * - v1.3.2: Bug fixes (Session 14) — Fixed Move Away infinite movement (added state
 *         transition to Idle), added MoveTowardsSafe() helper for collision detection
 *         via raycast, prevents phasing through walls (2026-02-13)
+* - v1.3.3: Collision & Patrol debug (Session 14) — Added debug logs for patrol state,
+*         increased MoveAwayTarget threshold to 1.5f (accounts for collider size),
+*         added escape mechanism for snakes stuck in colliders (OverlapSphere check),
+*         better blocked movement logging (2026-02-13)
 ====================================================================
 */
 
@@ -374,19 +378,25 @@ namespace SnakeEnchanter.Snakes
         private void UpdatePatrol()
         {
             // Patrol only in Idle state
-            if (_currentState != SnakeState.Idle) return;
+            if (_currentState != SnakeState.Idle)
+            {
+                Debug.Log($"SnakeAI ({_snakeName}): Patrol blocked - Not in Idle state (current: {_currentState})");
+                return;
+            }
 
             // Stop patrol if player is visible
             if (_canSeePlayer)
             {
                 if (_isPatrolling)
                 {
-                    // Debug.Log($"SnakeAI ({_snakeName}): Patrol stopped - Player visible");
+                    Debug.Log($"SnakeAI ({_snakeName}): Patrol stopped - Player visible (distance: {_playerDistance:F2})");
                 }
                 _isPatrolling = false;
                 _isWaitingAtWaypoint = false;
                 return;
             }
+
+            Debug.Log($"SnakeAI ({_snakeName}): UpdatePatrol running - canSeePlayer: {_canSeePlayer}, isPatrolling: {_isPatrolling}");
 
             // Waiting at waypoint
             if (_isWaitingAtWaypoint)
@@ -403,7 +413,7 @@ namespace SnakeEnchanter.Snakes
             // Start patrolling if not yet started
             if (!_isPatrolling)
             {
-                // Debug.Log($"SnakeAI ({_snakeName}): Starting patrol from {_originalPosition}");
+                Debug.Log($"SnakeAI ({_snakeName}): Starting patrol from {_originalPosition}");
                 GenerateNewPatrolWaypoint();
                 _isPatrolling = true;
             }
@@ -481,14 +491,24 @@ namespace SnakeEnchanter.Snakes
                 case SnakeState.MovedAway:
                     if (_isMoving && _moveAwayTarget != null)
                     {
-                        // Smooth move to target position (with collision detection)
-                        MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
+                        float distanceToTarget = Vector3.Distance(transform.position, _moveAwayTarget.position);
 
-                        if (Vector3.Distance(transform.position, _moveAwayTarget.position) < 0.1f)
+                        // Check if close enough to target (increased threshold for collider size)
+                        if (distanceToTarget < 1.5f)
                         {
                             _isMoving = false;
                             // Transition back to Idle after reaching target
                             SetState(SnakeState.Idle);
+                            Debug.Log($"SnakeAI ({_snakeName}): Reached MoveAwayTarget at distance {distanceToTarget:F2}");
+                        }
+                        else
+                        {
+                            // Smooth move to target position (with collision detection)
+                            bool moved = MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
+                            if (!moved && Time.frameCount % 60 == 0) // Log every ~1 second if blocked
+                            {
+                                Debug.Log($"SnakeAI ({_snakeName}): Move blocked by obstacle, distance to target: {distanceToTarget:F2}");
+                            }
                         }
                     }
                     break;
@@ -574,8 +594,19 @@ namespace SnakeEnchanter.Snakes
             Vector3 direction = (targetPosition - transform.position).normalized;
             float distance = speed * Time.deltaTime;
 
-            // Raycast to check for obstacles
-            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, distance + 0.1f, ~_playerLayer))
+            // Check if already inside a collider (stuck)
+            Collider[] overlaps = Physics.OverlapSphere(transform.position, 0.3f, ~_playerLayer);
+            if (overlaps.Length > 0 && overlaps[0] != _collider)
+            {
+                // Snake is stuck inside a collider - try to escape by moving away from center
+                Vector3 escapeDirection = (transform.position - overlaps[0].bounds.center).normalized;
+                transform.position += escapeDirection * (speed * 2f * Time.deltaTime); // Move faster to escape
+                Debug.LogWarning($"SnakeAI ({_snakeName}): Stuck in {overlaps[0].name}, escaping...");
+                return false;
+            }
+
+            // Raycast to check for obstacles ahead
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, distance + 0.2f, ~_playerLayer))
             {
                 // Obstacle detected - don't move
                 return false;
