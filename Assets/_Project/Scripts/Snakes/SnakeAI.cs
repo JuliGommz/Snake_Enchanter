@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.3 - Collision & Patrol Debug (Session 14)
+* Version: 1.3.4 - Collision Fix (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -58,6 +58,9 @@
 *         increased MoveAwayTarget threshold to 1.5f (accounts for collider size),
 *         added escape mechanism for snakes stuck in colliders (OverlapSphere check),
 *         better blocked movement logging (2026-02-13)
+* - v1.3.4: Collision fix (Session 14) — Removed OverlapSphere (caused self-detection),
+*         simplified MoveTowardsSafe to only raycast for environment (not snakes),
+*         snakes can now pass through each other, reduced debug spam (2026-02-13)
 ====================================================================
 */
 
@@ -380,7 +383,7 @@ namespace SnakeEnchanter.Snakes
             // Patrol only in Idle state
             if (_currentState != SnakeState.Idle)
             {
-                Debug.Log($"SnakeAI ({_snakeName}): Patrol blocked - Not in Idle state (current: {_currentState})");
+                // Silent - Patrol blocked by non-Idle state (normal behavior)
                 return;
             }
 
@@ -389,14 +392,12 @@ namespace SnakeEnchanter.Snakes
             {
                 if (_isPatrolling)
                 {
-                    Debug.Log($"SnakeAI ({_snakeName}): Patrol stopped - Player visible (distance: {_playerDistance:F2})");
+                    // Debug.Log($"SnakeAI ({_snakeName}): Patrol stopped - Player visible");
                 }
                 _isPatrolling = false;
                 _isWaitingAtWaypoint = false;
                 return;
             }
-
-            Debug.Log($"SnakeAI ({_snakeName}): UpdatePatrol running - canSeePlayer: {_canSeePlayer}, isPatrolling: {_isPatrolling}");
 
             // Waiting at waypoint
             if (_isWaitingAtWaypoint)
@@ -504,11 +505,7 @@ namespace SnakeEnchanter.Snakes
                         else
                         {
                             // Smooth move to target position (with collision detection)
-                            bool moved = MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
-                            if (!moved && Time.frameCount % 60 == 0) // Log every ~1 second if blocked
-                            {
-                                Debug.Log($"SnakeAI ({_snakeName}): Move blocked by obstacle, distance to target: {distanceToTarget:F2}");
-                            }
+                            MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
                         }
                     }
                     break;
@@ -594,22 +591,17 @@ namespace SnakeEnchanter.Snakes
             Vector3 direction = (targetPosition - transform.position).normalized;
             float distance = speed * Time.deltaTime;
 
-            // Check if already inside a collider (stuck)
-            Collider[] overlaps = Physics.OverlapSphere(transform.position, 0.3f, ~_playerLayer);
-            if (overlaps.Length > 0 && overlaps[0] != _collider)
+            // Raycast to check for obstacles ahead (ignore self and other snakes)
+            int layerMask = ~(_playerLayer | LayerMask.GetMask("Default")); // Exclude player and default layer (snakes)
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, distance + 0.3f, layerMask))
             {
-                // Snake is stuck inside a collider - try to escape by moving away from center
-                Vector3 escapeDirection = (transform.position - overlaps[0].bounds.center).normalized;
-                transform.position += escapeDirection * (speed * 2f * Time.deltaTime); // Move faster to escape
-                Debug.LogWarning($"SnakeAI ({_snakeName}): Stuck in {overlaps[0].name}, escaping...");
-                return false;
-            }
-
-            // Raycast to check for obstacles ahead
-            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, distance + 0.2f, ~_playerLayer))
-            {
-                // Obstacle detected - don't move
-                return false;
+                // Only block if obstacle is environment (not self, not other snakes)
+                if (!hit.collider.CompareTag("Snake"))
+                {
+                    // Environment obstacle detected - don't move
+                    return false;
+                }
             }
 
             // Safe to move
