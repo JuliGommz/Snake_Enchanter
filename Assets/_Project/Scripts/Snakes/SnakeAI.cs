@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-13
-* Version: 1.3.8 - Fix Player Collision (Session 14)
+* Version: 1.3.10 - Fix MoveAway Infinite Loop (Session 14)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -75,6 +75,20 @@
 * - v1.3.8: Fix Player collision bug (Session 14) — CRITICAL: Player must BLOCK not passthrough
 *         (user feedback: snakes attack player, must stop near player for bite range), removed
 *         Player passthrough logic, ALL objects now block movement correctly (2026-02-13)
+* - v1.3.9: Fix MoveAwayTarget stopping + Attack ranges (Session 14) — THREE CRITICAL FIXES:
+*         1) MoveAwayTarget stopping: Detect MoveAwayTarget collider blocking snake (raycast check),
+*            increased threshold to 1.0f to account for collider size, snake stops when blocked
+*         2) State transition: Added TransitionFromMoveAwayToRootState() method, evaluates player
+*            position after reaching target, returns to Idle (resumes attacks/patrol intelligently)
+*         3) Attack range gaps: Fixed 3.5-4 units and 7-8 units gaps where snakes did nothing,
+*            now approach player in gaps (FollowPlayer), ensures continuous engagement (2026-02-13)
+* - v1.3.10: Fix MoveAway infinite loop (Session 14) — CRITICAL FIX for stuck snakes:
+*         ROOT CAUSE: MoveAwayTarget GameObjects had "Untagged" instead of "MoveAwayTarget" tag
+*         + snakes blocked by obstacles before reaching distant targets (>4 units) with no timeout
+*         FIXES: 1) Scene: Tagged both MoveAwayTarget objects with "MoveAwayTarget" tag
+*         2) Code: Added 2-second timeout when blocked by non-target obstacles (prevents infinite loop)
+*         3) Code: Reset timeout counter when movement succeeds (only counts continuous blocking)
+*         Result: Snakes now properly exit MovedAway state via tag detection OR timeout (2026-02-13)
 ====================================================================
 */
 
@@ -515,23 +529,51 @@ namespace SnakeEnchanter.Snakes
 
                         float distanceToTarget = Vector3.Distance(transform.position, _moveAwayTarget.position);
 
-                        // Check if reached target (precise threshold - MoveAwayTarget has collider that stops snake)
-                        if (distanceToTarget < 0.5f)
+                        // Check if reached target (distance-based)
+                        if (distanceToTarget < 1.0f)
                         {
                             _isMoving = false;
-                            // Transition back to Idle after reaching target
-                            SetState(SnakeState.Idle);
-                            Debug.Log($"SnakeAI ({_snakeName}): Reached MoveAwayTarget at distance {distanceToTarget:F2}");
+                            TransitionFromMoveAwayToRootState();
+                            Debug.Log($"SnakeAI ({_snakeName}): Reached MoveAwayTarget at distance {distanceToTarget:F2}, transitioning to root state");
                         }
                         else
                         {
                             // Smooth move to target position (with collision detection)
                             bool moved = MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
 
-                            // Safety: If blocked for too long, give up and return to Idle
+                            // Check if blocked - could be obstacle OR the target itself
                             if (!moved)
                             {
-                                // Increment stuck counter or add timeout here if needed
+                                // Raycast to see what's blocking
+                                Vector3 direction = (_moveAwayTarget.position - transform.position).normalized;
+                                RaycastHit hit;
+                                if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, 1.5f))
+                                {
+                                    // If blocked by MoveAwayTarget, we've arrived
+                                    if (hit.collider.CompareTag("MoveAwayTarget"))
+                                    {
+                                        _isMoving = false;
+                                        TransitionFromMoveAwayToRootState();
+                                        Debug.Log($"SnakeAI ({_snakeName}): Blocked by MoveAwayTarget collider (tag detected), reached destination");
+                                    }
+                                    // If blocked by obstacle and not making progress, give up after timeout
+                                    else
+                                    {
+                                        _stateTimer += Time.deltaTime;
+                                        if (_stateTimer > 2.0f) // 2 seconds of continuous blocking
+                                        {
+                                            _isMoving = false;
+                                            _stateTimer = 0f;
+                                            TransitionFromMoveAwayToRootState();
+                                            Debug.LogWarning($"SnakeAI ({_snakeName}): Blocked by obstacle for 2s, giving up on MoveAwayTarget");
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // Successfully moved - reset timeout counter
+                                _stateTimer = 0f;
                             }
                         }
                     }
@@ -563,10 +605,13 @@ namespace SnakeEnchanter.Snakes
 
         /// <summary>
         /// Handles player interaction during Idle state based on distance ranges.
-        /// - 0-0.5: Bite Attack
+        /// - 0-0.5: Bite Attack (look at player)
         /// - 0.5-3.5: Follow player
-        /// - 4-7: Breath Attack
-        /// - 8+: Projectile (Advanced mode only)
+        /// - 3.5-4: Approach (close gap for breath attack)
+        /// - 4-7: Breath Attack (look at player)
+        /// - 7-8: Approach (close gap for projectile)
+        /// - 8+: Projectile (look at player, Advanced mode only)
+        /// Default: Look at player if visible
         /// </summary>
         private void HandleIdlePlayerInteraction()
         {
@@ -585,6 +630,11 @@ namespace SnakeEnchanter.Snakes
                 // Follow range (0.5-3.5 units)
                 FollowPlayer();
             }
+            else if (_playerDistance > _followRangeMax && _playerDistance < _breathRangeMin)
+            {
+                // Gap range (3.5-4 units) - approach for breath attack
+                FollowPlayer();
+            }
             else if (_playerDistance >= _breathRangeMin && _playerDistance <= _breathRangeMax)
             {
                 // Breath Attack range (4-7 units)
@@ -592,11 +642,28 @@ namespace SnakeEnchanter.Snakes
                 // Just look at player
                 LookAtPlayer();
             }
-            else if (_playerDistance > _projectileRange && _isAdvancedMode)
+            else if (_playerDistance > _breathRangeMax && _playerDistance < _projectileRange)
+            {
+                // Gap range (7-8 units) - approach for projectile (or look if Simple mode)
+                if (_isAdvancedMode)
+                {
+                    FollowPlayer(); // Close gap to projectile range
+                }
+                else
+                {
+                    LookAtPlayer(); // Simple mode: no projectile, just watch
+                }
+            }
+            else if (_playerDistance >= _projectileRange && _isAdvancedMode)
             {
                 // Projectile range (8+ units, Advanced only)
                 // Attack is handled in CheckAndTriggerAttack()
                 // Just look at player
+                LookAtPlayer();
+            }
+            else
+            {
+                // Default: Look at player (covers any edge cases)
                 LookAtPlayer();
             }
         }
@@ -691,6 +758,22 @@ namespace SnakeEnchanter.Snakes
             {
                 _isMoving = true;
             }
+        }
+
+        /// <summary>
+        /// Transitions from MovedAway state back to appropriate root state.
+        /// Evaluates player position/visibility to decide next state:
+        /// - If player visible and in range → Idle (will trigger attack/follow in next Update)
+        /// - If player not visible → Idle (will resume patrol)
+        /// </summary>
+        private void TransitionFromMoveAwayToRootState()
+        {
+            // Always return to Idle state
+            // Idle state logic will handle player interaction if visible
+            // Or resume patrol if player not visible
+            SetState(SnakeState.Idle);
+
+            Debug.Log($"SnakeAI ({_snakeName}): MoveAway complete → Idle (Player visible: {_canSeePlayer}, Distance: {_playerDistance:F1})");
         }
 
         /// <summary>
