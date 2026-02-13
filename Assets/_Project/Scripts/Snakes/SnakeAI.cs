@@ -5,8 +5,8 @@
 * Project: Snake Enchanter
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
-* Date: 2026-02-04
-* Version: 1.0
+* Date: 2026-02-13
+* Version: 1.3.1 - Patrol + Proximity + Attack System (Session 14 Restored)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -18,6 +18,7 @@
 * - Snake state machine architecture
 * - Tune interaction system
 * - Command range detection
+* - Attack system (v1.1): Range-based attacks (Bite/Breath/Projectile)
 * - Human reviewed and will modify as needed
 
 * DEPENDENCIES:
@@ -41,6 +42,15 @@
 
 * VERSION HISTORY:
 * - v1.0: Initial — state machine, tune reaction, command range
+* - v1.1: Attack system — Bite/Breath/Projectile with range detection,
+*         4s cooldown, interrupts tunes, raycast-based damage (2026-02-10)
+* - v1.2: Movement improvements — Chase behavior for aggressive snakes,
+*         spell animation delay for Move Away, separate normal/chase speeds (2026-02-10)
+* - v1.3: Patrol & Proximity system — Random waypoint patrol in 2-3 units radius,
+*         line-of-sight detection, range-based behaviors (Bite 0-0.5, Follow 0.5-3.5,
+*         Breath 4-7, Projectile 8+), patrol stops when player visible (2026-02-10)
+* - v1.3.1: Restored from Git (Session 14) — Full feature set recovered after
+*         accidental v1.0 revert (2026-02-13)
 ====================================================================
 */
 
@@ -62,6 +72,26 @@ namespace SnakeEnchanter.Snakes
         AttackingEnemy, // Charmed with Attack tune — attacking other target
         Frozen,         // Freeze tune effect — temporarily immobile
         Dead            // Killed (Phase 2+)
+    }
+
+    /// <summary>
+    /// Snake types with different attack capabilities.
+    /// </summary>
+    public enum SnakeType
+    {
+        Basic,    // Toon Snake - Only Bite Attack
+        Advanced  // Toon Cobra - Bite, Breath, Projectile
+    }
+
+    /// <summary>
+    /// Attack types based on range.
+    /// </summary>
+    public enum AttackType
+    {
+        None,
+        Bite,
+        Breath,
+        Projectile
     }
 
     /// <summary>
@@ -101,8 +131,59 @@ namespace SnakeEnchanter.Snakes
         [Tooltip("Position to move to when charmed with Move tune")]
         [SerializeField] private Transform _moveAwayTarget;
 
-        [Tooltip("Speed of move-away transition")]
-        [SerializeField] private float _moveSpeed = 3f;
+        [Tooltip("Normal movement speed (for Move Away, patrol, etc.)")]
+        [SerializeField] private float _moveSpeed = 0.4f;
+
+        [Tooltip("Delay before snake starts moving after spell cast (seconds)")]
+        [SerializeField] private float _spellAnimationDelay = 3.5f;
+
+        [Header("Attack System")]
+        [Tooltip("Snake type determines attack capabilities")]
+        [SerializeField] private SnakeType _snakeType = SnakeType.Basic;
+
+        [Tooltip("Bite attack range (close combat, 0-0.5 units)")]
+        [SerializeField] private float _biteRange = 0.5f;
+
+        [Tooltip("Breath attack range (medium range, 4-7 units)")]
+        [SerializeField] private float _breathRange = 7f;
+
+        [Tooltip("Projectile attack range (far range, Cobra Advanced mode only)")]
+        [SerializeField] private float _projectileRange = 8f;
+
+        [Tooltip("Damage dealt by bite attack")]
+        [SerializeField] private int _biteDamage = 15;
+
+        [Tooltip("Damage dealt by breath attack")]
+        [SerializeField] private int _breathDamage = 10;
+
+        [Tooltip("Damage dealt by projectile attack")]
+        [SerializeField] private int _projectileDamage = 8;
+
+        [Tooltip("Cooldown between attacks (seconds)")]
+        [SerializeField] private float _attackCooldown = 4f;
+
+        [Header("Proximity & Behavior")]
+        [Tooltip("Maximum distance to detect and react to player")]
+        [SerializeField] private float _detectionRange = 10f;
+
+        [Tooltip("Follow player in this range (0.5-3.5 units)")]
+        [SerializeField] private float _followRangeMin = 0.5f;
+        [SerializeField] private float _followRangeMax = 3.5f;
+
+        [Tooltip("Breath attack range (4-7 units)")]
+        [SerializeField] private float _breathRangeMin = 4f;
+        [SerializeField] private float _breathRangeMax = 7f;
+
+        [Tooltip("Speed when following/chasing player")]
+        [SerializeField] private float _chaseSpeed = 1f;
+
+        [Header("Patrol System")]
+        [Tooltip("Patrol radius around start position (2-3 units)")]
+        [SerializeField] private float _patrolRadiusMin = 2f;
+        [SerializeField] private float _patrolRadiusMax = 3f;
+
+        [Tooltip("Time to wait at each patrol waypoint (seconds)")]
+        [SerializeField] private float _patrolWaitTime = 2f;
 
         [Header("Visual Feedback (Phase 1 — Color Change)")]
         [SerializeField] private Color _idleColor = Color.green;
@@ -122,6 +203,21 @@ namespace SnakeEnchanter.Snakes
         private Vector3 _originalPosition;
         private Quaternion _originalRotation;
         private bool _isMoving = false;
+
+        // Attack system
+        private Animator _animator;
+        private float _lastAttackTime = -999f;
+        private bool _isAdvancedMode = false;
+
+        // Patrol system
+        private Vector3 _currentPatrolTarget;
+        private bool _isPatrolling = false;
+        private float _patrolWaitTimer = 0f;
+        private bool _isWaitingAtWaypoint = false;
+
+        // Proximity detection
+        private bool _canSeePlayer = false;
+        private float _playerDistance = Mathf.Infinity;
         #endregion
 
         #region Properties
@@ -153,6 +249,7 @@ namespace SnakeEnchanter.Snakes
         {
             _collider = GetComponent<Collider>();
             _renderer = GetComponentInChildren<Renderer>();
+            _animator = GetComponent<Animator>();
             _originalPosition = transform.position;
             _originalRotation = transform.rotation;
 
@@ -175,6 +272,13 @@ namespace SnakeEnchanter.Snakes
                 Debug.LogWarning($"SnakeAI ({_snakeName}): No GameObject with tag 'Player' found!");
             }
 
+            // Get game mode from GameManager (now it's initialized)
+            if (Core.GameManager.Instance != null)
+            {
+                _isAdvancedMode = Core.GameManager.Instance.CurrentMode == Core.GameMode.Advanced;
+                // Debug.Log($"SnakeAI ({_snakeName}): Game Mode = {(_isAdvancedMode ? "Advanced" : "Simple")}");
+            }
+
             SetState(SnakeState.Idle);
         }
 
@@ -193,7 +297,10 @@ namespace SnakeEnchanter.Snakes
 
         private void Update()
         {
+            UpdateProximityDetection();
+            UpdatePatrol();
             UpdateState();
+            CheckAndTriggerAttack();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -207,8 +314,138 @@ namespace SnakeEnchanter.Snakes
             if (healthSystem != null)
             {
                 healthSystem.TakeDamage(_contactDamage);
-                Debug.Log($"SnakeAI ({_snakeName}): Contact damage! {_contactDamage} HP");
+                // Debug.Log($"SnakeAI ({_snakeName}): Contact damage! {_contactDamage} HP");
             }
+        }
+        #endregion
+
+        #region Proximity Detection
+        /// <summary>
+        /// Updates proximity detection - checks if snake can see player and distance.
+        /// Uses raycast for line-of-sight detection.
+        /// </summary>
+        private void UpdateProximityDetection()
+        {
+            if (_playerTransform == null)
+            {
+                _canSeePlayer = false;
+                _playerDistance = Mathf.Infinity;
+                return;
+            }
+
+            // Calculate distance
+            _playerDistance = Vector3.Distance(transform.position, _playerTransform.position);
+
+            // Check if player is within detection range
+            if (_playerDistance > _detectionRange)
+            {
+                _canSeePlayer = false;
+                return;
+            }
+
+            // Raycast for line-of-sight
+            Vector3 directionToPlayer = (_playerTransform.position - transform.position).normalized;
+            Vector3 rayOrigin = transform.position + Vector3.up * 0.5f; // Slightly elevated
+
+            if (Physics.Raycast(rayOrigin, directionToPlayer, out RaycastHit hit, _detectionRange))
+            {
+                bool canSee = hit.collider.CompareTag("Player");
+                if (canSee != _canSeePlayer) // State changed
+                {
+                    // Debug.Log($"SnakeAI ({_snakeName}): Player visibility changed: {canSee} (hit: {hit.collider.name}, distance: {_playerDistance:F2})");
+                }
+                _canSeePlayer = canSee;
+            }
+            else
+            {
+                _canSeePlayer = false;
+            }
+        }
+        #endregion
+
+        #region Patrol System
+        /// <summary>
+        /// Updates patrol behavior - moves to random waypoints around start position.
+        /// Only active in Idle state when player is NOT visible.
+        /// </summary>
+        private void UpdatePatrol()
+        {
+            // Patrol only in Idle state
+            if (_currentState != SnakeState.Idle) return;
+
+            // Stop patrol if player is visible
+            if (_canSeePlayer)
+            {
+                if (_isPatrolling)
+                {
+                    // Debug.Log($"SnakeAI ({_snakeName}): Patrol stopped - Player visible");
+                }
+                _isPatrolling = false;
+                _isWaitingAtWaypoint = false;
+                return;
+            }
+
+            // Waiting at waypoint
+            if (_isWaitingAtWaypoint)
+            {
+                _patrolWaitTimer -= Time.deltaTime;
+                if (_patrolWaitTimer <= 0f)
+                {
+                    _isWaitingAtWaypoint = false;
+                    GenerateNewPatrolWaypoint();
+                }
+                return;
+            }
+
+            // Start patrolling if not yet started
+            if (!_isPatrolling)
+            {
+                // Debug.Log($"SnakeAI ({_snakeName}): Starting patrol from {_originalPosition}");
+                GenerateNewPatrolWaypoint();
+                _isPatrolling = true;
+            }
+
+            // Move toward patrol target
+            float patrolSpeed = _moveSpeed * 0.75f; // 25% slower than normal movement
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                _currentPatrolTarget,
+                patrolSpeed * Time.deltaTime);
+
+            // Rotate toward target
+            Vector3 directionToTarget = (_currentPatrolTarget - transform.position).normalized;
+            if (directionToTarget != Vector3.zero)
+            {
+                Vector3 lookTarget = new Vector3(_currentPatrolTarget.x, transform.position.y, _currentPatrolTarget.z);
+                transform.rotation = Quaternion.Slerp(
+                    transform.rotation,
+                    Quaternion.LookRotation(directionToTarget),
+                    Time.deltaTime * 2f);
+            }
+
+            // Check if reached waypoint
+            if (Vector3.Distance(transform.position, _currentPatrolTarget) < 0.2f)
+            {
+                _isWaitingAtWaypoint = true;
+                _patrolWaitTimer = _patrolWaitTime;
+            }
+        }
+
+        /// <summary>
+        /// Generates a new random patrol waypoint around start position.
+        /// </summary>
+        private void GenerateNewPatrolWaypoint()
+        {
+            float radius = Random.Range(_patrolRadiusMin, _patrolRadiusMax);
+            float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+
+            Vector3 offset = new Vector3(
+                Mathf.Cos(angle) * radius,
+                0f,
+                Mathf.Sin(angle) * radius);
+
+            _currentPatrolTarget = _originalPosition + offset;
+            // Debug.Log($"SnakeAI ({_snakeName}): New patrol waypoint: {_currentPatrolTarget} (radius: {radius:F2})");
         }
         #endregion
 
@@ -221,15 +458,24 @@ namespace SnakeEnchanter.Snakes
             switch (_currentState)
             {
                 case SnakeState.Idle:
-                    // Phase 1: Static, just waiting
+                    // Idle behavior: Patrol OR react to player if visible
+                    if (_canSeePlayer)
+                    {
+                        HandleIdlePlayerInteraction();
+                    }
+                    // Patrol happens in UpdatePatrol()
                     break;
 
                 case SnakeState.Aggressive:
+                    // Aggressive state now only used for Failed Tune reaction
                     _stateTimer -= Time.deltaTime;
                     if (_stateTimer <= 0f)
                     {
                         SetState(SnakeState.Idle);
                     }
+
+                    // Follow player and bite once
+                    FollowPlayerForFailedTune();
                     break;
 
                 case SnakeState.MovedAway:
@@ -267,6 +513,108 @@ namespace SnakeEnchanter.Snakes
         }
 
         /// <summary>
+        /// Handles player interaction during Idle state based on distance ranges.
+        /// - 0-0.5: Bite Attack
+        /// - 0.5-3.5: Follow player
+        /// - 4-7: Breath Attack
+        /// - 8+: Projectile (Advanced mode only)
+        /// </summary>
+        private void HandleIdlePlayerInteraction()
+        {
+            if (_playerTransform == null || !_canSeePlayer) return;
+
+            // Range-based behavior
+            if (_playerDistance <= _biteRange)
+            {
+                // Bite Attack range (0-0.5 units)
+                // Attack is handled in CheckAndTriggerAttack()
+                // Just look at player
+                LookAtPlayer();
+            }
+            else if (_playerDistance > _followRangeMin && _playerDistance <= _followRangeMax)
+            {
+                // Follow range (0.5-3.5 units)
+                FollowPlayer();
+            }
+            else if (_playerDistance >= _breathRangeMin && _playerDistance <= _breathRangeMax)
+            {
+                // Breath Attack range (4-7 units)
+                // Attack is handled in CheckAndTriggerAttack()
+                // Just look at player
+                LookAtPlayer();
+            }
+            else if (_playerDistance > _projectileRange && _isAdvancedMode)
+            {
+                // Projectile range (8+ units, Advanced only)
+                // Attack is handled in CheckAndTriggerAttack()
+                // Just look at player
+                LookAtPlayer();
+            }
+        }
+
+        /// <summary>
+        /// Follow player smoothly (used in 0.5-3.5 units range).
+        /// </summary>
+        private void FollowPlayer()
+        {
+            if (_playerTransform == null) return;
+
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                _playerTransform.position,
+                _chaseSpeed * Time.deltaTime);
+
+            LookAtPlayer();
+        }
+
+        /// <summary>
+        /// Rotate to face player (Y-axis only).
+        /// </summary>
+        private void LookAtPlayer()
+        {
+            if (_playerTransform == null) return;
+
+            Vector3 lookTarget = new Vector3(_playerTransform.position.x, transform.position.y, _playerTransform.position.z);
+            Vector3 direction = (lookTarget - transform.position).normalized;
+
+            if (direction != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(
+                    transform.rotation,
+                    Quaternion.LookRotation(direction),
+                    Time.deltaTime * 5f);
+            }
+        }
+
+        /// <summary>
+        /// Follow player and bite once (Failed Tune reaction).
+        /// Used in Aggressive state after failed tune.
+        /// </summary>
+        private void FollowPlayerForFailedTune()
+        {
+            if (_playerTransform == null) return;
+
+            // Follow player until bite range
+            if (_playerDistance > _biteRange)
+            {
+                FollowPlayer();
+            }
+            // Bite attack is triggered automatically in CheckAndTriggerAttack()
+        }
+
+        /// <summary>
+        /// Starts the Move Away movement after spell animation delay.
+        /// Called via Invoke() from SetState(MovedAway).
+        /// </summary>
+        private void StartMoveAwayMovement()
+        {
+            if (_currentState == SnakeState.MovedAway)
+            {
+                _isMoving = true;
+            }
+        }
+
+        /// <summary>
         /// Transitions to a new state with appropriate setup.
         /// </summary>
         private void SetState(SnakeState newState)
@@ -288,9 +636,11 @@ namespace SnakeEnchanter.Snakes
                     break;
 
                 case SnakeState.MovedAway:
-                    _isMoving = true;
+                    _isMoving = false; // Wait for spell animation delay
                     SetVisualColor(_movedColor);
                     EnableCollider(false);
+                    // Start movement after spell animation delay
+                    Invoke(nameof(StartMoveAwayMovement), _spellAnimationDelay);
                     break;
 
                 case SnakeState.Sleeping:
@@ -310,7 +660,7 @@ namespace SnakeEnchanter.Snakes
                     break;
             }
 
-            Debug.Log($"SnakeAI ({_snakeName}): {previousState} → {newState}");
+            // Debug.Log($"SnakeAI ({_snakeName}): {previousState} → {newState}");
         }
         #endregion
 
@@ -383,7 +733,7 @@ namespace SnakeEnchanter.Snakes
                     break;
             }
 
-            Debug.Log($"SnakeAI ({_snakeName}): Tune effect applied — {effect}");
+            // Debug.Log($"SnakeAI ({_snakeName}): Tune effect applied — {effect}");
         }
 
         /// <summary>
@@ -414,6 +764,159 @@ namespace SnakeEnchanter.Snakes
             }
 
             return true;
+        }
+        #endregion
+
+        #region Attack System
+        /// <summary>
+        /// Checks player distance and triggers appropriate attack if in range.
+        /// Called every frame. Respects cooldown and state requirements.
+        /// Only attacks if player is visible (line of sight).
+        /// </summary>
+        private void CheckAndTriggerAttack()
+        {
+            // Only attack if Idle or Aggressive
+            if (_currentState != SnakeState.Idle && _currentState != SnakeState.Aggressive)
+                return;
+
+            // Only attack if player is visible
+            if (!_canSeePlayer)
+                return;
+
+            // Check cooldown
+            if (Time.time - _lastAttackTime < _attackCooldown)
+                return;
+
+            // Need player reference
+            if (_playerTransform == null)
+                return;
+
+            // Determine attack type based on distance and snake type
+            AttackType attackType = DetermineAttackType(_playerDistance);
+
+            if (attackType != AttackType.None)
+            {
+                TriggerAttack(attackType);
+            }
+        }
+
+        /// <summary>
+        /// Determines which attack to use based on distance and snake capabilities.
+        /// New ranges: Bite (0-0.5), Breath (4-7), Projectile (8+)
+        /// </summary>
+        private AttackType DetermineAttackType(float distance)
+        {
+            // Projectile (Advanced Cobra only, 8+ units)
+            if (_snakeType == SnakeType.Advanced && _isAdvancedMode &&
+                distance >= _projectileRange)
+            {
+                return AttackType.Projectile;
+            }
+
+            // Breath (Cobra, 4-7 units)
+            if (_snakeType == SnakeType.Advanced &&
+                distance >= _breathRangeMin && distance <= _breathRangeMax)
+            {
+                return AttackType.Breath;
+            }
+
+            // Bite (All snakes, 0-0.5 units)
+            if (distance <= _biteRange)
+            {
+                return AttackType.Bite;
+            }
+
+            return AttackType.None;
+        }
+
+        /// <summary>
+        /// Triggers attack animation and schedules damage.
+        /// </summary>
+        private void TriggerAttack(AttackType attackType)
+        {
+            _lastAttackTime = Time.time;
+
+            // Trigger animator
+            if (_animator != null)
+            {
+                switch (attackType)
+                {
+                    case AttackType.Bite:
+                        _animator.SetTrigger("Bite Attack");
+                        break;
+                    case AttackType.Breath:
+                        // Breath Attack is a BOOL (Type 4) in Animator Controller
+                        _animator.SetBool("Breath Attack", true);
+                        Invoke(nameof(ResetBreathBool), 2f); // Reset after animation
+                        break;
+                    case AttackType.Projectile:
+                        _animator.SetTrigger("Projectile Attack");
+                        break;
+                }
+            }
+
+            // Determine damage and delay
+            int damage = attackType switch
+            {
+                AttackType.Bite => _biteDamage,
+                AttackType.Breath => _breathDamage,
+                AttackType.Projectile => _projectileDamage,
+                _ => 0
+            };
+
+            // Animation delays (approximate)
+            float damageDelay = attackType switch
+            {
+                AttackType.Bite => 0.3f,        // Quick bite
+                AttackType.Breath => 0.5f,      // Breath wind-up
+                AttackType.Projectile => 0.6f,  // Projectile shoot
+                _ => 0f
+            };
+
+            // Schedule damage after animation delay
+            Invoke(nameof(DealScheduledDamage), damageDelay);
+            _scheduledDamage = damage;
+
+            // Debug.Log($"SnakeAI ({_snakeName}): {attackType} attack triggered! Damage: {damage}");
+        }
+
+        private int _scheduledDamage = 0;
+
+        /// <summary>
+        /// Resets Breath Attack bool after animation completes.
+        /// </summary>
+        private void ResetBreathBool()
+        {
+            if (_animator != null)
+            {
+                _animator.SetBool("Breath Attack", false);
+            }
+        }
+
+        /// <summary>
+        /// Deals damage to player after attack animation delay.
+        /// Uses Raycast to check if player is still in line of sight.
+        /// </summary>
+        private void DealScheduledDamage()
+        {
+            if (_playerTransform == null) return;
+
+            // Raycast to player (line of sight check)
+            Vector3 directionToPlayer = (_playerTransform.position - transform.position).normalized;
+            float distanceToPlayer = Vector3.Distance(transform.position, _playerTransform.position);
+
+            if (Physics.Raycast(transform.position + Vector3.up, directionToPlayer, out RaycastHit hit, distanceToPlayer + 1f))
+            {
+                if (hit.collider.CompareTag("Player"))
+                {
+                    var healthSystem = hit.collider.GetComponent<Player.HealthSystem>();
+                    if (healthSystem != null)
+                    {
+                        healthSystem.TakeDamage(_scheduledDamage);
+                        // Debug.Log($"SnakeAI ({_snakeName}): Hit player for {_scheduledDamage} damage!");
+                    }
+                }
+            }
         }
         #endregion
 
@@ -472,9 +975,28 @@ namespace SnakeEnchanter.Snakes
         #region Debug Visualization
         private void OnDrawGizmosSelected()
         {
-            // Command range
+            // Command range (yellow)
             Gizmos.color = new Color(1f, 1f, 0f, 0.2f);
             Gizmos.DrawWireSphere(transform.position, _commandRange);
+
+            // Attack ranges
+            // Bite range (red)
+            Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
+            Gizmos.DrawWireSphere(transform.position, _biteRange);
+
+            // Breath range (orange, Cobra only)
+            if (_snakeType == SnakeType.Advanced)
+            {
+                Gizmos.color = new Color(1f, 0.5f, 0f, 0.2f);
+                Gizmos.DrawWireSphere(transform.position, _breathRange);
+            }
+
+            // Projectile range (purple, Cobra Advanced only)
+            if (_snakeType == SnakeType.Advanced)
+            {
+                Gizmos.color = new Color(0.5f, 0f, 1f, 0.1f);
+                Gizmos.DrawWireSphere(transform.position, _projectileRange);
+            }
 
             // Move away target
             if (_moveAwayTarget != null)
