@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.4.1 - Restore Session 14 Fixes + Attack VFX (Session 15)
+* Version: 1.4.2 - SphereCast Collision Fix (Session 15)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -103,6 +103,12 @@
 *         RESTORED: Raycast Distance 1.0 unit min (v1.3.13) - Props collision working
 *         RESTORED: SetVisualColor() URP support (v1.3.11) - _BaseColor property
 *         Result: Props block movement, MoveAwayTarget reaches destination (2026-02-14)
+* - v1.4.2: SphereCast collision fix (Session 15) — FINAL FIX for Props/Snake collision:
+*         ROOT CAUSE: Physics.Raycast fails when origin inside collider volume
+*         SOLUTION: Replaced Raycast with SphereCast(radius=0.3f)
+*         EFFECT: Snakes now detect Props/other Snakes even when overlapping
+*         CLEANUP: Removed debug logs (Debug.Log, Debug.DrawRay)
+*         Result: Props collision WORKING, Snakes no longer overlap (2026-02-14)
 ====================================================================
 */
 
@@ -740,9 +746,7 @@ namespace SnakeEnchanter.Snakes
             // Prevents Snake from phasing through Props when moving slowly
             float rayDistance = Mathf.Max(distance + 0.3f, 1.0f);
 
-            // DEBUG: Visualize raycast in Scene View (RED = raycast direction)
             Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
-            Debug.DrawRay(rayOrigin, direction * rayDistance, Color.red, 0.5f);
 
             RaycastHit hit;
             // CRITICAL FIX (v1.4.2): Use SphereCast instead of Raycast
@@ -751,9 +755,7 @@ namespace SnakeEnchanter.Snakes
             float sphereRadius = 0.3f; // Snake body width approximation
             if (Physics.SphereCast(rayOrigin, sphereRadius, direction, out hit, rayDistance))
             {
-                // ALL objects block movement (including Player)
-                // This is correct: Snake stops near Player to attack, doesn't phase through
-                Debug.Log($"SnakeAI ({_snakeName}): Movement blocked by {hit.collider.name} (Tag: {hit.collider.tag}) at distance {hit.distance:F2}");
+                // Movement blocked - stop here
                 return false;
             }
 

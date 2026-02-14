@@ -139,7 +139,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &11288512
 Transform:
   m_ObjectHideFlags: 0
@@ -2175,7 +2175,7 @@ Transform:
   m_GameObject: {fileID: 460752678}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.756687, y: 0, z: 17.710442}
+  m_LocalPosition: {x: 9.85, y: 0, z: 24.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4137,7 +4137,7 @@ Transform:
   m_GameObject: {fileID: 981868796}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.19, y: 0, z: 16.55}
+  m_LocalPosition: {x: 6.43, y: 0, z: 20.52}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4592,7 +4592,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1050318072
 Transform:
   m_ObjectHideFlags: 0
@@ -9346,6 +9346,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 5275582990251285860, guid: 1771cc13544579b41a7ad297b1512364, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 5275582990251455446, guid: 1771cc13544579b41a7ad297b1512364, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9359,6 +9367,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 638920450}
     m_Modifications:
+    - target: {fileID: 3895159921555612900, guid: 8b1bf4514b3c0994694a730e9a42664b, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895159921555694072, guid: 8b1bf4514b3c0994694a730e9a42664b, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 3895159921555699470, guid: 8b1bf4514b3c0994694a730e9a42664b, type: 3}
       propertyPath: m_Name
       value: 01_Quest-Room_1
@@ -9420,6 +9436,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 638920450}
     m_Modifications:
+    - target: {fileID: 8145075080786421293, guid: 0833dac49f202b6448d93a568e6fa1ad, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8145075080786433873, guid: 0833dac49f202b6448d93a568e6fa1ad, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 8145075080786458177, guid: 0833dac49f202b6448d93a568e6fa1ad, type: 3}
       propertyPath: m_Name
       value: 02.2_East_2
@@ -9521,6 +9545,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8394123839483086187, guid: c5e9c203f11d0594689ea256f0744f09, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394123839483114519, guid: c5e9c203f11d0594689ea256f0744f09, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 8394123839483122951, guid: c5e9c203f11d0594689ea256f0744f09, type: 3}
       propertyPath: m_Name
       value: 02.3_South_7
@@ -9581,6 +9613,14 @@ PrefabInstance:
     - target: {fileID: 8889392561560538892, guid: 4b9ff9ddd1868334baef2a96e318f57e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8889392561560773590, guid: 4b9ff9ddd1868334baef2a96e318f57e, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8889392561560803472, guid: 4b9ff9ddd1868334baef2a96e318f57e, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 8889392561560949310, guid: 4b9ff9ddd1868334baef2a96e318f57e, type: 3}
       propertyPath: m_Name
@@ -9651,6 +9691,18 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 552732235441599797, guid: 6a93f6ae670b49641b88c1b79c302b3a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 552732235441629721, guid: 6a93f6ae670b49641b88c1b79c302b3a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 552732235441631133, guid: 6a93f6ae670b49641b88c1b79c302b3a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9704,6 +9756,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6515977565760720928, guid: 8e15c79fcf98ec74e8948d471506e020, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 6515977565760741724, guid: 8e15c79fcf98ec74e8948d471506e020, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 6515977565760749644, guid: 8e15c79fcf98ec74e8948d471506e020, type: 3}
       propertyPath: m_Name
       value: 02.3_South_8
@@ -9725,11 +9785,19 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 638920450}
     m_Modifications:
+    - target: {fileID: 725622386294045389, guid: 9172f19af62c01a49b98a2921cfecec1, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 725622386294253863, guid: 9172f19af62c01a49b98a2921cfecec1, type: 3}
       propertyPath: m_Name
       value: 02.3_South-curve_9
       objectReference: {fileID: 0}
     - target: {fileID: 725622386294253863, guid: 9172f19af62c01a49b98a2921cfecec1, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 725622386294259665, guid: 9172f19af62c01a49b98a2921cfecec1, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -9791,6 +9859,14 @@ PrefabInstance:
       value: 01_Hallway
       objectReference: {fileID: 0}
     - target: {fileID: 5043078750119075585, guid: 15fb59a7a7bc59c46b611eeb59c2afc4, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 5043078750119104365, guid: 15fb59a7a7bc59c46b611eeb59c2afc4, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 5043078750119132689, guid: 15fb59a7a7bc59c46b611eeb59c2afc4, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -9887,6 +9963,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 575267181343211773, guid: 911e60438cb9d4046b3fe8a30efcf82d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 575267181343240577, guid: 911e60438cb9d4046b3fe8a30efcf82d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 575267181343248529, guid: 911e60438cb9d4046b3fe8a30efcf82d, type: 3}
       propertyPath: m_Name
       value: 02.2_East_7
@@ -9908,11 +9992,19 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 638920450}
     m_Modifications:
+    - target: {fileID: 9011434405631270579, guid: 0aa202c3f2f6534429af925cb1a1f3c9, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 9011434405631285285, guid: 0aa202c3f2f6534429af925cb1a1f3c9, type: 3}
       propertyPath: m_Name
       value: 02_Quest-Room_2_CROSSROADS
       objectReference: {fileID: 0}
     - target: {fileID: 9011434405631285285, guid: 0aa202c3f2f6534429af925cb1a1f3c9, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 9011434405631291357, guid: 0aa202c3f2f6534429af925cb1a1f3c9, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -10017,6 +10109,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 5237303959013962222, guid: 2edfe80ff86469046bed41914d392087, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 5237303959013984936, guid: 2edfe80ff86469046bed41914d392087, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10075,6 +10175,14 @@ PrefabInstance:
       value: 02.2_East_6
       objectReference: {fileID: 0}
     - target: {fileID: 8914344304103984255, guid: a071c8cb1d59d944783a3665a46ec18f, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8914344304104021011, guid: a071c8cb1d59d944783a3665a46ec18f, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8914344304104041839, guid: a071c8cb1d59d944783a3665a46ec18f, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -10139,6 +10247,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 1830809223200981919, guid: 157221d1ee5d11f4da45e69342c24631, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830809223201028313, guid: 157221d1ee5d11f4da45e69342c24631, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10192,11 +10308,19 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2169217555915710610, guid: 0c46374724b95f04fb2a09df7b1fc1aa, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 2169217555915738950, guid: 0c46374724b95f04fb2a09df7b1fc1aa, type: 3}
       propertyPath: m_Name
       value: 02_Quest-Room_3_dead-end
       objectReference: {fileID: 0}
     - target: {fileID: 2169217555915738950, guid: 0c46374724b95f04fb2a09df7b1fc1aa, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 2169217555915804192, guid: 0c46374724b95f04fb2a09df7b1fc1aa, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -10218,6 +10342,14 @@ PrefabInstance:
       value: 02.1_North_1
       objectReference: {fileID: 0}
     - target: {fileID: 4875192415254789357, guid: 7125ff7bb9a79ae499abb5cab959eee1, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 4875192415254967875, guid: 7125ff7bb9a79ae499abb5cab959eee1, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 4875192415254990085, guid: 7125ff7bb9a79ae499abb5cab959eee1, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -10314,6 +10446,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3848811014476599819, guid: e7068903845ed784ebf70f283a46836d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 3848811014476620663, guid: e7068903845ed784ebf70f283a46836d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 3848811014476628583, guid: e7068903845ed784ebf70f283a46836d, type: 3}
       propertyPath: m_Name
       value: 02.3_South_5
@@ -10374,6 +10514,14 @@ PrefabInstance:
     - target: {fileID: 8866389065274594903, guid: 2689b786f57a97549a19024e242f3299, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8866389065274812661, guid: 2689b786f57a97549a19024e242f3299, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8866389065274994153, guid: 2689b786f57a97549a19024e242f3299, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 8866389065274997535, guid: 2689b786f57a97549a19024e242f3299, type: 3}
       propertyPath: m_Name
@@ -10600,11 +10748,23 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 347005933194119172, guid: fe68875b0eff9d346bce0f42b5b96c4a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 347005933194195984, guid: fe68875b0eff9d346bce0f42b5b96c4a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 347005933194206594, guid: fe68875b0eff9d346bce0f42b5b96c4a, type: 3}
       propertyPath: m_Name
       value: 02_Exit
       objectReference: {fileID: 0}
     - target: {fileID: 347005933194206594, guid: fe68875b0eff9d346bce0f42b5b96c4a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 347005933194216002, guid: fe68875b0eff9d346bce0f42b5b96c4a, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -10621,6 +10781,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 638920450}
     m_Modifications:
+    - target: {fileID: 8173856529960760052, guid: b7cb4c529f87936418656d334b7d9442, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8173856529960782258, guid: b7cb4c529f87936418656d334b7d9442, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 8173856529960796956, guid: b7cb4c529f87936418656d334b7d9442, type: 3}
       propertyPath: m_Name
       value: 01_Hallway_curve
@@ -10730,6 +10898,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 2108633596767380587, guid: ae29aaabdc0720045bf8a843e33a751e, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 2108633596767412013, guid: ae29aaabdc0720045bf8a843e33a751e, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10743,6 +10919,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 638920450}
     m_Modifications:
+    - target: {fileID: 3018175081573059141, guid: 4fa84fd98b486254bb4ca81cb154545d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018175081573101827, guid: 4fa84fd98b486254bb4ca81cb154545d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 3018175081573171435, guid: 4fa84fd98b486254bb4ca81cb154545d, type: 3}
       propertyPath: m_Name
       value: 02.3_South_1
@@ -10844,6 +11028,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8860994095670050431, guid: b27104f6d6b37be4e9a488b66753e845, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8860994095670054659, guid: b27104f6d6b37be4e9a488b66753e845, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 8860994095670078995, guid: b27104f6d6b37be4e9a488b66753e845, type: 3}
       propertyPath: m_Name
       value: 02.3_South_8
@@ -10905,11 +11097,19 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1844564711224714750, guid: 60f82a0b308a9aa448a0ac4f71f080e6, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 1844564711224805930, guid: 60f82a0b308a9aa448a0ac4f71f080e6, type: 3}
       propertyPath: m_Name
       value: 00_Start_closed
       objectReference: {fileID: 0}
     - target: {fileID: 1844564711224805930, guid: 60f82a0b308a9aa448a0ac4f71f080e6, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 1844564711224871756, guid: 60f82a0b308a9aa448a0ac4f71f080e6, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -10965,6 +11165,14 @@ PrefabInstance:
     - target: {fileID: 5641955975228444398, guid: d1e23f47b1b01314899a10972b566545, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5641955975228755246, guid: d1e23f47b1b01314899a10972b566545, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 5641955975228783698, guid: d1e23f47b1b01314899a10972b566545, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 5641955975228792130, guid: d1e23f47b1b01314899a10972b566545, type: 3}
       propertyPath: m_Name
@@ -11027,11 +11235,19 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4974988007024926997, guid: c03ca2ad217d7f14fa82ee163cf6d0f7, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 4974988007024932835, guid: c03ca2ad217d7f14fa82ee163cf6d0f7, type: 3}
       propertyPath: m_Name
       value: 02.2_East_1
       objectReference: {fileID: 0}
     - target: {fileID: 4974988007024932835, guid: c03ca2ad217d7f14fa82ee163cf6d0f7, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 4974988007025140745, guid: c03ca2ad217d7f14fa82ee163cf6d0f7, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -11053,6 +11269,14 @@ PrefabInstance:
       value: 02.3_South_4
       objectReference: {fileID: 0}
     - target: {fileID: 3207882649592417371, guid: 05c04a53316e18d45b8022cca4dd3647, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 3207882649592442187, guid: 05c04a53316e18d45b8022cca4dd3647, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 3207882649592454199, guid: 05c04a53316e18d45b8022cca4dd3647, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
@@ -11157,6 +11381,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 6997372633924180382, guid: f5098ba26b2ba12409091eb96add4185, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 6997372633924215512, guid: f5098ba26b2ba12409091eb96add4185, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11218,6 +11450,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 3298884955874397372, guid: 499c68f0effef2e4b943de2e3827f1d2, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 3298884955874441210, guid: 499c68f0effef2e4b943de2e3827f1d2, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11236,6 +11476,14 @@ PrefabInstance:
       value: 02.3_South_2
       objectReference: {fileID: 0}
     - target: {fileID: 8255914625945676002, guid: 80485fa53aa878041b42bbd8d9128d78, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8255914625945723468, guid: 80485fa53aa878041b42bbd8d9128d78, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
+    - target: {fileID: 8255914625945753866, guid: 80485fa53aa878041b42bbd8d9128d78, type: 3}
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
