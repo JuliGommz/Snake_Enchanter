@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.4.0 - Attack VFX System (Session 15)
+* Version: 1.4.1 - Restore Session 14 Fixes + Attack VFX (Session 15)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -98,6 +98,11 @@
 *         FEATURES: Projectile FX auto-rotates to face player, lifetime-based cleanup
 *         PREFAB FIX: Disabled playOnAwake + looping on FX prefabs (manual .Play() control)
 *         Result: Breath/Projectile attacks now have visual particle effects (2026-02-14)
+* - v1.4.1: Restore Session 14 Fixes (Session 15) — Fixes lost during git revert:
+*         RESTORED: Target-Detach in Awake() (v1.3.14) - MoveAwayTarget detached at start
+*         RESTORED: Raycast Distance 1.0 unit min (v1.3.13) - Props collision working
+*         RESTORED: SetVisualColor() URP support (v1.3.11) - _BaseColor property
+*         Result: Props block movement, MoveAwayTarget reaches destination (2026-02-14)
 ====================================================================
 */
 
@@ -316,6 +321,16 @@ namespace SnakeEnchanter.Snakes
             if (_renderer != null)
             {
                 _originalColor = _renderer.material.color;
+            }
+
+            // CRITICAL FIX (v1.3.14): Detach MoveAwayTarget from Snake hierarchy at START
+            // This prevents target from moving with Snake during Patrol/Follow
+            if (_moveAwayTarget != null && _moveAwayTarget.parent == transform)
+            {
+                Vector3 worldPos = _moveAwayTarget.position;
+                _moveAwayTarget.SetParent(null);
+                _moveAwayTarget.position = worldPos;
+                Debug.Log($"SnakeAI ({_snakeName}): Detached MoveAwayTarget at START (World: {worldPos})");
             }
         }
 
@@ -721,8 +736,11 @@ namespace SnakeEnchanter.Snakes
             float distance = speed * Time.deltaTime;
 
             // Raycast to check for obstacles ahead
+            // CRITICAL FIX (v1.3.13): Minimum 1.0 unit raycast distance
+            // Prevents Snake from phasing through Props when moving slowly
+            float rayDistance = Mathf.Max(distance + 0.3f, 1.0f);
             RaycastHit hit;
-            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, distance + 0.3f))
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, rayDistance))
             {
                 // ALL objects block movement (including Player)
                 // This is correct: Snake stops near Player to attack, doesn't phase through
@@ -1165,12 +1183,28 @@ namespace SnakeEnchanter.Snakes
         /// <summary>
         /// Sets the snake's visual color for state feedback.
         /// Phase 1: Simple color change. Phase 3: Particles, glow, etc.
+        /// URP Lit shader compatible (uses _BaseColor property).
         /// </summary>
         private void SetVisualColor(Color color)
         {
             if (_renderer != null)
             {
-                _renderer.material.color = color;
+                // URP Lit shader uses "_BaseColor" property, not "color"
+                if (_renderer.material.HasProperty("_BaseColor"))
+                {
+                    _renderer.material.SetColor("_BaseColor", color);
+                }
+                else
+                {
+                    // Fallback for other shaders
+                    _renderer.material.color = color;
+                }
+
+                // Debug.Log($"SnakeAI ({_snakeName}): Color changed to {color} (State visual feedback)");
+            }
+            else
+            {
+                Debug.LogWarning($"SnakeAI ({_snakeName}): Renderer not found, cannot change color!");
             }
         }
 
