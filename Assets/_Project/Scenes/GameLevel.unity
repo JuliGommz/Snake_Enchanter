@@ -1241,7 +1241,7 @@ Transform:
   m_GameObject: {fileID: 232224790}
   serializedVersion: 2
   m_LocalRotation: {x: 0.009125729, y: 0.98018, z: -0.046501115, w: 0.19235788}
-  m_LocalPosition: {x: 1.3179564, y: 1.7594706, z: -55.602978}
+  m_LocalPosition: {x: 1.3259432, y: 1.7539564, z: -55.622543}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1576,7 +1576,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.009125726, y: 0.98018, z: -0.046501108, w: 0.19235787}
-  m_LocalPosition: {x: 1.3179564, y: 1.7594706, z: -55.602978}
+  m_LocalPosition: {x: 1.3259432, y: 1.7539564, z: -55.622543}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6969,7 +6969,7 @@ Transform:
   m_GameObject: {fileID: 1642035516}
   serializedVersion: 2
   m_LocalRotation: {x: -0.09229592, y: 0.70105726, z: -0.7010575, w: 0.09229619}
-  m_LocalPosition: {x: -0.026, y: -0.124, z: 0}
+  m_LocalPosition: {x: -0.02, y: -0.145, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9342,6 +9342,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.1_North_Dead-End
       objectReference: {fileID: 0}
+    - target: {fileID: 5275582990251219970, guid: 1771cc13544579b41a7ad297b1512364, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9358,6 +9362,10 @@ PrefabInstance:
     - target: {fileID: 3895159921555699470, guid: 8b1bf4514b3c0994694a730e9a42664b, type: 3}
       propertyPath: m_Name
       value: 01_Quest-Room_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3895159921555699470, guid: 8b1bf4514b3c0994694a730e9a42664b, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 3895159921555823174, guid: 8b1bf4514b3c0994694a730e9a42664b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9415,6 +9423,10 @@ PrefabInstance:
     - target: {fileID: 8145075080786458177, guid: 0833dac49f202b6448d93a568e6fa1ad, type: 3}
       propertyPath: m_Name
       value: 02.2_East_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8145075080786458177, guid: 0833dac49f202b6448d93a568e6fa1ad, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 8145075080786634221, guid: 0833dac49f202b6448d93a568e6fa1ad, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9513,6 +9525,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.3_South_7
       objectReference: {fileID: 0}
+    - target: {fileID: 8394123839483122951, guid: c5e9c203f11d0594689ea256f0744f09, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9569,6 +9585,10 @@ PrefabInstance:
     - target: {fileID: 8889392561560949310, guid: 4b9ff9ddd1868334baef2a96e318f57e, type: 3}
       propertyPath: m_Name
       value: 02.1_North_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8889392561560949310, guid: 4b9ff9ddd1868334baef2a96e318f57e, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9627,6 +9647,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02_Quest-Room_3
       objectReference: {fileID: 0}
+    - target: {fileID: 552732235441402559, guid: 6a93f6ae670b49641b88c1b79c302b3a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9684,6 +9708,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.3_South_8
       objectReference: {fileID: 0}
+    - target: {fileID: 6515977565760749644, guid: 8e15c79fcf98ec74e8948d471506e020, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9700,6 +9728,10 @@ PrefabInstance:
     - target: {fileID: 725622386294253863, guid: 9172f19af62c01a49b98a2921cfecec1, type: 3}
       propertyPath: m_Name
       value: 02.3_South-curve_9
+      objectReference: {fileID: 0}
+    - target: {fileID: 725622386294253863, guid: 9172f19af62c01a49b98a2921cfecec1, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 725622386294375535, guid: 9172f19af62c01a49b98a2921cfecec1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9757,6 +9789,10 @@ PrefabInstance:
     - target: {fileID: 5043078750119075585, guid: 15fb59a7a7bc59c46b611eeb59c2afc4, type: 3}
       propertyPath: m_Name
       value: 01_Hallway
+      objectReference: {fileID: 0}
+    - target: {fileID: 5043078750119075585, guid: 15fb59a7a7bc59c46b611eeb59c2afc4, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 5043078750119316653, guid: 15fb59a7a7bc59c46b611eeb59c2afc4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9855,6 +9891,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.2_East_7
       objectReference: {fileID: 0}
+    - target: {fileID: 575267181343248529, guid: 911e60438cb9d4046b3fe8a30efcf82d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9871,6 +9911,10 @@ PrefabInstance:
     - target: {fileID: 9011434405631285285, guid: 0aa202c3f2f6534429af925cb1a1f3c9, type: 3}
       propertyPath: m_Name
       value: 02_Quest-Room_2_CROSSROADS
+      objectReference: {fileID: 0}
+    - target: {fileID: 9011434405631285285, guid: 0aa202c3f2f6534429af925cb1a1f3c9, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 9011434405631528689, guid: 0aa202c3f2f6534429af925cb1a1f3c9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9969,6 +10013,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.3_South_6
       objectReference: {fileID: 0}
+    - target: {fileID: 5237303959013900294, guid: 2edfe80ff86469046bed41914d392087, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10025,6 +10073,10 @@ PrefabInstance:
     - target: {fileID: 8914344304103984255, guid: a071c8cb1d59d944783a3665a46ec18f, type: 3}
       propertyPath: m_Name
       value: 02.2_East_6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8914344304103984255, guid: a071c8cb1d59d944783a3665a46ec18f, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10083,6 +10135,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.2_East_4
       objectReference: {fileID: 0}
+    - target: {fileID: 1830809223200803121, guid: 157221d1ee5d11f4da45e69342c24631, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10140,6 +10196,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02_Quest-Room_3_dead-end
       objectReference: {fileID: 0}
+    - target: {fileID: 2169217555915738950, guid: 0c46374724b95f04fb2a09df7b1fc1aa, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10156,6 +10216,10 @@ PrefabInstance:
     - target: {fileID: 4875192415254789357, guid: 7125ff7bb9a79ae499abb5cab959eee1, type: 3}
       propertyPath: m_Name
       value: 02.1_North_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4875192415254789357, guid: 7125ff7bb9a79ae499abb5cab959eee1, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 4875192415255224799, guid: 7125ff7bb9a79ae499abb5cab959eee1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -10254,6 +10318,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.3_South_5
       objectReference: {fileID: 0}
+    - target: {fileID: 3848811014476628583, guid: e7068903845ed784ebf70f283a46836d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10310,6 +10378,10 @@ PrefabInstance:
     - target: {fileID: 8866389065274997535, guid: 2689b786f57a97549a19024e242f3299, type: 3}
       propertyPath: m_Name
       value: 02.3_South-curve_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8866389065274997535, guid: 2689b786f57a97549a19024e242f3299, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10532,6 +10604,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02_Exit
       objectReference: {fileID: 0}
+    - target: {fileID: 347005933194206594, guid: fe68875b0eff9d346bce0f42b5b96c4a, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10548,6 +10624,10 @@ PrefabInstance:
     - target: {fileID: 8173856529960796956, guid: b7cb4c529f87936418656d334b7d9442, type: 3}
       propertyPath: m_Name
       value: 01_Hallway_curve
+      objectReference: {fileID: 0}
+    - target: {fileID: 8173856529960796956, guid: b7cb4c529f87936418656d334b7d9442, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 8173856529961049646, guid: b7cb4c529f87936418656d334b7d9442, type: 3}
       propertyPath: m_LocalPosition.x
@@ -10646,6 +10726,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.2_East_3
       objectReference: {fileID: 0}
+    - target: {fileID: 2108633596767327619, guid: ae29aaabdc0720045bf8a843e33a751e, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10662,6 +10746,10 @@ PrefabInstance:
     - target: {fileID: 3018175081573171435, guid: 4fa84fd98b486254bb4ca81cb154545d, type: 3}
       propertyPath: m_Name
       value: 02.3_South_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018175081573171435, guid: 4fa84fd98b486254bb4ca81cb154545d, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 3018175081573326297, guid: 4fa84fd98b486254bb4ca81cb154545d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -10760,6 +10848,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.3_South_8
       objectReference: {fileID: 0}
+    - target: {fileID: 8860994095670078995, guid: b27104f6d6b37be4e9a488b66753e845, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10816,6 +10908,10 @@ PrefabInstance:
     - target: {fileID: 1844564711224805930, guid: 60f82a0b308a9aa448a0ac4f71f080e6, type: 3}
       propertyPath: m_Name
       value: 00_Start_closed
+      objectReference: {fileID: 0}
+    - target: {fileID: 1844564711224805930, guid: 60f82a0b308a9aa448a0ac4f71f080e6, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10874,6 +10970,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 00_Start_hallway
       objectReference: {fileID: 0}
+    - target: {fileID: 5641955975228792130, guid: d1e23f47b1b01314899a10972b566545, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10931,6 +11031,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.2_East_1
       objectReference: {fileID: 0}
+    - target: {fileID: 4974988007024932835, guid: c03ca2ad217d7f14fa82ee163cf6d0f7, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10947,6 +11051,10 @@ PrefabInstance:
     - target: {fileID: 3207882649592417371, guid: 05c04a53316e18d45b8022cca4dd3647, type: 3}
       propertyPath: m_Name
       value: 02.3_South_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3207882649592417371, guid: 05c04a53316e18d45b8022cca4dd3647, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 3207882649592766455, guid: 05c04a53316e18d45b8022cca4dd3647, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11045,6 +11153,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.2_East_5
       objectReference: {fileID: 0}
+    - target: {fileID: 6997372633924003958, guid: f5098ba26b2ba12409091eb96add4185, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11102,6 +11214,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 02.3_South_3
       objectReference: {fileID: 0}
+    - target: {fileID: 3298884955874379282, guid: 499c68f0effef2e4b943de2e3827f1d2, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11118,6 +11234,10 @@ PrefabInstance:
     - target: {fileID: 8255914625945676002, guid: 80485fa53aa878041b42bbd8d9128d78, type: 3}
       propertyPath: m_Name
       value: 02.3_South_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8255914625945676002, guid: 80485fa53aa878041b42bbd8d9128d78, type: 3}
+      propertyPath: m_TagString
+      value: Environment
       objectReference: {fileID: 0}
     - target: {fileID: 8255914625945990608, guid: 80485fa53aa878041b42bbd8d9128d78, type: 3}
       propertyPath: m_LocalPosition.x
