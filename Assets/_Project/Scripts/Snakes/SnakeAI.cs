@@ -739,8 +739,17 @@ namespace SnakeEnchanter.Snakes
             // CRITICAL FIX (v1.3.13): Minimum 1.0 unit raycast distance
             // Prevents Snake from phasing through Props when moving slowly
             float rayDistance = Mathf.Max(distance + 0.3f, 1.0f);
+
+            // DEBUG: Visualize raycast in Scene View (RED = raycast direction)
+            Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
+            Debug.DrawRay(rayOrigin, direction * rayDistance, Color.red, 0.5f);
+
             RaycastHit hit;
-            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, rayDistance))
+            // CRITICAL FIX (v1.4.2): Use SphereCast instead of Raycast
+            // Raycast FAILS when origin is inside collider (Snake overlaps Props/other Snakes)
+            // SphereCast with radius can detect from inside colliders
+            float sphereRadius = 0.3f; // Snake body width approximation
+            if (Physics.SphereCast(rayOrigin, sphereRadius, direction, out hit, rayDistance))
             {
                 // ALL objects block movement (including Player)
                 // This is correct: Snake stops near Player to attack, doesn't phase through
