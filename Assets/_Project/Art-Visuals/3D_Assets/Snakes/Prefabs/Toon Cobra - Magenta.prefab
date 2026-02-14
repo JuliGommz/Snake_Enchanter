@@ -496,12 +496,34 @@ MonoBehaviour:
   _aggressiveDuration: 5
   _freezeDuration: 4
   _moveAwayTarget: {fileID: 0}
-  _moveSpeed: 3
+  _moveSpeed: 0.8
+  _spellAnimationDelay: 3.5
+  _snakeType: 0
+  _biteRange: 0.5
+  _breathRange: 6
+  _projectileRange: 8
+  _biteDamage: 15
+  _breathDamage: 10
+  _projectileDamage: 8
+  _attackCooldown: 4
+  _detectionRange: 8
+  _followRangeMin: 0.5
+  _followRangeMax: 3.5
+  _breathRangeMin: 4
+  _breathRangeMax: 6
+  _chaseSpeed: 1
+  _patrolRadiusMin: 2
+  _patrolRadiusMax: 3
+  _patrolWaitTime: 2
   _idleColor: {r: 0, g: 1, b: 0, a: 1}
   _aggressiveColor: {r: 1, g: 0, b: 0, a: 1}
   _sleepColor: {r: 0.5, g: 0.5, b: 1, a: 1}
   _frozenColor: {r: 0, g: 1, b: 1, a: 1}
   _movedColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+  _poisonBreathFXPrefab: {fileID: 125172, guid: 552251c2a3c3dee40bd6578daad431c7, type: 3}
+  _projectileFXPrefab: {fileID: 190672, guid: 0b57796020b4e1345878526bc8a77cb8, type: 3}
+  _impactFXPrefab: {fileID: 157790, guid: bc7d7dcbaf692c2438202acdf71affd7, type: 3}
+  _fxSpawnPoint: {fileID: 0}
   _showDebugLabel: 1
 --- !u!1 &127320
 GameObject:

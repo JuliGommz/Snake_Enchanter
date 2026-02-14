@@ -258,11 +258,34 @@
 ### 13.02.2026 (Donnerstag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| SnakeAI Props Collision Fix (Tag Typo "Enviroment") | | x | x |
+| Props Mesh Colliders auf Convex setzen (20 Prefabs) | | x | x |
+| SnakeAI Raycast Distance Fix (0.33 → 1.0 min) | | x | x |
+| MoveAwayTarget Hierarchy Fix (SetParent null) | | x | x |
+| Visual Color System Fix (URP _BaseColor) | | x | x |
+| Material Emission Glow System (v1.4.0) | x | x | x |
+| Particle Glow System Experiment (v1.4.1) | | x | ❌ |
+| Particle System Revert (git restore) | | x | x |
+| Documentation erstellen (4 MD files) | | x | x |
+| SnakeAI v1.3.11 - v1.3.14 Testing | x | x | x |
 
 **Screenshot:** `Media/Screenshots/2026-02-13_.png`
 
 **Notizen:**
+- **SnakeAI v1.3.14 COMPLETE** - Alle Core Behaviors funktionieren
+- **Props Collision:** Tag-Typo "Enviroment" in 20 Prefabs behoben (Bash-Script)
+- **MoveAwayTarget:** War Child von Snake → Endlos-Verfolgung. Fix: SetParent(null) in Awake()
+- **Visual Feedback:** Material Emission funktioniert (Augen leuchten in State-Farbe)
+- **Particle Glow:** Experiment fehlgeschlagen (kontinuierliche Emission trotz Settings)
+- **Git Revert:** Particle System Changes sauber entfernt (git restore + rm)
+- **Lessons Learned:**
+  - User-Vorschläge ernst nehmen (Props Collider waren das Problem)
+  - Targets niemals als Child von bewegten Objekten
+  - Tag Typos sind silent killers (keine Compiler-Warnung)
+  - URP Shader Properties sind nicht universal (_BaseColor statt .color)
+- **Documentation:** Movement Logic, Props Collision Fix, MoveAwayTarget Fix, Glow Setup
+- **Backlog:** External Glow System verschoben (Material Emission reicht erstmal)
+- **Status:** Phase 2 zu 90% complete, SnakeAI Core Features DONE
 
 
 ---

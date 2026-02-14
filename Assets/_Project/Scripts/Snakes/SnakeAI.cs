@@ -5,8 +5,8 @@
 * Project: Snake Enchanter
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
-* Date: 2026-02-13
-* Version: 1.3.10 - Fix MoveAway Infinite Loop (Session 14)
+* Date: 2026-02-14
+* Version: 1.4.0 - Attack VFX System (Session 15)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -19,6 +19,7 @@
 * - Tune interaction system
 * - Command range detection
 * - Attack system (v1.1): Range-based attacks (Bite/Breath/Projectile)
+* - Attack VFX system (v1.4.0): Particle spawning, lifetime management
 * - Human reviewed and will modify as needed
 
 * DEPENDENCIES:
@@ -89,6 +90,14 @@
 *         2) Code: Added 2-second timeout when blocked by non-target obstacles (prevents infinite loop)
 *         3) Code: Reset timeout counter when movement succeeds (only counts continuous blocking)
 *         Result: Snakes now properly exit MovedAway state via tag detection OR timeout (2026-02-13)
+* - v1.4.0: Attack VFX system (Session 15) — Visual effects for Breath/Projectile attacks:
+*         ADDED: SerializeField references for 3 FX prefabs (Poison Breath, Projectile, Impact)
+*         ADDED: _fxSpawnPoint Transform for precise VFX positioning (e.g., mouth bone)
+*         ADDED: SpawnAttackFX() method — spawns, plays, auto-destroys particle effects
+*         INTEGRATION: TriggerAttack() now calls SpawnAttackFX() after animation trigger
+*         FEATURES: Projectile FX auto-rotates to face player, lifetime-based cleanup
+*         PREFAB FIX: Disabled playOnAwake + looping on FX prefabs (manual .Play() control)
+*         Result: Breath/Projectile attacks now have visual particle effects (2026-02-14)
 ====================================================================
 */
 
@@ -229,6 +238,19 @@ namespace SnakeEnchanter.Snakes
         [SerializeField] private Color _sleepColor = new Color(0.5f, 0.5f, 1f, 1f); // Light blue
         [SerializeField] private Color _frozenColor = Color.cyan;
         [SerializeField] private Color _movedColor = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray transparent
+
+        [Header("Attack VFX (Phase 2)")]
+        [Tooltip("Poison Breath VFX prefab (spawned at snake mouth during breath attack)")]
+        [SerializeField] private GameObject _poisonBreathFXPrefab;
+
+        [Tooltip("Poison Projectile VFX prefab (spawned and travels to player during projectile attack)")]
+        [SerializeField] private GameObject _projectileFXPrefab;
+
+        [Tooltip("Poison Impact VFX prefab (spawned at hit location when projectile hits)")]
+        [SerializeField] private GameObject _impactFXPrefab;
+
+        [Tooltip("Transform point for FX spawn (e.g., mouth bone). If null, uses snake position.")]
+        [SerializeField] private Transform _fxSpawnPoint;
         #endregion
 
         #region Private Fields
@@ -1039,6 +1061,9 @@ namespace SnakeEnchanter.Snakes
             Invoke(nameof(DealScheduledDamage), damageDelay);
             _scheduledDamage = damage;
 
+            // Spawn attack VFX
+            SpawnAttackFX(attackType);
+
             // Debug.Log($"SnakeAI ({_snakeName}): {attackType} attack triggered! Damage: {damage}");
         }
 
@@ -1052,6 +1077,60 @@ namespace SnakeEnchanter.Snakes
             if (_animator != null)
             {
                 _animator.SetBool("Breath Attack", false);
+            }
+        }
+
+        /// <summary>
+        /// Spawns attack VFX based on attack type.
+        /// Uses _fxSpawnPoint if assigned, otherwise spawns at snake position.
+        /// </summary>
+        private void SpawnAttackFX(AttackType attackType)
+        {
+            GameObject fxPrefab = null;
+            Vector3 spawnPosition = _fxSpawnPoint != null ? _fxSpawnPoint.position : transform.position;
+            Quaternion spawnRotation = transform.rotation;
+
+            switch (attackType)
+            {
+                case AttackType.Breath:
+                    fxPrefab = _poisonBreathFXPrefab;
+                    break;
+
+                case AttackType.Projectile:
+                    fxPrefab = _projectileFXPrefab;
+                    // Projectile should face player
+                    if (_playerTransform != null)
+                    {
+                        Vector3 directionToPlayer = (_playerTransform.position - spawnPosition).normalized;
+                        spawnRotation = Quaternion.LookRotation(directionToPlayer);
+                    }
+                    break;
+
+                case AttackType.Bite:
+                    // Bite has no VFX (close-range physical attack)
+                    return;
+            }
+
+            // Spawn FX if prefab is assigned
+            if (fxPrefab != null)
+            {
+                GameObject fxInstance = Instantiate(fxPrefab, spawnPosition, spawnRotation);
+
+                // Get ParticleSystem and play
+                ParticleSystem ps = fxInstance.GetComponent<ParticleSystem>();
+                if (ps != null)
+                {
+                    ps.Play();
+
+                    // Auto-destroy after particle lifetime
+                    float lifetime = ps.main.duration + ps.main.startLifetime.constantMax;
+                    Destroy(fxInstance, lifetime);
+                }
+                else
+                {
+                    // Fallback: destroy after 3 seconds if no ParticleSystem found
+                    Destroy(fxInstance, 3f);
+                }
             }
         }
 

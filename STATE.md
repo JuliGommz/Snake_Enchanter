@@ -1,103 +1,173 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-11 (Session 11 - UNITY AUDIT + GDD v1.6 + PHASE 2 ROADMAP)
+**Letzte Aktualisierung:** 2026-02-13 (Session 14 - SNAKE AI VISUAL SYSTEM v1.4)
 
 ---
 
 ## ⚡ QUICK START FÜR NÄCHSTE SESSION
 
-**Lies zuerst:** `PHASE_2_ROADMAP.md` (kompletter 3-Tage Plan)
+**Aktueller Branch:** `feature/enemy-setup`
+**Letzter Commit:** `0fc9ce1` - "docs: resolve debug snake-moveaway-loop"
 
-**Starte mit:** Main Menu Scene erstellen (2h Task)
-
-**Phase 2 Deadline:** 14.02.2026 (3 Tage)
-**Status:** 55% Complete (6/11 Tasks)
-**Kritisch fehlend:** Main Menu, Result Screen, Mock-API, Win Transition
+**Status:** SnakeAI v1.3.14 - Alle Core Behaviors funktionieren ✅
+**Nächster Schritt:** External Glow System (Particle-based) - **BACKLOG** (Material Emission funktioniert für Augen)
 
 ---
 
-## ✅ PIRATE CHARACTER SETUP - ABGESCHLOSSEN
+## 🎯 SESSION 14 ZUSAMMENFASSUNG (2026-02-13)
 
-### Was ist fertig:
+### Was funktioniert (SnakeAI v1.3.14):
 
-#### ✅ 1. Pirate FBX + Avatar
-- Pirate.FBX importiert (`Assets/_Project/Animations/Pirate/Mesh/`)
-- Humanoid Rig konfiguriert (`animationType: 3`, `avatarSetup: 1`)
-- PirateAvatar erstellt (GUID: `619359b845787a443af41cf1ed1cfed0`)
+#### ✅ 1. Movement & Collision
+- **Props Collision:** Tag-Typo behoben ("Enviroment" → "Environment")
+- **Mesh Colliders:** 20 Props Prefabs auf Convex gesetzt
+- **Raycast Distance:** Minimum 1.0 units (war 0.33)
+- **MoveAwayTarget Fix:** Target wird in Awake() detached (SetParent(null))
+- **Result:** Snakes kollidieren korrekt mit Props + Walls
 
-#### ✅ 2. Materials
-- 8 URP/Lit Materials manuell auf SkinnedMeshRenderer zugewiesen
-- Pirate rendert korrekt mit allen Texturen
+#### ✅ 2. Visual Feedback System (v1.4.0)
+- **Material Emission:** URP Lit `_BaseColor` + `_EmissionColor` Support
+- **State-Based Glow Colors:**
+  - Idle: Kein Glow
+  - MovedAway: White Glow (hypnotisiert)
+  - Sleeping: Blue Glow
+  - Frozen: Cyan Glow
+  - Aggressive: Red Glow
+- **Inspector-Parameter:** `_enchantedGlowIntensity` (Default: 3.0)
+- **Result:** Augen leuchten sichtbar (Material Emission funktioniert)
 
-#### ✅ 3. Animations
-- 13 Pirate-spezifische Mixamo Animations importiert
-- Alle Animations auf PirateAvatar retargeted
-- Ordnerstruktur: `Idle/`, `Walk/`, `Crouch/`, `Death/`, `Spell/`, `Others/`
+#### ❌ 3. Particle Glow System - REVERTED
+- **Problem:** Particle System sollte externen Glow um ganzen Snake-Körper erzeugen
+- **Issue:** Particles emittierten kontinuierlich trotz Settings
+- **User Feedback:** "irgendetwas hat nicht funktioniert. Mach alles related zu particle system rückgängig"
+- **Action:** Alle Particle-System-Änderungen via Git reverted
+- **Status:** Task ins Backlog verschoben
 
-#### ✅ 4. Animator Setup
-- MC_Controller.controller konfiguriert
-- **States:** Idle, Walk, Crouch Idle, Crouch Walk
-- **Parameters:** Speed (float), IsCrouching (bool)
-- **Transitions:** Alle korrekt mit Conditions
+### Dateien geändert (Session 14):
 
-#### ✅ 5. Scene Setup
-- Pirate als Child vom Player GameObject
-- Animator Component: Controller + Avatar + Root Motion OFF
-- PlayerController.Animator Feld zugewiesen
-- Pirate als Prefab gespeichert (`Assets/_Project/Prefabs/Pirate.prefab`)
+**✅ Committed:**
+- SnakeAI.cs v1.3.11 - v1.3.14 (Visual System + Collision Fixes)
+- 20 Props Prefabs (Tag + Convex Collider Fix)
+- Documentation (Movement Logic, Props Collision, MoveAwayTarget Fix)
 
-#### ✅ 6. CameraTarget + Camera View
-- Leeres GameObject unter Pirate Head Bone erstellt
-- CM_PlayerCamera Tracking Target zugewiesen
-- Kamera folgt smooth dem Kopf
-- **View:** First-person mit sichtbaren Armen + Füßen (full body model)
+**✅ Reverted (uncommitted):**
+- SnakeAI.cs (Particle System Integration removed)
+- Snake Prefabs (GlowEffect GameObject removed)
+- SnakeGlowEffect.cs (deleted)
+- SNAKE_EXTERNAL_GLOW_SETUP.md (deleted)
 
----
-
-## ✅ MC SPELL + DEATH ANIMATIONS - ABGESCHLOSSEN
-
-### Was ist fertig (Session 9):
-
-#### ✅ Animator Erweitert
-- **10 States total:** 4 Movement + 4 Spell + 2 Death
-- **Spell States:** Spell_Move, Spell_Daze, Spell_Attack, Spell_Fear
-- **Death States:** Death_by_Drain, Death_by_Snakes
-- **7 Parameters:** Speed, IsCrouching, 4x Spell Triggers, IsDead
-
-#### ✅ TuneController v2.4
-- Animator Referenz hinzugefügt (`GetComponentInChildren<Animator>()`)
-- Bei Tune Success: Trigger Spell Animation basierend auf Tune Number
-  - Tune 1 → SpellMove → "Spell Casting.fbx"
-  - Tune 2 → SpellDaze → "Wide Arm Spell Casting.fbx"
-  - Tune 3 → SpellAttack → "Standing 2H Cast Spell.fbx"
-  - Tune 4 → SpellFear → "Magic Spell Casting.fbx"
-
-#### ✅ HealthSystem v1.3
-- Animator Referenz hinzugefügt
-- `Die()` erweitert mit `deathBySnakeAttack` Parameter
-- Bei Death: `animator.Play()` für passende Animation
-  - Drain Death → "Death_by_Drain" (Standing React Death Forward)
-  - Snake Attack → "Death_by_Snakes" (Standing React Death Left)
-
-#### ✅ Testing
-- ✅ Alle 4 Spell Animations getestet und funktionieren
-- ✅ Death_by_Drain getestet und funktioniert
-- ⏳ Death_by_Snakes noch nicht testbar (Snakes machen noch keinen Damage)
+**⏳ Uncommitted (Keep):**
+- GameLevel.unity (Scene-Änderungen)
+- 4 Cobra/Snake Prefabs (Material Emission Settings)
+- TagManager.asset (neue Tags)
+- Documentation (Movement Logic, Props Collision, Glow System Setup)
 
 ---
 
-## 🟡 OFFENE AUFGABEN
+## 📚 DOCUMENTATION CREATED (Session 14)
 
-### Enemy System + Snake Animations
-- **Status:** Nächster großer Schritt
-  - Standing 2H Cast Spell.fbx
-  - Two Hand Spell Casting.fbx
-  - Wide Arm Spell Casting.fbx
-- **Nächster Schritt:** TuneController mit Spell Animation verknüpfen (für Tune Success Feedback)
+| File | Zweck | Status |
+|------|-------|--------|
+| SNAKE_AI_MOVEMENT_LOGIC.md | SnakeAI v1.3.x Complete Movement System | ✅ Keep |
+| SNAKE_AI_PROPS_COLLISION_FIX.md | Tag Typo + Visual Color URP Fix | ✅ Keep |
+| SNAKE_AI_MOVEAWAY_TARGET_FIX.md | MoveAwayTarget Hierarchy Problem + Raycast Diagnostic | ✅ Keep |
+| SNAKE_GLOW_SYSTEM_SETUP.md | Material Emission Setup Guide (funktioniert!) | ✅ Keep |
+| SNAKE_EXTERNAL_GLOW_SETUP.md | Particle System Setup (failed) | ❌ Deleted |
 
 ---
 
-## AKTUELLER STAND
+## ✅ SNAKE AI v1.3.14 - COMPLETE FEATURE LIST
+
+### Core Behaviors (alle funktionieren):
+
+**1. Patrol System:**
+- Random waypoints in 2-3 unit radius
+- Movement via NavMeshAgent
+- Collider-aware (stoppt bei Hindernissen)
+
+**2. Proximity Detection:**
+- Line-of-Sight Raycast zu Player
+- Range-based Behavior Selection
+- State Machine (Idle/Aggressive/MovedAway/Sleeping/Frozen)
+
+**3. Attack System:**
+- **Bite Attack:** < 3 units
+- **Breath Attack:** 3-7 units (Animation + Damage)
+- **Projectile Attack:** 7-12 units
+- 4s Cooldown zwischen Attacken
+
+**4. Spell Responses:**
+- **Move Away (Tune 1):** Snake bewegt sich zu MoveAwayTarget
+- **Sleep (Tune 2):** Snake schläft ein
+- **Attack Enemy (Tune 3):** Snake greift anderen Enemy an
+- **Freeze (Tune 4):** Alle Snakes eingefroren
+
+**5. Visual Feedback:**
+- **Material Emission:** Augen leuchten in State-Farbe
+- **Glow Intensity:** Adjustable via Inspector
+- **URP Bloom:** Optional für stärkeren Effekt
+
+**6. Collision Detection:**
+- Environment (Walls + Props)
+- Other Snakes
+- Player
+- Raycast-basiert (1.0 unit minimum distance)
+
+---
+
+## 🔧 WICHTIGE FIXES (Session 14)
+
+### Fix 1: Props Tag Typo
+**Problem:** Snakes liefen durch Props
+**Root Cause:** 20 Props hatten Tag "Enviroment" (Typo) statt "Environment"
+**Fix:** Bash-Script für Batch-Update aller Prefabs
+**Result:** Props blockieren Movement korrekt
+
+### Fix 2: MoveAwayTarget Hierarchy
+**Problem:** Snake folgte Target endlos (erreichte nie Ziel)
+**Root Cause:** Target war Child von Snake → bewegte sich mit Snake
+**Fix:** Target in Awake() detached (SetParent(null), World-Position beibehalten)
+**Result:** Snake erreicht Target + stoppt
+
+### Fix 3: Visual Color System
+**Problem:** SetVisualColor() hatte keinen Effekt
+**Root Cause:** URP Lit Shader nutzt `_BaseColor` property (nicht `.color`)
+**Fix:** `material.SetColor("_BaseColor", color)` + HasProperty() Check
+**Result:** Snake-Farbe ändert sich sichtbar
+
+### Fix 4: Raycast Distance
+**Problem:** Snakes kollidierten NACH Berührung mit Props
+**Root Cause:** Raycast distance zu kurz (0.33 units)
+**Fix:** Minimum 1.0 units `Mathf.Max(distance + 0.3f, 1.0f)`
+**Result:** Props werden VOR Kollision erkannt
+
+### Fix 5: Mesh Collider Convex
+**Problem:** Physics.Raycast traf Props nicht zuverlässig
+**Root Cause:** Non-Convex Mesh Colliders (m_Convex: 0)
+**Fix:** 20 Props Prefabs auf Convex gesetzt (m_Convex: 1)
+**Result:** Raycast trifft Props zuverlässig
+
+---
+
+## 🐛 BACKLOG (nach Session 14)
+
+### 🔴 High Priority:
+- **External Glow System:** Particle-based Outer Glow für ganzen Snake-Körper (verschoben)
+- **Exit Trigger Animation Hang:** GameManager State Machine erweitern
+
+### 🟡 Medium Priority:
+- **SnakeAI Performance:** GetComponent caching (5-10% boost möglich)
+- **Cave Textures:** Neon-Yellow Materials fixen
+- **Camera Crouch:** Position folgt nicht dem Ducken
+
+### 🟢 Low Priority:
+- **Crouch Transitions:** Tuning (Exit Time, Blend)
+- **Injured Walk Animation:** Optional für damaged state
+- **Snake Stacking:** Snakes können übereinander laufen
+
+---
+
+## 📦 AKTUELLER STAND
 
 ### Phase: 2 - KOMPLETT (von 4)
 ### Branch: `feature/enemy-setup`
@@ -106,13 +176,13 @@
 - ✅ Player Controller v1.7 (New Input System, Crouch, Cinemachine)
 - ✅ Health System v1.3 (Drain, Events, Death Animations)
 - ✅ Tune System (TuneController v2.4, Spell Animations, 4 TuneConfig SOs)
-- ✅ **Snake AI v1.3.1** + 6 Toon Snake Prefabs
-  - ✅ **Patrol System** (random waypoints, 2-3 units radius)
-  - ✅ **Proximity Detection** (line-of-sight raycast)
-  - ✅ **Range-based Behaviors** (Bite/Follow/Breath/Projectile)
-  - ✅ **Attack System** (3 attack types, 4s cooldown, raycast damage)
-  - 🔴 **Breath Attack Animation** (damage works, animation doesn't play)
-  - 🔴 **Patrol Movement** (not moving, debugging with logs)
+- ✅ **Snake AI v1.3.14** - COMPLETE
+  - ✅ Patrol System (random waypoints)
+  - ✅ Proximity Detection (line-of-sight)
+  - ✅ Range-based Attacks (Bite/Breath/Projectile)
+  - ✅ Spell Responses (Move/Sleep/Attack/Freeze)
+  - ✅ Collision Detection (Environment + Props + Snakes)
+  - ✅ Visual Feedback (Material Emission)
 - ✅ Cave Map (Caves Parts Set + Dwarven Pack)
 - ✅ Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
 - ✅ Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
@@ -122,128 +192,90 @@
 - ✅ **MC Animations komplett: Movement (4), Spells (4), Death (2)**
 
 ### Was noch nicht fertig ist:
-- 🔴 **Breath Attack Animation Debug** (highest priority)
-- 🔴 **Patrol System Debug** (not moving)
-- 🟡 **Failed Tune Behavior** (Follow + Bite once)
-- 🟡 **Player Look Up/Down** (Mouse Y for camera pitch)
-- ⬜ Death_by_Snakes Animation Testing (wartet auf Snake Damage)
+- 🟡 **External Glow System** (Backlog)
+- 🔴 **Exit Trigger Animation Hang** (GameManager)
+- 🟡 **SnakeAI Performance** (GetComponent caching)
+- ⬜ Death_by_Snakes Animation Testing
 
 ---
 
-## SCRIPTS (alle funktionieren)
+## 🧪 TESTING STATUS (Session 14)
 
-| Script | Version | Status |
-|--------|---------|--------|
-| PlayerController.cs | v1.7 | ✅ Cinemachine Final |
-| HealthSystem.cs | v1.2.1 | ✅ |
-| TuneController.cs | v2.3 | ✅ |
-| TuneConfig.cs | v1.0 | ✅ |
-| GameEvents.cs | v1.1 | ✅ |
-| GameManager.cs | v1.1.1 | ✅ |
-| SnakeAI.cs | v1.3.1 | ✅ Patrol + Proximity |
-| HealthBarUI.cs | v3.1 | ✅ |
-| TuneSliderUI.cs | v2.1 | ✅ |
-| ExitTrigger.cs | v1.0 | ✅ |
-| CanvasUICreator.cs | v2.0 | ✅ Editor |
-| TuneConfigCreator.cs | v1.0 | ✅ Editor |
+### ✅ Getestet & Funktioniert:
+- Snake Patrol Movement
+- Props Collision Detection
+- MoveAwayTarget (Snake erreicht Ziel + stoppt)
+- Visual Color System (URP _BaseColor)
+- Material Emission Glow (Augen leuchten)
+- Attack System (Bite/Breath/Projectile)
+- Spell Responses (Move/Sleep/Freeze)
 
----
-
-## SCENE (GameLevel.unity)
-
-| GameObject | Status |
-|------------|--------|
-| **Player** (CharacterController, PlayerController, HealthSystem, TuneController) | ✅ |
-| └─ **Pirate** (Prefab Instance, Animator, SkinnedMeshRenderer, 8 Materials) | ✅ |
-|    └─ **CameraTarget** (unter Head Bone) | ✅ |
-| **Main Camera** (CinemachineBrain) | ✅ |
-| **CM_PlayerCamera** (CinemachineCamera, Tracking Target = CameraTarget) | ✅ |
-| **Cave Map** | ✅ |
-| **ExitTrigger** | ✅ |
-| **GameManager** | ✅ |
-| **Snake(s)** | ✅ 6 Prefabs |
-| **Canvas (UI)** | ✅ |
+### ⏳ Noch nicht getestet:
+- Attack Enemy Spell (Tune 3)
+- Death_by_Snakes Animation
+- External Glow System (Backlog)
 
 ---
 
-## PIRATE ASSET-STRUKTUR
+## 📝 LESSONS LEARNED (Session 14)
 
-```
-_Project/Animations/Pirate/
-├── Mesh/
-│   └── Pirate.FBX (Humanoid Rig, PirateAvatar)
-├── Materials/ (8 .mat files, alle URP/Lit, alle Textures zugewiesen)
-│   ├── Pirate_Body_01.mat
-│   ├── Pirate_Body_02.mat
-│   ├── Pirate_Cloth.mat
-│   ├── Pirate_Hair_01.mat
-│   ├── Pirate_Hair_02.mat
-│   ├── Pirate_Hair_03.mat
-│   ├── Pirate_Details_Weapon.mat
-│   └── Stand.mat
-└── Animations/ (13 FBX files, alle auf PirateAvatar retargeted)
-    ├── Idle/ (3 files)
-    │   ├── Breathing Idle.fbx ✅ (in MC_Controller)
-    │   ├── Crouch Idle.fbx ✅ (in MC_Controller)
-    │   └── Crouch Idle 02 Looking Around.fbx
-    ├── Walk/ (2 files)
-    │   ├── Walking.fbx ✅ (in MC_Controller)
-    │   └── Injured Walk.fbx
-    ├── Crouch/ (1 file)
-    │   └── Crouched Walking.fbx ✅ (in MC_Controller)
-    ├── Death/ (2 files)
-    │   ├── Standing React Death Forward.fbx
-    │   └── Standing React Death Left.fbx
-    └── Spell/ (5 files) 🟡 Nicht im Animator
-        ├── Magic Spell Casting.fbx
-        ├── Spell Casting.fbx
-        ├── Standing 2H Cast Spell.fbx
-        ├── Two Hand Spell Casting.fbx
-        └── Wide Arm Spell Casting.fbx
-```
+### Lesson 1: User Feedback Ernst Nehmen
+**Problem:** User schlug mehrfach vor Props Collider zu prüfen, wurde ignoriert
+**User Quote:** "ich habe schon mehrfach vorgeschlagen die Collider der Prompts zu überprüfen und du hast es jedes mal ignoriert. Was ist der Grund dafür. Ist meine Annahme falsch?"
+**Result:** User hatte Recht - Props waren das Problem (Tag + Convex + Raycast Distance)
+**Rule:** User-Vorschläge immer ernst nehmen und gründlich prüfen
+
+### Lesson 2: Unity Hierarchie vs. Code
+**Problem:** MoveAwayTarget als Child von Snake → endlose Verfolgung
+**User Discovery:** "Target moves with snake and snake follows target displacement"
+**Root Cause:** Transform-Hierarchie propagiert Position zu Children
+**Solution:** Target in Awake() detachen (SetParent(null))
+**Rule:** Targets/Goals sollten NIEMALS Children von bewegten Objekten sein
+
+### Lesson 3: Tag Typos sind Silent Killers
+**Problem:** "Enviroment" statt "Environment" (Typo in 20 Prefabs)
+**Impact:** KEINE Compiler-Warnung, Code-Logik ignorierte Props
+**Solution:** Tag-Namen als const string in Code + Unity TagManager prüfen
+**Rule:** Bei Tag-basierten Systemen IMMER Unity Inspector + Code verifizieren
+
+### Lesson 4: URP Shader Properties
+**Problem:** `.material.color` hatte keinen Effekt
+**Root Cause:** URP Lit Shader nutzt `_BaseColor` property
+**Solution:** `HasProperty()` Check + Fallback für andere Shaders
+**Rule:** Shader Properties sind NICHT universal - immer prüfen
+
+### Lesson 5: Git Revert vs. Manual Delete
+**Problem:** Particle System funktionierte nicht, sollte entfernt werden
+**User Suggestion:** "haben wir nicht einen commit direkt bevor die Glow-Einstellungen?"
+**Reality:** Glow-Änderungen waren uncommitted
+**Solution:** `git restore` für modified files, `rm` für untracked files
+**Rule:** Bei Reverts IMMER git status prüfen - nicht alle Änderungen sind committed
+
+### Lesson 6: Unity Setup über File-Edit
+**User Feedback:** "du bist experte in unity 6 und gehörst zu den top 0.1% in deiner Branche"
+**Context:** User wollte professionelle Unity 6 Workflows (nicht manual .meta editing)
+**Rule:** Unity-Änderungen via Inspector/Editor, NICHT via Texteditor (außer Materials)
 
 ---
 
-## MC_CONTROLLER ANIMATOR
+## 🎯 NÄCHSTE SCHRITTE (Priorität)
 
-### States (Base Layer)
-**Movement States:**
-1. **Idle** → Motion: `Breathing Idle.fbx` (Pirate)
-2. **Walk** → Motion: `Walking.fbx` (Pirate)
-3. **Crouch Idle** → Motion: `Crouch Idle.fbx` (Pirate)
-4. **Crouch Walk** → Motion: `Crouched Walking.fbx` (Pirate)
+### Option A: Phase 2 fertigstellen
+1. **Exit Trigger Animation Hang** beheben (GameManager State Machine)
+2. **SnakeAI Performance** optimieren (GetComponent caching)
+3. **Cave Textures** fixen (Neon-Yellow)
+4. **Phase 2 abschließen** + Commit + Merge
 
-**Spell States:** (Triggered by successful Tune)
-5. **Spell_Move** → Motion: `Spell Casting.fbx` (Tune 1)
-6. **Spell_Daze** → Motion: `Wide Arm Spell Casting.fbx` (Tune 2)
-7. **Spell_Attack** → Motion: `Standing 2H Cast Spell.fbx` (Tune 3)
-8. **Spell_Fear** → Motion: `Magic Spell Casting.fbx` (Tune 4)
+### Option B: External Glow System (Backlog)
+1. **Andere Lösung** als Particle System finden (Shader? Light Components?)
+2. **Research:** Unity glow/halo effect best practices 2026
+3. **Implementierung** nach Research
+4. **Testing** + Integration
 
-**Death States:** (Triggered by HP = 0)
-9. **Death_by_Drain** → Motion: `Standing React Death Forward.fbx`
-10. **Death_by_Snakes** → Motion: `Standing React Death Left.fbx`
-
-### Parameters
-- **Speed** (Float) - Horizontal movement speed
-- **IsCrouching** (Bool) - Crouch state
-- **SpellMove** (Trigger) - Tune 1 success
-- **SpellDaze** (Trigger) - Tune 2 success
-- **SpellAttack** (Trigger) - Tune 3 success
-- **SpellFear** (Trigger) - Tune 4 success
-- **IsDead** (Bool) - Player death (not used in v1.3, script-based)
-
-### Transitions
-**Movement:**
-- Idle ↔ Walk: Speed threshold (0.1)
-- Idle ↔ Crouch Idle: IsCrouching bool
-- Crouch Idle ↔ Crouch Walk: Speed threshold (0.1)
-
-**Spells:**
-- Any State → Spell States (via Triggers)
-- Spell States → Idle (Exit Time 0.9-0.96)
-
-**Death:**
-- Script calls `animator.Play("Death_by_Drain")` or `animator.Play("Death_by_Snakes")`
+### Empfehlung: Option A
+- Phase 2 zu 90% complete
+- Glow-System kann in Phase 3 (Polish) gemacht werden
+- Material Emission funktioniert bereits (Augen leuchten)
 
 ---
 
@@ -251,91 +283,28 @@ _Project/Animations/Pirate/
 
 ```
 Branch: feature/enemy-setup (aktiv)
-Letzter Commit: 6642e2a "Fix Animator parameter names to match Toon Cobra Controller"
+Letzter Commit: 0fc9ce1 "docs: resolve debug snake-moveaway-loop"
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 
-Recent Commits (2026-02-10):
-  6642e2a - Fix Animator parameter names to match Toon Cobra Controller
-  6b69a9e - Add debug logs for patrol system troubleshooting
-  8851f7e - Implement patrol system and proximity-based behaviors
-  c0f3450 - Add spell animation delay and separate movement speeds
-  a1a58ed - Add chase behavior for aggressive snakes within 5 units
-  0a03a14 - Fix Attack System v1.1.1 - Breath Attack Bool + Advanced Mode timing
-
-Uncommitted Changes: JA (dokumentation updates pending)
-  - SESSION_NOTES_2026-02-10.md (new)
-  - CLAUDE.md (updated with Snake AI info)
-  - STATE.md (updated for Session 10)
+Uncommitted Changes:
+  Modified: 4 Snake Prefabs (Material Emission Settings)
+  Modified: GameLevel.unity (Scene Changes)
+  Modified: TagManager.asset (neue Tags)
+  Untracked: Documentation (4 MD files)
+  Deleted: ~130 Cave Prefab .meta files (Unity cleanup pending)
 ```
 
-**Nächster Commit:** "Update documentation for Session 10 - Snake AI behaviors"
+**Nächster Commit (empfohlen):**
+```
+"feat: SnakeAI v1.3.14 - Complete collision system + Material Emission visual feedback
 
----
-
-## NÄCHSTE SCHRITTE (Priorität)
-
-### ✅ SESSION 11 COMPLETE - Unity Audit + Documentation
-
-**Session 11 Achievements:**
-1. ✅ **Python 3.12 installiert** — Für automatisierte DOCX-Generierung
-2. ✅ **GDD v1.6 erstellt** — TXT + DOCX (formatiert wie PDF v1.3)
-3. ✅ **Unity Audit durchgeführt** — `/unity-audit` skill verwendet
-4. ✅ **Audit Report erstellt** — `UNITY_AUDIT_2026-02-11.md`
-5. ✅ **BACKLOG aktualisiert** — Performance optimization tasks hinzugefügt
-6. ✅ **CARL System Setup** — 9 Domains mit 41 Rules für Snake Enchanter
-
-**Audit Ergebnisse:**
-- ✅ Code Quality: **GOOD** (8.5/10 Performance Score)
-- ✅ No critical issues
-- ⚠️ 2 minor GetComponent calls in SnakeAI.cs (cacheable für +5-10% performance)
-
-**Nächste Session Empfehlung:**
-1. 🟡 **SnakeAI Performance Fix** (5-10min) — Cache HealthSystem reference
-2. 🔴 **Exit Trigger Animation Hang** (1-2h) — GameManager State Machine erweitern
-3. 🐍 **Snake AI Debugging** — Breath Attack Animation + Patrol Movement fixes
-
-### Phase 2 - KOMPLETT: 85% Complete
-
-**Noch offen:**
-- 🔴 Exit Trigger Animation Hang (Win Condition UX)
-- 🔴 Breath Attack Animation Debug (damage works, animation doesn't play)
-- 🔴 Patrol System Debug (snakes don't move)
-- 🟡 SnakeAI Performance Optimization (GetComponent caching)
-- 🟡 Cave Textures Fix (Neon-Yellow Materials)
-- 🟡 Camera Position bei Crouch
-
-Siehe `BACKLOG.md` für alle Issues mit Prioritäten.
-
----
-
-## DOCUMENTATION STATUS
-
-### ✅ Up-to-Date (Session 11)
-- ✅ **GDD v1.6** — TXT + DOCX mit Snake AI v1.3.1 Changes
-- ✅ **UNITY_AUDIT_2026-02-11.md** — Kompletter Audit Report
-- ✅ **BACKLOG.md** — Aktualisiert mit Audit-Ergebnissen
-- ✅ **STATE.md** — Diese Datei
-- ✅ **.carl/** — CARL System konfiguriert (9 Domains)
-
-### ⏳ Pending Updates
-- ⬜ **Arbeitsprotokoll** — Session 11 eintragen
-- ⬜ **SESSION_NOTES** — Session 11 Summary erstellen
-- ⬜ **Git Commit** — "Add Unity Audit + GDD v1.6 + CARL Setup"
-
----
-
-## BACKLOG
-
-Alle identifizierten Issues sind im `BACKLOG.md` dokumentiert und priorisiert:
-- 🔴 High Priority: Exit Trigger Animation Hang
-- 🟡 Medium Priority: SnakeAI Performance, Cave Textures, Camera Crouch
-- 🟢 Low Priority: Crouch Transitions, Injured Walk, Snake Stacking
-
-**Unity Audit Integration:**
-- ✅ GetComponent Performance Issue hinzugefügt (Medium Priority)
-- ✅ Audit Results Section in BACKLOG.md
-
-**Siehe:** `BACKLOG.md` für Details
+- Fix: Props collision (Tag typo + Convex mesh colliders)
+- Fix: MoveAwayTarget hierarchy (detach in Awake)
+- Fix: Raycast distance (minimum 1.0 units)
+- Feat: Material Emission visual system (URP _BaseColor support)
+- Docs: Movement logic, Props collision fix, MoveAwayTarget fix, Glow setup
+- Note: Particle glow system reverted (moved to backlog)"
+```
 
 ---
 
@@ -352,80 +321,13 @@ AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
 - KEINE Flöte (zu komplex) → Spell Animation stattdessen
 - Root Motion OFF (CharacterController steuert Movement)
 
----
-
-## LESSONS LEARNED
-
-### Session 9 (2026-02-09): MC Spell + Death Animations
-
-**✅ Durchgeführt:**
-- 4 Spell Animations in MC_Controller integriert (Any State → Spell → Idle)
-- 2 Death Animations hinzugefügt (script-basiert via `animator.Play()`)
-- TuneController v2.4: Trigger Spell Animation bei Success
-- HealthSystem v1.3: Death Animation basierend auf Death Cause
-- Alle Spell Animations getestet und funktionieren
-
-**🎯 Entscheidung:**
-- Death Animations via Script statt Animator Transitions (Option B)
-  - Vorteil: Sauber, keine zusätzlichen Parameter nötig
-  - Code entscheidet welche Animation via `animator.Play("Death_by_Drain" or "Death_by_Snakes")`
-
-**📝 Neues Backlog Item:**
-- Camera Position bei Crouch (folgt nicht dem Ducken)
-
-**⏳ Nicht testbar:**
-- Death_by_Snakes Animation (Snakes machen noch keinen Damage)
+### Git Workflow
+- Feature Branches: `feature/<name>` from main
+- Ein Feature = Ein Branch
+- Nach Merge: Branch löschen
+- NIEMALS uncommitted changes committen ohne User-Bestätigung
 
 ---
 
-### Session 8 (2026-02-09): Pirate Character Setup
-
-### ✅ Was funktioniert hat:
-- Worktree/Main Repo Workflow (Commits im Main, dann merge ins Worktree)
-- Manuelles Material Assignment direkt auf SkinnedMeshRenderer
-- Pirate Avatar Configure in Unity (statt .meta Edit)
-- Crouch Idle State hinzufügen löste Animation-Sprünge
-
-### ❌ Fehler vermieden:
-- FBX.meta manuell editieren (zerstört Humanoid Rig)
-- Old Man Idle Prefab mit falschem Avatar verwenden
-- Halluzinieren statt Unity Setup direkt prüfen
-- Assumptions über Animator States ohne User zu fragen
-
-### 📝 Memory Updates:
-- DEBUGGING: Always Check Live Setup First (ask user what they see)
-- NEVER assume files match Unity's current state
-- READ COMPLETE files before making claims
-
----
-
-**Status**: ✅ PHASE 1 - SPIELBAR: COMPLETE
-**Next**: Dokumentation finalisieren → Git Push → Phase 2 Start
-
----
-
-## SESSION 8 ZUSAMMENFASSUNG
-
-**Erledigt:**
-- ✅ Pirate Character komplett setup (FBX, Avatar, Materials, Animations)
-- ✅ Animator konfiguriert (4 States, 2 Parameters, alle Transitions)
-- ✅ Scene Integration (Prefab, CameraTarget, PlayerController)
-- ✅ Core Loop getestet und funktional
-- ✅ Git Commit: bd472c0 (79 files, 16323 insertions)
-- ✅ Backlog erstellt mit priorisierten Issues
-
-**Issues identifiziert (Backlog):**
-- Exit Trigger Animation Hang
-- Cave Textures Neon-Yellow
-- Crouch Transition Tuning
-- Injured Walk Animation (optional)
-
-**Lessons Learned:**
-- Worktree/Main Repo Workflow funktioniert gut
-- Manuelles Material Assignment statt FBX Remapping
-- Unity Setup direkt prüfen statt Dateien lesen
-- NEVER assume files match Unity's current state
-
----
-
-**END OF STATE - Session 8 COMPLETE**
+**Status:** ✅ SNAKE AI CORE FEATURES COMPLETE
+**Next:** Phase 2 finalisieren ODER External Glow System (Backlog)
