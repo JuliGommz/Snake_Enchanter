@@ -73,7 +73,7 @@ namespace SnakeEnchanter.Tunes
         [Header("Tune Configurations (ScriptableObjects)")]
         [Tooltip("Tune 1 - Move Command")]
         [SerializeField] private TuneConfig _tune1Config;
-        [Tooltip("Tune 2 - Sleep Command")]
+        [Tooltip("Tune 2 - Daze Command")]
         [SerializeField] private TuneConfig _tune2Config;
         [Tooltip("Tune 3 - Attack Command")]
         [SerializeField] private TuneConfig _tune3Config;

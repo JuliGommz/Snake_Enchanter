@@ -482,7 +482,7 @@ namespace SnakeEnchanter.UI
                 string tuneName = tuneNumber switch
                 {
                     1 => "Move",
-                    2 => "Sleep",
+                    2 => "Daze",
                     3 => "Attack",
                     4 => "Freeze",
                     _ => $"Tune {tuneNumber}"

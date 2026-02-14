@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.4.2 - SphereCast Collision Fix (Session 15)
+* Version: 1.6.0 - Directional Slither & Debug Logging (Session 16)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -30,7 +30,7 @@
 
 * DESIGN RATIONALE:
 * - GDD Section 4: Snakes are both danger and tool
-* - State machine: Idle → Charmed/Sleeping/Attacking/Frozen
+* - State machine: Idle → Charmed/Dazed/Attacking/Frozen
 * - Player must be in command range to cast tunes
 * - Phase 1: Static snakes, no patrol (boceto approach)
 * - Phase 2: Add NavMeshAgent patrol, animations
@@ -109,6 +109,30 @@
 *         EFFECT: Snakes now detect Props/other Snakes even when overlapping
 *         CLEANUP: Removed debug logs (Debug.Log, Debug.DrawRay)
 *         Result: Props collision WORKING, Snakes no longer overlap (2026-02-14)
+* - v1.5.0: Tune 2 & 3 Spell Behaviors (Session 16) — Complete spell response system:
+*         TUNE 2 (Daze): Snake becomes dazed/stunned, collider disabled, DIE animation, 8s timer
+*         TUNE 3 (Attack): Snake finds nearest NON-SNAKE creature (tag "Creature"), attacks, both neutralized
+*         RENAME: Sleeping → Dazed (no sleep animation, Die animation shows unconscious/collapsed)
+*         RENAME: FindNearestTargetableSnake → FindNearestCreature (excludes ALL snakes)
+*         ADDED: StartAttackingEnemy() - NON-SNAKE creature target selection + attack logic
+*         ADDED: FindNearestCreature() - Searches "Creature" tag, SKIPS all SnakeAI components
+*         ADDED: NeutralizeAfterAttack() - Phase 1 simplified (both creatures → Dead/Destroyed)
+*         ADDED: Dead state handling in SetState() - Gray visual, Die animation, no collision
+*         ADDED: UpdateMovementAnimation() - Slither Forward bool for player chase/patrol
+*         DESIGN: Snakes do NOT attack other snakes, only non-snake creatures (future enemies)
+*         Result: All 4 Tune behaviors functional (Move, Daze, Attack, Freeze) (2026-02-14)
+* - v1.6.0: Directional Slither & Debug Logging (Session 16) — Movement animations + comprehensive logs:
+*         SLITHER DIRECTIONAL: UpdateMovementAnimation() now supports all 3 directions (Forward/Left/Right)
+*         ADDED: _lastMoveDirection Vector3 - Tracks movement vector for directional slither
+*         UPDATED: MoveTowardsSafe() - Captures movement direction from position delta
+*         LOGIC: InverseTransformDirection calculates local movement (relative to snake's forward)
+*         LOGIC: Compares forward vs right amount to determine which slither animation to play
+*         DEBUG LOGGING: All spell states (Move, Daze, Attack, Freeze) with detailed parameters
+*         DEBUG LOGGING: Attack triggers (Bite/Breath/Projectile) with damage, distance, delay
+*         DEBUG LOGGING: Slither direction selection (Forward/Left/Right) with local direction values
+*         DEBUG LOGGING: Daze state transitions (IsDazed bool, timer, collision, glow color)
+*         DEBUG LOGGING: Attack Creature targeting (creature name, distance, neutralization logic)
+*         Result: Directional slither animations + full debug visibility for all behaviors (2026-02-14)
 ====================================================================
 */
 
@@ -126,7 +150,7 @@ namespace SnakeEnchanter.Snakes
         Idle,           // Default — blocking path, not aggressive
         Aggressive,     // Attacks player on contact (after failed tune)
         MovedAway,      // Charmed with Move tune — cleared path
-        Sleeping,       // Charmed with Sleep tune — passive, no collision
+        Dazed,          // Charmed with Daze tune — passive, stunned, no collision
         AttackingEnemy, // Charmed with Attack tune — attacking other target
         Frozen,         // Freeze tune effect — temporarily immobile
         Dead            // Killed (Phase 2+)
@@ -181,6 +205,9 @@ namespace SnakeEnchanter.Snakes
 
         [Tooltip("Time snake stays aggressive before returning to idle (seconds)")]
         [SerializeField] private float _aggressiveDuration = 5f;
+
+        [Tooltip("Time snake stays dazed before returning to idle (seconds)")]
+        [SerializeField] private float _dazedDuration = 8f;
 
         [Tooltip("Time snake stays frozen (seconds)")]
         [SerializeField] private float _freezeDuration = 4f;
@@ -246,7 +273,7 @@ namespace SnakeEnchanter.Snakes
         [Header("Visual Feedback (Phase 1 — Color Change)")]
         [SerializeField] private Color _idleColor = Color.green;
         [SerializeField] private Color _aggressiveColor = Color.red;
-        [SerializeField] private Color _sleepColor = new Color(0.5f, 0.5f, 1f, 1f); // Light blue
+        [SerializeField] private Color _dazedColor = new Color(0.5f, 0.5f, 1f, 1f); // Light blue
         [SerializeField] private Color _frozenColor = Color.cyan;
         [SerializeField] private Color _movedColor = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray transparent
 
@@ -382,7 +409,70 @@ namespace SnakeEnchanter.Snakes
             UpdatePatrol();
             UpdateState();
             CheckAndTriggerAttack();
+            UpdateMovementAnimation();
         }
+
+        /// <summary>
+        /// Updates movement animation based on current state and movement direction.
+        /// Sets directional slither bools (Forward/Left/Right) based on movement vector.
+        /// </summary>
+        private void UpdateMovementAnimation()
+        {
+            if (_animator == null) return;
+
+            // Check if snake is moving (following player, patrolling, or moving away)
+            bool isMoving = (_currentState == SnakeState.Aggressive) ||
+                           (_currentState == SnakeState.Idle && _isPatrolling) ||
+                           (_currentState == SnakeState.MovedAway && _isMoving);
+
+            // Reset all slither bools
+            _animator.SetBool("Slither Forward", false);
+            _animator.SetBool("Slither Left", false);
+            _animator.SetBool("Slither Right", false);
+
+            if (!isMoving) return;
+
+            // Calculate movement direction relative to snake's facing direction
+            Vector3 movementVector = _lastMoveDirection;
+
+            if (movementVector.sqrMagnitude < 0.01f)
+            {
+                // No movement direction, default to forward
+                _animator.SetBool("Slither Forward", true);
+                return;
+            }
+
+            // Get local movement direction (relative to snake's forward)
+            Vector3 localDirection = transform.InverseTransformDirection(movementVector.normalized);
+
+            // Determine primary movement axis (forward, left, or right)
+            float forwardAmount = localDirection.z;  // Positive = forward, Negative = backward
+            float rightAmount = localDirection.x;     // Positive = right, Negative = left
+
+            // Use thresholds to determine which animation to play
+            if (Mathf.Abs(forwardAmount) > Mathf.Abs(rightAmount))
+            {
+                // Forward/Backward dominant
+                _animator.SetBool("Slither Forward", true);
+            }
+            else if (rightAmount > 0.1f)
+            {
+                // Right dominant
+                _animator.SetBool("Slither Right", true);
+            }
+            else if (rightAmount < -0.1f)
+            {
+                // Left dominant
+                _animator.SetBool("Slither Left", true);
+            }
+            else
+            {
+                // Fallback to forward
+                _animator.SetBool("Slither Forward", true);
+            }
+        }
+
+        private Vector3 _lastMoveDirection = Vector3.forward; // Tracks last movement direction for slither animation
 
         private void OnTriggerEnter(Collider other)
         {
@@ -628,8 +718,13 @@ namespace SnakeEnchanter.Snakes
                     }
                     break;
 
-                case SnakeState.Sleeping:
-                    // Stays asleep — no timer in Phase 1
+                case SnakeState.Dazed:
+                    // Dazed with timer - snake lies on ground until timer expires
+                    _stateTimer -= Time.deltaTime;
+                    if (_stateTimer <= 0f)
+                    {
+                        SetState(SnakeState.Idle);
+                    }
                     break;
 
                 case SnakeState.Frozen:
@@ -641,7 +736,12 @@ namespace SnakeEnchanter.Snakes
                     break;
 
                 case SnakeState.AttackingEnemy:
-                    // Phase 1: Just stays in this state (no enemy targets yet)
+                    // AttackingEnemy behavior handled by StartAttackingEnemy() (invoked from SetState)
+                    // Snake stays in this state until neutralized
+                    break;
+
+                case SnakeState.Dead:
+                    // Dead snakes do nothing
                     break;
             }
         }
@@ -760,7 +860,12 @@ namespace SnakeEnchanter.Snakes
             }
 
             // Safe to move
+            Vector3 oldPosition = transform.position;
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, distance);
+
+            // Track movement direction for slither animation
+            _lastMoveDirection = (transform.position - oldPosition).normalized;
+
             return true;
         }
 
@@ -812,6 +917,104 @@ namespace SnakeEnchanter.Snakes
         }
 
         /// <summary>
+        /// Starts attacking the nearest enemy creature (Tune 3 behavior).
+        /// Finds closest creature with tag "Creature" and triggers attack, then neutralizes both.
+        /// </summary>
+        private void StartAttackingEnemy()
+        {
+            if (_currentState != SnakeState.AttackingEnemy) return;
+
+            // Find nearest creature (tag-based, not just snakes)
+            GameObject targetCreature = FindNearestCreature();
+
+            if (targetCreature != null)
+            {
+                // Look at target creature
+                Vector3 directionToTarget = (targetCreature.transform.position - transform.position).normalized;
+                if (directionToTarget != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.LookRotation(directionToTarget);
+                }
+
+                // Trigger bite attack animation (snake attacks creature)
+                if (_animator != null)
+                {
+                    _animator.SetTrigger("Bite Attack");
+                }
+
+                Debug.Log($"SnakeAI ({_snakeName}): [ATTACK CREATURE] Target: '{targetCreature.name}' at distance {Vector3.Distance(transform.position, targetCreature.transform.position):F2}");
+
+                // Neutralize both creatures after attack (simplified Phase 1 implementation)
+                // Both attacker and target become "Dead" or disabled
+                Invoke(nameof(NeutralizeAfterAttack), 1.5f); // Wait for attack animation
+
+                // Try to neutralize target (if it has SnakeAI component)
+                SnakeAI targetSnakeAI = targetCreature.GetComponent<SnakeAI>();
+                if (targetSnakeAI != null)
+                {
+                    Debug.Log($"SnakeAI ({_snakeName}): [ATTACK CREATURE] Target is Snake, both will neutralize in 1.5s");
+                    targetSnakeAI.Invoke(nameof(NeutralizeAfterAttack), 1.5f);
+                }
+                else
+                {
+                    // Target is not a snake - just disable it (Phase 1 simplified)
+                    Debug.Log($"SnakeAI ({_snakeName}): [ATTACK CREATURE] Target is NOT Snake, destroying in 1.5s");
+                    Destroy(targetCreature, 1.5f);
+                }
+            }
+            else
+            {
+                // No target found - return to Idle
+                Debug.LogWarning($"SnakeAI ({_snakeName}): [ATTACK CREATURE] No targetable creature found (tag:Creature, NOT SnakeAI), returning to Idle");
+                SetState(SnakeState.Idle);
+            }
+        }
+
+        /// <summary>
+        /// Finds the nearest creature with tag "Creature" (excluding self and ALL snakes).
+        /// Snakes only attack non-snake creatures (e.g., future enemies, monsters).
+        /// Used by Tune 3 (Attack Enemy) to select target.
+        /// </summary>
+        private GameObject FindNearestCreature()
+        {
+            GameObject[] allCreatures = GameObject.FindGameObjectsWithTag("Creature");
+            GameObject nearestCreature = null;
+            float nearestDistance = Mathf.Infinity;
+
+            foreach (var creature in allCreatures)
+            {
+                if (creature == this.gameObject) continue; // Skip self
+
+                // Skip ALL snakes (snakes don't attack other snakes, only other creatures)
+                SnakeAI snakeAI = creature.GetComponent<SnakeAI>();
+                if (snakeAI != null)
+                {
+                    continue; // Skip all snakes (regardless of state)
+                }
+
+                float distance = Vector3.Distance(transform.position, creature.transform.position);
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestCreature = creature;
+                }
+            }
+
+            return nearestCreature;
+        }
+
+        /// <summary>
+        /// Neutralizes this snake after attack (Phase 1: both attacker and target disabled).
+        /// </summary>
+        private void NeutralizeAfterAttack()
+        {
+            // Simplified Phase 1: Set to Dead state (effectively removed from game)
+            SetState(SnakeState.Dead);
+            EnableCollider(false); // Disable collision
+            Debug.Log($"SnakeAI ({_snakeName}): Neutralized after attack (Dead state)");
+        }
+
+        /// <summary>
         /// Transitions from MovedAway state back to appropriate root state.
         /// Evaluates player position/visibility to decide next state:
         /// - If player visible and in range → Idle (will trigger attack/follow in next Update)
@@ -835,17 +1038,29 @@ namespace SnakeEnchanter.Snakes
             SnakeState previousState = _currentState;
             _currentState = newState;
 
+            // Clear IsDazed bool when leaving Dazed state
+            if (previousState == SnakeState.Dazed && newState != SnakeState.Dazed)
+            {
+                if (_animator != null)
+                {
+                    _animator.SetBool("IsDazed", false);
+                }
+                Debug.Log($"SnakeAI ({_snakeName}): [DAZE END] Leaving Dazed state, IsDazed=false");
+            }
+
             switch (newState)
             {
                 case SnakeState.Idle:
                     SetVisualColor(_idleColor);
                     EnableCollider(true);
+                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Idle");
                     break;
 
                 case SnakeState.Aggressive:
                     _stateTimer = _aggressiveDuration;
                     SetVisualColor(_aggressiveColor);
                     EnableCollider(true);
+                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Aggressive (timer: {_stateTimer:F1}s, Red glow)");
                     break;
 
                 case SnakeState.MovedAway:
@@ -854,26 +1069,47 @@ namespace SnakeEnchanter.Snakes
                     EnableCollider(false);
                     // Start movement after spell animation delay
                     Invoke(nameof(StartMoveAwayMovement), _spellAnimationDelay);
+                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 1 (Move) → MovedAway (White glow, collision OFF, delay: {_spellAnimationDelay}s)");
                     break;
 
-                case SnakeState.Sleeping:
-                    SetVisualColor(_sleepColor);
-                    EnableCollider(false); // GDD: collision disabled when sleeping
+                case SnakeState.Dazed:
+                    SetVisualColor(_dazedColor);
+                    EnableCollider(false); // GDD: collision disabled when dazed
+                    _stateTimer = _dazedDuration; // Set timer for how long snake stays dazed
+                    // Set IsDazed bool to true - keeps snake in Die animation
+                    if (_animator != null)
+                    {
+                        _animator.SetBool("IsDazed", true);
+                    }
+                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 2 (Daze) → Dazed (Blue glow, IsDazed=true, collision OFF, timer: {_stateTimer:F1}s)");
                     break;
 
                 case SnakeState.AttackingEnemy:
                     SetVisualColor(Color.yellow);
                     EnableCollider(false);
+                    // Start attacking nearest enemy snake after animation delay
+                    Invoke(nameof(StartAttackingEnemy), _spellAnimationDelay);
+                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 3 (Attack) → AttackingEnemy (Yellow glow, collision OFF, delay: {_spellAnimationDelay}s)");
                     break;
 
                 case SnakeState.Frozen:
                     _stateTimer = _freezeDuration;
                     SetVisualColor(_frozenColor);
                     EnableCollider(true); // Still blocks path when frozen
+                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 4 (Freeze) → Frozen (Cyan glow, collision ON, timer: {_stateTimer:F1}s)");
+                    break;
+
+                case SnakeState.Dead:
+                    SetVisualColor(Color.gray); // Grayed out visual
+                    EnableCollider(false); // No collision
+                    // Trigger death animation
+                    if (_animator != null)
+                    {
+                        _animator.SetTrigger("Die");
+                    }
+                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Dead (Gray, collision OFF, Die trigger)");
                     break;
             }
-
-            // Debug.Log($"SnakeAI ({_snakeName}): {previousState} → {newState}");
         }
         #endregion
 
@@ -901,7 +1137,7 @@ namespace SnakeEnchanter.Snakes
             SnakeEffect effect = tuneNumber switch
             {
                 1 => SnakeEffect.Move,
-                2 => SnakeEffect.Sleep,
+                2 => SnakeEffect.Daze,
                 3 => SnakeEffect.Attack,
                 _ => SnakeEffect.Move
             };
@@ -933,8 +1169,8 @@ namespace SnakeEnchanter.Snakes
                     SetState(SnakeState.MovedAway);
                     break;
 
-                case SnakeEffect.Sleep:
-                    SetState(SnakeState.Sleeping);
+                case SnakeEffect.Daze:
+                    SetState(SnakeState.Dazed);
                     break;
 
                 case SnakeEffect.Attack:
@@ -1093,7 +1329,7 @@ namespace SnakeEnchanter.Snakes
             // Spawn attack VFX
             SpawnAttackFX(attackType);
 
-            // Debug.Log($"SnakeAI ({_snakeName}): {attackType} attack triggered! Damage: {damage}");
+            Debug.Log($"SnakeAI ({_snakeName}): [ATTACK] {attackType} triggered! (Damage: {damage}, Distance: {_playerDistance:F2}, Delay: {damageDelay}s)");
         }
 
         private int _scheduledDamage = 0;
@@ -1253,7 +1489,7 @@ namespace SnakeEnchanter.Snakes
         /// </summary>
         public void ApplyFreeze()
         {
-            if (_currentState == SnakeState.Sleeping || _currentState == SnakeState.Dead) return;
+            if (_currentState == SnakeState.Dazed || _currentState == SnakeState.Dead) return;
             SetState(SnakeState.Frozen);
         }
         #endregion

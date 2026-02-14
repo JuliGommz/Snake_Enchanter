@@ -44,13 +44,13 @@ namespace SnakeEnchanter.Editor
                 zoneColor = new Color(0.2f, 0.8f, 0.2f) // Green
             });
 
-            // Tune 2 — Sleep (GDD: 4s, Zone 35-60%)
-            CreateTuneConfig(folder, "Tune2_Sleep", new TuneConfigData
+            // Tune 2 — Daze (GDD: 4s, Zone 35-60%)
+            CreateTuneConfig(folder, "Tune2_Daze", new TuneConfigData
             {
-                tuneName = "Sleep",
+                tuneName = "Daze",
                 keyNumber = 2,
-                effect = SnakeEffect.Sleep,
-                description = "Lulls the snake into a deep sleep. Disables collision.",
+                effect = SnakeEffect.Daze,
+                description = "Dazes the snake into unconsciousness. Disables collision.",
                 duration = 4.0f,
                 zoneStart = 0.35f,
                 zoneEnd = 0.60f,
@@ -93,7 +93,7 @@ namespace SnakeEnchanter.Editor
             EditorUtility.DisplayDialog("Tune Configs Created",
                 "4 TuneConfig ScriptableObjects created:\n" +
                 "• Tune1_Move (3s, 40-65%)\n" +
-                "• Tune2_Sleep (4s, 35-60%)\n" +
+                "• Tune2_Daze (4s, 35-60%)\n" +
                 "• Tune3_Attack (5s, 30-55%)\n" +
                 "• Tune4_Freeze (6s, 25-50%)\n\n" +
                 "Location: " + folder +

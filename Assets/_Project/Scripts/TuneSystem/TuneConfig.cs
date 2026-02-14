@@ -131,7 +131,7 @@ namespace SnakeEnchanter.Tunes
     public enum SnakeEffect
     {
         Move,       // Snake moves out of the way
-        Sleep,      // Snake falls asleep
+        Daze,       // Snake becomes dazed/stunned (benommen)
         Attack,     // Snake attacks enemies
         Freeze      // All creatures freeze (Advanced Mode)
     }

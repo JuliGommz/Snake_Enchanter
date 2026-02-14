@@ -290,14 +290,36 @@
 
 ---
 
-### 14.02.2026 (Freitag)
+### 14.02.2026 (Freitag) - Session 16
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| Tune 2: Sleep → Daze Rename (alle Files) | | x | x |
+| Tune 2 Behavior: 8s Timer, Die Animation, Blue Glow | x | x | x |
+| Tune 3 Behavior: Attack Non-Snake Creatures (tag-based) | x | x | x |
+| Directional Slither Animations (Forward/Left/Right) | x | x | x |
+| Debug Logging System (Spells, Attacks, States) | | x | x |
+| SnakeAI v1.5.0 → v1.6.0 Implementation | x | x | x |
+| DESIGN_CHANGES.md Backlog Section erstellen | | x | x |
 
-**Screenshot:** `Media/Screenshots/2026-02-14_.png`
+**Screenshot:** `Media/Screenshots/2026-02-14_Session16.png`
 
 **Notizen:**
+- **SnakeAI v1.6.0** - Directional Slither + Debug Logging
+- **Sleep → Daze:** Komplettes Rename (SnakeState, SnakeEffect, UI, Editor Scripts)
+- **Tune 2 (Daze):** Code funktioniert (IsDazed Bool, 8s Timer, Blue Glow, Collision OFF)
+- **Tune 3 (Attack):** FindNearestCreature() skips ALL snakes (nur non-snake creatures)
+- **Directional Slither:** UpdateMovementAnimation() setzt Forward/Left/Right basierend auf InverseTransformDirection
+- **Debug Logging:** Alle Spell States, Attack Types, Daze Transitions vollständig geloggt
+- **Testing:** Slither funktioniert, Tune 1-3 Spells loggen korrekt
+- **BACKLOG Items dokumentiert:**
+  - Two-Level Success System (Spell Cast + Enemy Enchanted)
+  - Player Spell Cooldown (Inspector-konfigurierbar)
+  - Player Success Rate (50-90% basierend auf Health)
+  - Spell Range System (Inspector-definierbar)
+  - Dynamic Slider Balancing (Speed/Zone Variation)
+  - Particle Glow System (ersetzt Material Color Change)
+  - Enemy Attack System Completion
+- **Status:** Phase 2 Core Features COMPLETE, Backlog für Phase 3 definiert
 
 
 ---
