@@ -7,6 +7,9 @@ TagManager:
   - Enemy
   - MoveAwayTarget
   - Environment
+  - Enviroment
+  - CinemachineTarget
+  - Creature
   layers:
   - Default
   - TransparentFX

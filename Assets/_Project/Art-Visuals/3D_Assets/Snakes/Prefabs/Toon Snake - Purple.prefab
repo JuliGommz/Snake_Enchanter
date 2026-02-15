@@ -1269,21 +1269,21 @@ MonoBehaviour:
   _aggressiveDuration: 5
   _freezeDuration: 4
   _moveAwayTarget: {fileID: 0}
-  _moveSpeed: 3
+  _moveSpeed: 0.7
   _spellAnimationDelay: 3.5
   _snakeType: 0
   _biteRange: 0.5
   _breathRange: 7
   _projectileRange: 8
-  _biteDamage: 15
-  _breathDamage: 10
+  _biteDamage: 10
+  _breathDamage: 8
   _projectileDamage: 8
   _attackCooldown: 4
-  _detectionRange: 10
+  _detectionRange: 6
   _followRangeMin: 0.5
   _followRangeMax: 3.5
   _breathRangeMin: 4
-  _breathRangeMax: 7
+  _breathRangeMax: 5
   _chaseSpeed: 1
   _patrolRadiusMin: 2
   _patrolRadiusMax: 3
