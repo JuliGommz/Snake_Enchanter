@@ -133,6 +133,14 @@
 *         DEBUG LOGGING: Daze state transitions (IsDazed bool, timer, collision, glow color)
 *         DEBUG LOGGING: Attack Creature targeting (creature name, distance, neutralization logic)
 *         Result: Directional slither animations + full debug visibility for all behaviors (2026-02-14)
+* - v1.7.0: Spell Targeting & Animation Fixes (Session 17) — Critical bug fixes for detection + animator:
+*         FIXED: IsPlayerInRange now checks BOTH distance AND line-of-sight (_canSeePlayer)
+*         REASON: Spells were targeting snakes through walls (only checked distance, not visibility)
+*         REMOVED: Unused _playerLayer field (declared but never used in code, m_Bits: 0 in prefabs)
+*         DOCS: Added Animator Controller fix instructions (.planning/debug/ANIMATOR_FIX_INSTRUCTIONS.md)
+*         ISSUE: Die animation not playing - Animator Controller missing Idle→Die transition on Die trigger
+*         REQUIRES: Manual fix in Unity Editor - add Idle→Die transition with Die trigger condition
+*         Result: Spells now require line-of-sight, no more targeting through walls (2026-02-15)
 ====================================================================
 */
 
@@ -195,9 +203,6 @@ namespace SnakeEnchanter.Snakes
         [Header("Command Range")]
         [Tooltip("Max distance for player to cast tunes on this snake")]
         [SerializeField] private float _commandRange = 8f;
-
-        [Tooltip("Layer mask for player detection")]
-        [SerializeField] private LayerMask _playerLayer;
 
         [Header("Behavior")]
         [Tooltip("Damage dealt to player on contact when aggressive")]
@@ -331,13 +336,23 @@ namespace SnakeEnchanter.Snakes
         /// <summary>Is this snake currently targetable (can receive tune commands)?</summary>
         public bool IsTargetable => _currentState == SnakeState.Idle || _currentState == SnakeState.Aggressive;
 
-        /// <summary>Is player within command range?</summary>
+        /// <summary>
+        /// Is player within command range AND visible (line-of-sight)?
+        /// Used for spell targeting - prevents spells from targeting snakes through walls.
+        /// </summary>
         public bool IsPlayerInRange
         {
             get
             {
                 if (_playerTransform == null) return false;
-                return Vector3.Distance(transform.position, _playerTransform.position) <= _commandRange;
+
+                // Check distance first (cheap check)
+                float distance = Vector3.Distance(transform.position, _playerTransform.position);
+                if (distance > _commandRange) return false;
+
+                // Check line-of-sight (requires visibility for spell targeting)
+                // _canSeePlayer is updated by UpdateProximityDetection() every frame
+                return _canSeePlayer;
             }
         }
         #endregion
