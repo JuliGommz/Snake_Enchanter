@@ -89,7 +89,8 @@ namespace SnakeEnchanter.Tunes
         [SerializeField] private float _defaultZoneEnd = 0.65f;
 
         [Header("Tune 4 Availability")]
-        [SerializeField] private bool _tune4Unlocked = false;
+        [Tooltip("Set to true for testing - normally unlocked via progression")]
+        [SerializeField] private bool _tune4Unlocked = true; // TESTING: Default true for Phase 2
 
         [Header("Mode Settings")]
         [Tooltip("Simple Mode adds this to zone size")]
