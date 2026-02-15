@@ -1,16 +1,68 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-14 (Session 16 - SNAKE AI v1.6.0 + BACKLOG)
+**Letzte Aktualisierung:** 2026-02-15 (Session 17 - SnakeAI v1.7.2 Bug Fixes COMPLETE)
 
 ---
 
 ## ⚡ QUICK START FÜR NÄCHSTE SESSION
 
 **Aktueller Branch:** `feature/enemy-setup`
-**Letzter Commit:** `78a3a8e` - "feat: SnakeAI v1.6.0 - Directional Slither + Debug Logging + Sleep→Daze Rename"
+**Letzter Commit:** `9cc945d` - "fix: SnakeAI v1.7.2 - Die Animation Loop Fixed"
 
-**Status:** SnakeAI v1.6.0 - Directional Slither + Debug Logging COMPLETE ✅
-**Nächster Schritt:** Phase 2 abschließen ODER BACKLOG Items für Phase 3
+**Status:** SnakeAI v1.7.2 COMPLETE ✅ | 4 Critical Bugs FIXED ✅
+**Nächster Schritt:** Phase 2 Final Testing (Slither L/R, Tune 4) → Branch Merge
+
+---
+
+## 🎯 SESSION 17 ZUSAMMENFASSUNG (2026-02-15)
+
+### 🔧 Bug Fixes - SnakeAI v1.7.0 → v1.7.2
+
+**3 Commits, 4 Critical Bugs Fixed:**
+
+#### ✅ Commit `14b7df5` - SnakeAI v1.7.1
+1. **IsDazed Parameter ERROR** - Controller Mismatch
+   - Problem: Prefabs nutzten External_Assets controller (OHNE IsDazed)
+   - Fix: Alle 6 Snake Prefabs auf _Project controller umgestellt
+   - Result: "Parameter 'IsDazed' does not exist" ERROR behoben
+
+2. **Attack Cooldown nach Daze**
+   - Problem: Snake konnte 4s nicht angreifen nach Dazed → Idle
+   - Fix: `_lastAttackTime = 0f` beim Verlassen von Dazed state
+   - Result: Snake greift sofort an nach Daze-Ende
+
+3. **Spell 1 stoppt Patrol** (KEIN BUG - Working as Intended)
+   - Analyse: Spell out-of-range → Snake ignoriert ✅
+   - Player visible → Snake beobachtet statt Patrol ✅
+
+#### ✅ Commit `9cc945d` - SnakeAI v1.7.2
+4. **Die Animation Loop**
+   - Problem: Snake fiel 2x runter + stand sofort auf
+   - Root Cause: Dead state setzte IsDazed NICHT → Die → Idle Transition
+   - Fix: `IsDazed=true` in Dead state setzen
+   - Result: Snake bleibt in Die Animation (collapsed)
+
+### 📊 Testing Results (User)
+
+**✅ Tune 2 (Daze):**
+- Works perfectly, no debug errors
+- IsDazed parameter error RESOLVED
+
+**✅ Tune 3 (Attack):**
+- Snake greift RobotKyle an (Tag "Creature")
+- Both Snake + Creature die (Phase 1 simplified design)
+- **BACKLOG (Phase 3):** Kampf-System mit HP (Snake kann überleben/sterben basierend auf Creature Interaction)
+
+**⏳ Still TODO:**
+- Slither Left/Right testen (nur Forward getestet)
+- Tune 4 (Freeze) testen
+
+### 📚 Documentation Created
+
+**GSD Debug Session:**
+- `.planning/debug/resolved/snake-ai-detection-targeting-bugs.md` - Full investigation
+- `.planning/debug/ANIMATOR_FIX_INSTRUCTIONS.md` - Unity Editor fix guide
+- `.planning/debug/FIX_SUMMARY.md` - Comprehensive fix summary
 
 ---
 
@@ -222,22 +274,36 @@
 
 ## 🎯 NÄCHSTE SCHRITTE (Priorität)
 
-### Option A: Phase 2 abschließen
-1. **Scene Prefabs committen** (Snake Prefabs, GameLevel.unity)
-2. **TagManager committen**
-3. **Phase 2 Feature Testing** (End-to-End playthrough)
-4. **Branch Merge:** feature/enemy-setup → main
+### ✅ Phase 2 Fast Fertig - Noch 2 Tests:
 
-### Option B: BACKLOG Features (Phase 3)
-1. **Spell Cooldown System** implementieren
-2. **Spell Range System** implementieren
-3. **Success Rate System** implementieren
-4. **Particle Glow System** research + implement
+1. **Slither Left/Right testen**
+   - Forward funktioniert ✅
+   - Left/Right Logik implementiert, aber ungetestet
 
-### Empfehlung: Option A
-- Phase 2 Core Features COMPLETE
-- BACKLOG ist für Phase 3 (Polish) vorgesehen
-- Sauberer Abschluss bevor neue Features
+2. **Tune 4 (Freeze) testen**
+   - Code vorhanden, nicht getestet
+
+3. **DANN Branch Merge:** feature/enemy-setup → main
+
+### BACKLOG Features (Phase 3)
+
+**Spell System Enhancements:**
+- Two-Level Success System (Player Timing + Enemy Enchantment)
+- Player Spell Cooldown (Inspector-konfigurierbar)
+- Player Success Rate (50-90% basierend auf Health)
+- Spell Range System (Inspector-definierbar)
+- Dynamic Slider Balancing (Speed/Zone Variation)
+- Particle Glow System (ersetzt Material Color Change)
+
+**Creature Combat System (NEW):**
+- Kampf-System: Snake vs Creature mit HP
+- Creature kann Snake angreifen
+- Snake überlebt/stirbt basierend auf HP-Interaktion
+- Aktuell: Beide sterben (Phase 1 simplified)
+
+### Empfehlung: Phase 2 ABSCHLIESSEN
+- 4 Critical Bugs FIXED ✅
+- Slither/Freeze testen → Branch Merge → Phase 3
 
 ---
 
@@ -245,27 +311,22 @@
 
 ```
 Branch: feature/enemy-setup (aktiv)
-Letzter Commit: 78a3a8e "feat: SnakeAI v1.6.0 - Directional Slither + Debug Logging + Sleep→Daze Rename"
+Letzter Commit: 9cc945d "fix: SnakeAI v1.7.2 - Die Animation Loop Fixed"
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 
-Uncommitted Changes:
-  Modified: GameLevel.unity (Scene Changes)
-  Modified: 6 Snake Prefabs (Animator parameters)
-  Modified: Toon Cobra Controller (IsDazed, Slither Bools)
-  Modified: TagManager.asset
-  Untracked: SpaceRobotKyle/ (Test enemy asset)
+Working tree: MODIFIED (STATE.md uncommitted)
 ```
 
-**Nächster Commit (empfohlen):**
-```
-"chore: Scene + Prefabs setup for SnakeAI v1.6.0 testing
+**Commits Session 17:**
+1. `c146b1f` - Scene + Prefabs setup (Snake Prefabs, TagManager, RobotKyle)
+2. `8f00a58` - Unity package dependencies update (URP, ShaderGraph)
+3. `43feec9` - SnakeAI v1.7.0 - Spell line-of-sight + Dead code cleanup (GSD Debug)
+4. `ed2a970` - Debug session documentation (GSD)
+5. `1b2aef3` - Debug session resolved (GSD)
+6. `14b7df5` - SnakeAI v1.7.1 - Controller Fix + Attack Cooldown Reset
+7. `9cc945d` - SnakeAI v1.7.2 - Die Animation Loop Fixed
 
-- Snake Prefabs: Animator parameters (IsDazed, Slither Forward/Left/Right)
-- Toon Cobra Controller: Parameter setup
-- GameLevel.unity: Testing scene state
-- TagManager: Creature tag added
-- SpaceRobotKyle: Test enemy for Tune 3 (Attack)"
-```
+**Total:** 7 commits, 4 critical bugs fixed
 
 ---
 
