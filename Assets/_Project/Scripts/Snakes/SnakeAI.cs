@@ -1053,14 +1053,16 @@ namespace SnakeEnchanter.Snakes
             SnakeState previousState = _currentState;
             _currentState = newState;
 
-            // Clear IsDazed bool when leaving Dazed state
+            // Clear IsDazed bool + Reset attack cooldown when leaving Dazed state
             if (previousState == SnakeState.Dazed && newState != SnakeState.Dazed)
             {
                 if (_animator != null)
                 {
                     _animator.SetBool("IsDazed", false);
                 }
-                Debug.Log($"SnakeAI ({_snakeName}): [DAZE END] Leaving Dazed state, IsDazed=false");
+                // Reset attack cooldown so snake can attack immediately after daze
+                _lastAttackTime = 0f;
+                Debug.Log($"SnakeAI ({_snakeName}): [DAZE END] Leaving Dazed state, IsDazed=false, attack cooldown reset");
             }
 
             switch (newState)
