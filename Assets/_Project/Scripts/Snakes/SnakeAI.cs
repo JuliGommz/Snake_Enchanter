@@ -1119,12 +1119,13 @@ namespace SnakeEnchanter.Snakes
                 case SnakeState.Dead:
                     SetVisualColor(Color.gray); // Grayed out visual
                     EnableCollider(false); // No collision
-                    // Trigger death animation
+                    // Trigger death animation + Set IsDazed=true to stay in Die animation
                     if (_animator != null)
                     {
                         _animator.SetTrigger("Die");
+                        _animator.SetBool("IsDazed", true); // Prevents Die → Idle transition
                     }
-                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Dead (Gray, collision OFF, Die trigger)");
+                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Dead (Gray, collision OFF, Die trigger, IsDazed=true)");
                     break;
             }
         }
