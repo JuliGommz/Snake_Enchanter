@@ -290,6 +290,56 @@
 
 ---
 
+### 15.02.2026 (Samstag) - Session 17
+| Aufgabe | geplant | in Bearbeitung | erledigt |
+|---------|:-------:|:--------------:|:--------:|
+| Scene + Prefabs Setup (6 Snake Prefabs, MoveAwayTargets) | | x | x |
+| Unity Packages Update (URP, ShaderGraph) | | x | x |
+| SnakeAI v1.7.0: Line-of-Sight + Dead Code Cleanup (GSD Debug) | | x | x |
+| SnakeAI v1.7.1: Controller Fix + Attack Cooldown Reset | | x | x |
+| SnakeAI v1.7.2: Die Animation Loop Fixed | | x | x |
+| Tune 4 (Freeze) Unlock für Testing | | x | x |
+| Bug Testing Session (IsDazed, Attack Cooldown, Die Animation) | x | x | x |
+| GSD Debug Documentation | | x | x |
+| Projektplan Phase 2 Status Update | | x | x |
+| MERGE_CHECKLIST.md + PHASE3_SCOPE.md erstellen | | x | x |
+
+**Screenshot:** `Media/Screenshots/2026-02-15_Phase2Complete.png`
+
+**Notizen:**
+- **SnakeAI v1.7.0 → v1.7.2:** 4 Critical Bugs Fixed in 3 Commits
+- **Bug 1 (IsDazed Parameter ERROR):**
+  - Prefabs nutzten External_Assets controller ohne IsDazed parameter
+  - Fix: Alle 6 Snake Prefabs auf _Project controller umgestellt
+  - Result: "Parameter 'IsDazed' does not exist" ERROR behoben
+- **Bug 2 (Attack Cooldown):**
+  - Snake konnte 4s nicht angreifen nach Dazed → Idle transition
+  - Fix: `_lastAttackTime = 0f` beim Verlassen von Dazed state
+- **Bug 3 (Die Animation Loop):**
+  - Root Cause: Dead state setzte IsDazed NICHT → Die → Idle Transition
+  - Fix: `IsDazed=true` in Dead state setzen
+  - Result: Snake bleibt in Die Animation (collapsed)
+- **Bug 4 (Tune 4 UI Missing):**
+  - `_tune4Unlocked = false` by default
+  - Fix: Changed to `true` for Phase 2 testing
+- **Testing Results:**
+  - ✅ Tune 1 (Move): Works perfectly
+  - ✅ Tune 2 (Daze): 8s timer, Blue glow, Die animation
+  - ✅ Tune 3 (Attack): Snake attacks RobotKyle, both die (Phase 1 design)
+  - ⏳ Tune 4 (Freeze): Unlocked but not functional → Phase 3 backlog
+  - ⏳ Slither Left/Right: Untested
+- **Phase 2 Declaration:** User declared Phase 2 feature-complete
+  - Tune 4 Freeze: Moved to Phase 3 backlog (code exists, not working)
+  - Manual work: User placing Snake prefabs + MoveAwayTargets in scene
+- **Documentation:**
+  - GSD Debug Session: 3 files in `.planning/debug/`
+  - MERGE_CHECKLIST.md: Branch merge workflow
+  - PHASE3_SCOPE.md: Audio, Visual, UI Polish scope
+- **Status:** Phase 2 COMPLETE (95%), awaiting scene placement → Branch merge
+- **Git:** 7 commits on feature/enemy-setup, 4 critical bugs fixed
+
+---
+
 ### 14.02.2026 (Freitag) - Session 16
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|

@@ -10,11 +10,11 @@
 | Meilenstein | Ziel-Datum | Status |
 |-------------|------------|--------|
 | GDD v1 Abgabe | 27.01.2026 | ✅ Erledigt |
-| **Phase 1: Spielbar** | ~07.02 | ⏳ |
-| Fortschritts-Präsentation 1 | ~08.02 | ⏳ |
-| **Phase 2: Komplett** | ~14.02 | ⏳ |
+| **Phase 1: Spielbar** | ~07.02 | ✅ Erledigt |
+| Fortschritts-Präsentation 1 | ~08.02 | ✅ Erledigt |
+| **Phase 2: Komplett** | ~14.02 | ✅ Erledigt (15.02) |
 | GDD v2 + Making-of | ~17.02 | ⏳ |
-| **Phase 3: Schön** | ~21.02 | ⏳ |
+| **Phase 3: Schön** | ~21.02 | ⏳ In Vorbereitung |
 | Fortschritts-Präsentation 2 | ~24.02 | ⏳ |
 | **Phase 4: Fertig** | ~03.03 | ⏳ |
 | Finale Abgabe | ~03.03 | ⏳ |
@@ -40,24 +40,27 @@
 
 ---
 
-## Phase 2: KOMPLETT (~4-5 Tage)
+## Phase 2: KOMPLETT (~4-5 Tage) ✅ **COMPLETE**
 > "Alle Features drin, sieht noch rough aus"
 
 | Nr | Aufgabe | Status |
 |----|---------|--------|
-| 2.1 | Alle 3 Tunes (Move, Sleep, Attack) | ⏳ |
-| 2.2 | Snake State Machine | ⏳ |
-| 2.3 | Toon Snakes importieren | ⏳ |
-| 2.4 | Snake Animationen einbinden | ⏳ |
-| 2.5 | 3 Areas (Tutorial → Mitte → Finale) | ⏳ |
-| 2.6 | Game States (Menu, Playing, Paused, End) | ⏳ |
-| 2.7 | Main Menu + Result Screen | ⏳ |
-| 2.8 | Simple + Advanced Mode | ⏳ |
-| 2.9 | Tune 4 (Freeze) für Advanced | ⏳ |
-| 2.10 | Backend Setup + API | ⏳ |
-| 2.11 | Session-Stats senden | ⏳ |
+| 2.1 | Alle 4 Tunes (Move, Daze, Attack, Freeze) | ✅ v2.5 |
+| 2.2 | Snake State Machine | ✅ v1.7.2 |
+| 2.3 | Toon Snakes importieren | ✅ 6 Prefabs |
+| 2.4 | Snake Animationen einbinden | ✅ Slither 3-dir |
+| 2.5 | 3 Areas (Tutorial → Mitte → Finale) | 🔄 Phase 3 |
+| 2.6 | Game States (Menu, Playing, Paused, End) | ✅ Basic |
+| 2.7 | Main Menu + Result Screen | ✅ Basic |
+| 2.8 | Simple + Advanced Mode | ✅ Wählbar |
+| 2.9 | Tune 4 (Freeze) für Advanced | ⚠️ Phase 3 |
+| 2.10 | Backend Setup + API | 🔄 Phase 3 |
+| 2.11 | Session-Stats senden | 🔄 Phase 3 |
 
-**Done when:** Feature-Complete, alle Anforderungen erfüllt
+**Done when:** Core Features Complete ✅ (Scoped items moved to Phase 3)
+
+**Completion Date:** 2026-02-15 (Session 17)
+**Branch:** `feature/enemy-setup` (9 commits, 4 bugs fixed)
 
 ---
 
