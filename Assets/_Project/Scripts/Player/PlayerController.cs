@@ -207,6 +207,14 @@ namespace SnakeEnchanter.Player
             SetupInputActions();
         }
 
+        private void Start()
+        {
+            // Force immediate ground contact to prevent floating at spawn
+            // CharacterController takes 1 frame to apply gravity from Vector3.zero
+            // This ensures player is grounded on frame 1
+            _velocity.y = -5f;
+        }
+
         private void OnEnable()
         {
             EnableInput();
