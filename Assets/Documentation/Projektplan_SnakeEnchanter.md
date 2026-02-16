@@ -13,8 +13,9 @@
 | **Phase 1: Spielbar** | ~07.02 | ✅ Erledigt |
 | Fortschritts-Präsentation 1 | ~08.02 | ✅ Erledigt |
 | **Phase 2: Komplett** | ~14.02 | ✅ Erledigt (15.02) |
+| **v0.3: Bug Fixes & Stability** | ~16.02 | 🔄 In Arbeit (NavMesh) |
 | GDD v2 + Making-of | ~17.02 | ⏳ |
-| **Phase 3: Schön** | ~21.02 | ⏳ In Vorbereitung |
+| **Phase 3: Schön** | ~21.02 | ⏳ Nach v0.3 |
 | Fortschritts-Präsentation 2 | ~24.02 | ⏳ |
 | **Phase 4: Fertig** | ~03.03 | ⏳ |
 | Finale Abgabe | ~03.03 | ⏳ |
@@ -61,6 +62,35 @@
 
 **Completion Date:** 2026-02-15 (Session 17)
 **Branch:** `feature/enemy-setup` (9 commits, 4 bugs fixed)
+
+---
+
+## v0.3: Bug Fixes & Stability (~2-3 Tage) 🔄 **IN ARBEIT**
+> "NavMesh migration + Feature verification before polish"
+
+| Nr | Aufgabe | Status |
+|----|---------|--------|
+| 0.3.1 | Player Ground Detection Fix | ✅ v1.9 |
+| 0.3.2 | GSD Milestone Initialization | ✅ Complete |
+| 0.3.3 | NavMesh Research (4 files) | ✅ Complete |
+| 0.3.4 | Requirements & Roadmap | ✅ Complete |
+| 0.3.5 | NavMesh Scene Setup (Baking) | ⏳ Phase 3 |
+| 0.3.6 | Component Integration (Prefabs) | ⏳ Phase 4 |
+| 0.3.7 | Movement Migration (Code) | ⏳ Phase 5 |
+| 0.3.8 | Cleanup & Polish | ⏳ Phase 6 |
+| 0.3.9 | Testing & Verification | ⏳ Phase 7 |
+
+**Done when:** Snake patrol animations fixed, all Phase 2 features verified
+
+**Current Status:** Requirements phase complete (2026-02-16)
+**Branch:** `feature/enemy-setup` (12 commits, player ground fix + GSD init)
+**Next:** Plan Phase 3 (NavMesh Scene Setup) via `/gsd:plan-phase 3`
+
+**Research Findings:**
+- NavMeshAgent integration: HIGH confidence, 5 hours estimated
+- Zero blockers identified
+- 10-step incremental migration plan
+- Animation fix: Use `agent.velocity` instead of `_isPatrolling` bool
 
 ---
 
