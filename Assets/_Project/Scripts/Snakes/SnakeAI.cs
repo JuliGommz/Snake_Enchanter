@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.8.1 - NavMeshAgent Activation (Phase 5)
+* Version: 1.8.2 - NavMesh Patrol Replacement (Phase 5 Plan 02)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -156,6 +156,12 @@
 *         ADDED: HasAgentArrived() helper (fixes remainingDistance=Infinity Unity bug)
 *         ADDED: SetState() agent isStopped/ResetPath control per state
 *         NEXT: Phase 5 Plans 02-03 will replace MoveTowardsSafe() calls (2026-02-17)
+* - v1.8.2: NavMesh Patrol Replacement (Phase 5 Plan 02) — Patrol via SetDestination:
+*         REPLACED: UpdatePatrol() MoveTowardsSafe → agent.SetDestination(_currentPatrolTarget)
+*         REPLACED: Distance arrival check → HasAgentArrived() (fixes remainingDistance=Infinity)
+*         REPLACED: GenerateNewPatrolWaypoint() → NavMesh.SamplePosition validation
+*         ADDED: Velocity-based rotation in patrol (agent.velocity direction)
+*         RESULT: Patrol animation no longer restarts when snake blocked (2026-02-17)
 ====================================================================
 */
 
@@ -606,6 +612,10 @@ namespace SnakeEnchanter.Snakes
                 }
                 _isPatrolling = false;
                 _isWaitingAtWaypoint = false;
+                if (_agent != null && _agent.isOnNavMesh && _agent.hasPath)
+                {
+                    _agent.ResetPath(); // Stop moving while watching player
+                }
                 return;
             }
 
@@ -629,44 +639,73 @@ namespace SnakeEnchanter.Snakes
                 _isPatrolling = true;
             }
 
-            // Move toward patrol target (with collision detection)
-            float patrolSpeed = _moveSpeed * 0.75f; // 25% slower than normal movement
-            MoveTowardsSafe(_currentPatrolTarget, patrolSpeed);
-
-            // Rotate toward target
-            Vector3 directionToTarget = (_currentPatrolTarget - transform.position).normalized;
-            if (directionToTarget != Vector3.zero)
+            // Move toward patrol target via NavMeshAgent
+            if (_agent != null && _agent.isOnNavMesh)
             {
-                Vector3 lookTarget = new Vector3(_currentPatrolTarget.x, transform.position.y, _currentPatrolTarget.z);
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation,
-                    Quaternion.LookRotation(directionToTarget),
-                    Time.deltaTime * 2f);
+                float patrolSpeed = _moveSpeed * 0.75f;
+                _agent.speed = patrolSpeed;
+                _agent.SetDestination(_currentPatrolTarget);
+
+                // Rotate toward movement direction (velocity-based, not target-based)
+                // updateRotation=false means we handle rotation manually
+                if (_agent.velocity.sqrMagnitude > 0.01f)
+                {
+                    Vector3 moveDir = new Vector3(_agent.velocity.x, 0f, _agent.velocity.z).normalized;
+                    if (moveDir != Vector3.zero)
+                    {
+                        transform.rotation = Quaternion.Slerp(
+                            transform.rotation,
+                            Quaternion.LookRotation(moveDir),
+                            Time.deltaTime * 5f);
+                    }
+                }
             }
 
-            // Check if reached waypoint
-            if (Vector3.Distance(transform.position, _currentPatrolTarget) < 0.2f)
+            // Check if reached waypoint (HasAgentArrived avoids remainingDistance=Infinity bug)
+            if (HasAgentArrived())
             {
                 _isWaitingAtWaypoint = true;
                 _patrolWaitTimer = _patrolWaitTime;
+                if (_agent != null && _agent.isOnNavMesh)
+                {
+                    _agent.ResetPath(); // Clear destination while waiting
+                }
             }
         }
 
         /// <summary>
         /// Generates a new random patrol waypoint around start position.
+        /// Validates point is on NavMesh using SamplePosition — prevents off-mesh destinations.
+        /// Falls back to _originalPosition if no valid point found after 5 attempts.
         /// </summary>
         private void GenerateNewPatrolWaypoint()
         {
-            float radius = Random.Range(_patrolRadiusMin, _patrolRadiusMax);
-            float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            const int maxAttempts = 5;
+            const float sampleRadius = 1.0f; // Search radius around candidate point
 
-            Vector3 offset = new Vector3(
-                Mathf.Cos(angle) * radius,
-                0f,
-                Mathf.Sin(angle) * radius);
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                float radius = Random.Range(_patrolRadiusMin, _patrolRadiusMax);
+                float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
 
-            _currentPatrolTarget = _originalPosition + offset;
-            // Debug.Log($"SnakeAI ({_snakeName}): New patrol waypoint: {_currentPatrolTarget} (radius: {radius:F2})");
+                Vector3 candidatePoint = _originalPosition + new Vector3(
+                    Mathf.Cos(angle) * radius,
+                    0f,
+                    Mathf.Sin(angle) * radius);
+
+                // Validate point is on NavMesh
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(candidatePoint, out hit, sampleRadius, NavMesh.AllAreas))
+                {
+                    _currentPatrolTarget = hit.position;
+                    // Debug.Log($"SnakeAI ({_snakeName}): Patrol waypoint: {_currentPatrolTarget} (attempt {i+1})");
+                    return;
+                }
+            }
+
+            // Fallback: return to spawn position (always on NavMesh)
+            _currentPatrolTarget = _originalPosition;
+            Debug.LogWarning($"SnakeAI ({_snakeName}): No valid patrol waypoint found after {maxAttempts} attempts, using spawn position");
         }
 
         /// <summary>
