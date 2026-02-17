@@ -2,10 +2,10 @@
 
 ## Current Position
 
-**Phase:** 3 (NavMesh Scene Setup - Ready for planning)
+**Phase:** 4 (Component Integration — Ready for planning)
 **Plan:** —
-**Status:** Requirements defined, roadmap created, ready to plan Phase 3
-**Last activity:** 2026-02-16 — Milestone v0.3 requirements complete
+**Status:** Phase 3 complete. NavMesh baked in GameLevel scene. Ready to plan Phase 4.
+**Last activity:** 2026-02-17 — Phase 3 NavMesh Scene Setup complete
 
 ## Project Reference
 
@@ -16,12 +16,18 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 
 ## Recent Progress
 
-**2026-02-16 (Today - Continued):**
+**2026-02-17 (Today):**
+- ✅ Phase 3 complete: NavMesh baked in GameLevel scene
+- ✅ NavMeshSurface configured (Collect Objects: All, Height: 0.5, Radius: 0.3)
+- ✅ Blue overlay confirmed on all cave floor surfaces
+- ✅ Play mode: snakes still patrol normally (animation bug still present — expected)
+- 📋 Next: Plan Phase 4 (Component Integration) via `/gsd:plan-phase 4`
+
+**2026-02-16 (Earlier):**
 - ✅ GSD milestone v0.3 initialized (PROJECT.md, STATE.md, MILESTONES.md)
 - ✅ Research phase complete (4 files: STACK, FEATURES, ARCHITECTURE, PITFALLS)
 - ✅ Requirements defined (REQUIREMENTS.md - 4 core requirements)
 - ✅ Roadmap created (ROADMAP.md - 5 phases, 5 hours estimated)
-- 📋 Next: Plan Phase 3 (NavMesh Scene Setup) via `/gsd:plan-phase 3`
 
 **2026-02-16 (Earlier):**
 - ✅ Player ground detection fix (Start() method with `_velocity.y = -5f`)
@@ -45,16 +51,16 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 **HIGH PRIORITY (v0.3 Scope):**
 1. ⚠️ **Snake patrol animation jump bug**
    - When blocked by collider, animation restarts from frame 0
-   - Root cause: `_isPatrolling` bool stays true, position unchanged
-   - Solution: Migrate to NavMeshAgent (velocity-based animation triggers)
+   - Root cause confirmed: MoveTowardsSafe() + boolean _isPatrolling. Fix requires BOTH NavMesh movement AND velocity-based animation trigger (Phase 5). Teacher confirmed.
+   - Solution: Migrate to NavMeshAgent (Phase 5.3: velocity-based animation triggers)
    - Teacher-approved approach
 
-2. 🔄 **NavMesh migration** (In Plan)
-   - Replace custom MoveTowardsSafe() with NavMeshAgent.SetDestination()
-   - Bake NavMesh in GameLevel scene
-   - Add NavMeshAgent component to 6 snake prefabs
-   - Update animation triggers from boolean to velocity check
-   - State machine integration (enable/disable for Dazed/Frozen/Dead)
+2. 🔄 **NavMesh migration**
+   - ✅ Phase 3 complete (baked in GameLevel scene)
+   - 📋 Phase 4 next (add NavMeshAgent to prefabs, inactive)
+   - 📋 Phase 5 next (replace MoveTowardsSafe with SetDestination)
+   - 📋 Phase 5 includes: Update animation triggers from boolean to velocity check
+   - 📋 Phase 5 includes: State machine integration (enable/disable for Dazed/Frozen/Dead)
 
 3. ⏳ **Full feature testing** (After NavMesh)
    - Test Slither Left/Right (code exists, only Forward tested)
