@@ -209,14 +209,8 @@ namespace SnakeEnchanter.Player
 
         private void Start()
         {
-            // Snap player to ground on spawn — works on ramps and uneven terrain
-            // Raycast from above finds actual ground, positions player exactly on it
-            if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 10f))
-            {
-                float groundOffset = _controller.center.y - (_controller.height / 2f) + _controller.skinWidth;
-                transform.position = new Vector3(transform.position.x, hit.point.y - groundOffset, transform.position.z);
-            }
-            _velocity.y = -2f;
+            // Apply initial downward velocity so gravity grounds player on frame 1
+            _velocity.y = -5f;
         }
 
         private void OnEnable()
