@@ -2,10 +2,10 @@
 
 ## Current Position
 
-**Phase:** 5 (Movement Migration — Ready for planning)
-**Plan:** —
-**Status:** Phase 4 complete. NavMeshAgent added to all 6 prefabs, passive init in SnakeAI.cs v1.8.0. Ready to plan Phase 5.
-**Last activity:** 2026-02-17 — Phase 4 Component Integration complete
+**Phase:** 5 (Movement Migration — In progress)
+**Plan:** 02 (next)
+**Status:** Plan 05-01 complete. SnakeAI v1.8.1 — NavMeshAgent active (updatePosition=true), HasAgentArrived() added, SetState() wired. Ready for Plan 05-02 (patrol refactor).
+**Last activity:** 2026-02-17 — Plan 05-01 NavMeshAgent Activation complete (commit 355a6be)
 
 ## Project Reference
 
@@ -17,11 +17,17 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 ## Recent Progress
 
 **2026-02-17 (Today - continued):**
+- ✅ Plan 05-01 complete: SnakeAI v1.8.1 — NavMeshAgent active (updatePosition=true)
+- ✅ nextPosition sync before enabling (prevents teleport snap)
+- ✅ HasAgentArrived() helper added (4-condition, fixes remainingDistance=Infinity bug)
+- ✅ SetState() wired: Frozen→isStopped, Dazed/Dead/AttackingEnemy→isStopped+ResetPath, Idle/Aggressive/MovedAway→isStopped=false
+- 📋 Next: Plan 05-02 (patrol refactor: replace MoveTowardsSafe in UpdatePatrol with SetDestination)
+
+**2026-02-17 (Earlier):**
 - ✅ Phase 4 complete: NavMeshAgent added to 6 snake prefabs
 - ✅ SnakeAI v1.8.0: Awake() passive init (updatePosition=false, updateRotation=false, isStopped=true)
 - ✅ NavMesh rebaked: snakes excluded from obstacle geometry
 - ✅ Play mode verified: no errors, dual system stable
-- 📋 Next: Plan Phase 5 (Movement Migration) via `/gsd:plan-phase 5`
 
 **2026-02-17 (Today):**
 - ✅ Phase 3 complete: NavMesh baked in GameLevel scene
@@ -90,7 +96,7 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - PlayerController v1.8 (First-person, crouch, Cinemachine pitch-only)
 - HealthSystem v1.3 (Drain, restoration, death animations)
 - TuneController v2.5 (4 Tunes, Genshin-style slider, Tune 4 unlocked)
-- SnakeAI v1.7.2 (7-state machine, proximity detection, range attacks)
+- SnakeAI v1.8.1 (7-state machine, NavMeshAgent active, HasAgentArrived(), SetState agent control)
 - GameManager v1.1.1 (Win/Lose, Mode selection)
 
 **Key Files:**
@@ -105,5 +111,10 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - Teacher feedback: Use Unity native solutions over custom code
 - Documentation must be kept in sync with actual implementation
 
+**Key Decisions (Plan 05-01):**
+- NavMeshAgent position sync (nextPosition before updatePosition=true) prevents teleport snap
+- 4-condition HasAgentArrived() required — Unity remainingDistance returns Infinity on multi-segment paths
+- Frozen uses isStopped only (preserves path for resume); Dazed/Dead/AttackingEnemy use ResetPath()
+
 ---
-*Last updated: 2026-02-16 after GSD milestone initialization*
+*Last updated: 2026-02-17 after Plan 05-01 completion*
