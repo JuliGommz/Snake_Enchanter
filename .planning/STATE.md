@@ -3,9 +3,9 @@
 ## Current Position
 
 **Phase:** 5 (Movement Migration — In progress)
-**Plan:** 03 (next)
-**Status:** Plan 05-02 complete. SnakeAI v1.8.2 — patrol now uses SetDestination + NavMesh.SamplePosition waypoint validation + HasAgentArrived() arrival check. Ready for Plan 05-03 (FollowPlayer + MovedAway NavMesh migration).
-**Last activity:** 2026-02-17 — Plan 05-02 NavMesh Patrol Replacement complete (commit 5d8ac55)
+**Plan:** 04 (next)
+**Status:** Plan 05-03 complete. SnakeAI v1.8.3 — all movement via NavMeshAgent (FollowPlayer, StartMoveAwayMovement, MovedAway arrival). MoveTowardsSafe() deleted. Animation bug fixed via velocity-based detection. Ready for Plan 05-04 (final validation).
+**Last activity:** 2026-02-17 — Plan 05-03 NavMesh Full Migration complete (commit 7ef80c6)
 
 ## Project Reference
 
@@ -17,13 +17,20 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 ## Recent Progress
 
 **2026-02-17 (Today - continued):**
+- ✅ Plan 05-03 complete: SnakeAI v1.8.3 — all movement via NavMeshAgent (commit 7ef80c6)
+- ✅ FollowPlayer() → _agent.SetDestination(_playerTransform.position) at _chaseSpeed
+- ✅ StartMoveAwayMovement() → _agent.SetDestination(_moveAwayTarget.position) at _moveSpeed
+- ✅ MovedAway arrival: Vector3.Distance + 2s timeout → HasAgentArrived()
+- ✅ UpdateMovementAnimation(): _isPatrolling bool → _agent.velocity.magnitude > 0.1f (animation bug fixed)
+- ✅ MoveTowardsSafe() method deleted (~40 lines)
+- ✅ _lastMoveDirection field deleted
+- 📋 Next: Plan 05-04 (final validation)
 - ✅ Plan 05-02 complete: SnakeAI v1.8.2 — patrol via SetDestination (commit 5d8ac55)
 - ✅ UpdatePatrol() MoveTowardsSafe() → _agent.SetDestination(_currentPatrolTarget)
 - ✅ Arrival check: Vector3.Distance → HasAgentArrived() (fixes remainingDistance=Infinity bug)
 - ✅ Waypoint validation: GenerateNewPatrolWaypoint() now uses NavMesh.SamplePosition (5 attempts, fallback to _originalPosition)
 - ✅ Velocity-based rotation in patrol (agent.velocity direction, not target-based)
 - ✅ _agent.ResetPath() on player-spotted and on waypoint arrival
-- 📋 Next: Plan 05-03 (FollowPlayer + MovedAway NavMesh migration)
 - ✅ Plan 05-01 complete: SnakeAI v1.8.1 — NavMeshAgent active (updatePosition=true)
 - ✅ nextPosition sync before enabling (prevents teleport snap)
 - ✅ HasAgentArrived() helper added (4-condition, fixes remainingDistance=Infinity bug)
