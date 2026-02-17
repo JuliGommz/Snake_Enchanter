@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.8.2 - NavMesh Patrol Replacement (Phase 5 Plan 02)
+* Version: 1.8.3 - NavMesh Full Migration (Phase 5 Plan 03)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -162,6 +162,15 @@
 *         REPLACED: GenerateNewPatrolWaypoint() → NavMesh.SamplePosition validation
 *         ADDED: Velocity-based rotation in patrol (agent.velocity direction)
 *         RESULT: Patrol animation no longer restarts when snake blocked (2026-02-17)
+* - v1.8.3: NavMesh Full Migration (Phase 5 Plan 03) — All movement via NavMeshAgent:
+*         REPLACED: FollowPlayer() MoveTowardsSafe → agent.SetDestination(_playerTransform.position)
+*         REPLACED: StartMoveAwayMovement() _isMoving flag → agent.SetDestination(_moveAwayTarget.position)
+*         REPLACED: MovedAway arrival Vector3.Distance → HasAgentArrived()
+*         REPLACED: UpdateMovementAnimation() _isPatrolling bool → agent.velocity.magnitude check
+*         REPLACED: _lastMoveDirection field → agent.velocity.normalized inline
+*         DELETED: MoveTowardsSafe() method (~40 lines)
+*         DELETED: _lastMoveDirection field
+*         RESULT: Animation bug fixed — velocity is 0 only when truly stopped (2026-02-17)
 ====================================================================
 */
 
@@ -468,66 +477,54 @@ namespace SnakeEnchanter.Snakes
         }
 
         /// <summary>
-        /// Updates movement animation based on current state and movement direction.
-        /// Sets directional slither bools (Forward/Left/Right) based on movement vector.
+        /// Updates movement animation based on NavMeshAgent velocity.
+        /// Uses agent.velocity.magnitude for movement detection (fixes animation restart bug).
+        /// OLD: _isPatrolling bool → caused restart when blocked (bool=true but no movement)
+        /// NEW: velocity check → only true when agent is ACTUALLY moving
         /// </summary>
         private void UpdateMovementAnimation()
         {
             if (_animator == null) return;
 
-            // Check if snake is moving (following player, patrolling, or moving away)
-            bool isMoving = (_currentState == SnakeState.Aggressive) ||
-                           (_currentState == SnakeState.Idle && _isPatrolling) ||
-                           (_currentState == SnakeState.MovedAway && _isMoving);
+            // CRITICAL FIX: Use actual agent velocity, not boolean state
+            // _isPatrolling bool was true even when blocked → animation restarted every frame
+            // velocity.magnitude is 0 when truly stopped → animation holds last frame
+            bool isActuallyMoving = _agent != null &&
+                                    _agent.velocity.magnitude > 0.1f &&
+                                    (_currentState == SnakeState.Aggressive ||
+                                     _currentState == SnakeState.Idle ||
+                                     _currentState == SnakeState.MovedAway);
 
             // Reset all slither bools
             _animator.SetBool("Slither Forward", false);
             _animator.SetBool("Slither Left", false);
             _animator.SetBool("Slither Right", false);
 
-            if (!isMoving) return;
+            if (!isActuallyMoving) return;
 
-            // Calculate movement direction relative to snake's facing direction
-            Vector3 movementVector = _lastMoveDirection;
+            // Derive direction from agent velocity (NOT _lastMoveDirection — that field is deleted)
+            Vector3 localDirection = transform.InverseTransformDirection(_agent.velocity.normalized);
 
-            if (movementVector.sqrMagnitude < 0.01f)
-            {
-                // No movement direction, default to forward
-                _animator.SetBool("Slither Forward", true);
-                return;
-            }
+            float forwardAmount = localDirection.z;
+            float rightAmount = localDirection.x;
 
-            // Get local movement direction (relative to snake's forward)
-            Vector3 localDirection = transform.InverseTransformDirection(movementVector.normalized);
-
-            // Determine primary movement axis (forward, left, or right)
-            float forwardAmount = localDirection.z;  // Positive = forward, Negative = backward
-            float rightAmount = localDirection.x;     // Positive = right, Negative = left
-
-            // Use thresholds to determine which animation to play
             if (Mathf.Abs(forwardAmount) > Mathf.Abs(rightAmount))
             {
-                // Forward/Backward dominant
                 _animator.SetBool("Slither Forward", true);
             }
             else if (rightAmount > 0.1f)
             {
-                // Right dominant
                 _animator.SetBool("Slither Right", true);
             }
             else if (rightAmount < -0.1f)
             {
-                // Left dominant
                 _animator.SetBool("Slither Left", true);
             }
             else
             {
-                // Fallback to forward
                 _animator.SetBool("Slither Forward", true);
             }
         }
-
-        private Vector3 _lastMoveDirection = Vector3.forward; // Tracks last movement direction for slither animation
 
         private void OnTriggerEnter(Collider other)
         {
@@ -756,66 +753,22 @@ namespace SnakeEnchanter.Snakes
                 case SnakeState.MovedAway:
                     if (_moveAwayTarget != null)
                     {
-                        // Only move if spell animation delay has passed
+                        // Only move if spell animation delay has passed (StartMoveAwayMovement sets _isMoving)
                         if (!_isMoving)
                         {
-                            // Waiting for spell animation delay (3.5s)
                             break;
                         }
 
-                        float distanceToTarget = Vector3.Distance(transform.position, _moveAwayTarget.position);
-
-                        // Check if reached target (distance-based)
-                        if (distanceToTarget < 1.0f)
+                        // Check if NavMeshAgent has arrived at MoveAwayTarget
+                        if (HasAgentArrived())
                         {
                             _isMoving = false;
                             TransitionFromMoveAwayToRootState();
-                            Debug.Log($"SnakeAI ({_snakeName}): Reached MoveAwayTarget at distance {distanceToTarget:F2}, transitioning to root state");
-                        }
-                        else
-                        {
-                            // Smooth move to target position (with collision detection)
-                            bool moved = MoveTowardsSafe(_moveAwayTarget.position, _moveSpeed);
-
-                            // Check if blocked - could be obstacle OR the target itself
-                            if (!moved)
-                            {
-                                // Raycast to see what's blocking
-                                Vector3 direction = (_moveAwayTarget.position - transform.position).normalized;
-                                RaycastHit hit;
-                                if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out hit, 1.5f))
-                                {
-                                    // If blocked by MoveAwayTarget, we've arrived
-                                    if (hit.collider.CompareTag("MoveAwayTarget"))
-                                    {
-                                        _isMoving = false;
-                                        TransitionFromMoveAwayToRootState();
-                                        Debug.Log($"SnakeAI ({_snakeName}): Blocked by MoveAwayTarget collider (tag detected), reached destination");
-                                    }
-                                    // If blocked by obstacle and not making progress, give up after timeout
-                                    else
-                                    {
-                                        _stateTimer += Time.deltaTime;
-                                        if (_stateTimer > 2.0f) // 2 seconds of continuous blocking
-                                        {
-                                            _isMoving = false;
-                                            _stateTimer = 0f;
-                                            TransitionFromMoveAwayToRootState();
-                                            Debug.LogWarning($"SnakeAI ({_snakeName}): Blocked by obstacle for 2s, giving up on MoveAwayTarget");
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                // Successfully moved - reset timeout counter
-                                _stateTimer = 0f;
-                            }
+                            Debug.Log($"SnakeAI ({_snakeName}): Reached MoveAwayTarget via NavMesh, transitioning to root state");
                         }
                     }
                     else
                     {
-                        // No target set - return to Idle
                         Debug.LogWarning($"SnakeAI ({_snakeName}): MovedAway state but no MoveAwayTarget! Returning to Idle.");
                         SetState(SnakeState.Idle);
                     }
@@ -915,61 +868,18 @@ namespace SnakeEnchanter.Snakes
         }
 
         /// <summary>
-        /// Follow player smoothly (used in 0.5-3.5 units range).
+        /// Follow player smoothly via NavMeshAgent (used in 0.5-3.5 unit range).
+        /// updateRotation=false means LookAtPlayer() still handles facing.
         /// </summary>
         private void FollowPlayer()
         {
             if (_playerTransform == null) return;
+            if (_agent == null || !_agent.isOnNavMesh) return;
 
-            // Move toward player (with collision detection)
-            MoveTowardsSafe(_playerTransform.position, _chaseSpeed);
+            _agent.speed = _chaseSpeed;
+            _agent.SetDestination(_playerTransform.position);
 
             LookAtPlayer();
-        }
-
-        /// <summary>
-        /// Moves snake toward target with collision detection.
-        /// Uses raycast to check for obstacles.
-        /// Returns true if movement was successful, false if blocked.
-        ///
-        /// Tag-based blocking (EVERYTHING blocks):
-        /// - Environment: BLOCKS (walls, floors)
-        /// - Snake: BLOCKS (prevent snake overlap)
-        /// - MoveAwayTarget: BLOCKS (snake stops at target)
-        /// - Player: BLOCKS (snake stops near player for attack)
-        /// - Untagged: BLOCKS (default safe behavior)
-        /// </summary>
-        private bool MoveTowardsSafe(Vector3 targetPosition, float speed)
-        {
-            Vector3 direction = (targetPosition - transform.position).normalized;
-            float distance = speed * Time.deltaTime;
-
-            // Raycast to check for obstacles ahead
-            // CRITICAL FIX (v1.3.13): Minimum 1.0 unit raycast distance
-            // Prevents Snake from phasing through Props when moving slowly
-            float rayDistance = Mathf.Max(distance + 0.3f, 1.0f);
-
-            Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
-
-            RaycastHit hit;
-            // CRITICAL FIX (v1.4.2): Use SphereCast instead of Raycast
-            // Raycast FAILS when origin is inside collider (Snake overlaps Props/other Snakes)
-            // SphereCast with radius can detect from inside colliders
-            float sphereRadius = 0.3f; // Snake body width approximation
-            if (Physics.SphereCast(rayOrigin, sphereRadius, direction, out hit, rayDistance))
-            {
-                // Movement blocked - stop here
-                return false;
-            }
-
-            // Safe to move
-            Vector3 oldPosition = transform.position;
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, distance);
-
-            // Track movement direction for slither animation
-            _lastMoveDirection = (transform.position - oldPosition).normalized;
-
-            return true;
         }
 
         /// <summary>
@@ -1010,13 +920,17 @@ namespace SnakeEnchanter.Snakes
         /// <summary>
         /// Starts the Move Away movement after spell animation delay.
         /// Called via Invoke() from SetState(MovedAway).
+        /// Uses NavMeshAgent to navigate to _moveAwayTarget position.
         /// </summary>
         private void StartMoveAwayMovement()
         {
-            if (_currentState == SnakeState.MovedAway)
-            {
-                _isMoving = true;
-            }
+            if (_currentState != SnakeState.MovedAway) return;
+            if (_moveAwayTarget == null) return;
+            if (_agent == null || !_agent.isOnNavMesh) return;
+
+            _isMoving = true;
+            _agent.speed = _moveSpeed;
+            _agent.SetDestination(_moveAwayTarget.position);
         }
 
         /// <summary>
