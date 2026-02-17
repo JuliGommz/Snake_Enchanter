@@ -209,10 +209,14 @@ namespace SnakeEnchanter.Player
 
         private void Start()
         {
-            // Force immediate ground contact to prevent floating at spawn
-            // CharacterController takes 1 frame to apply gravity from Vector3.zero
-            // This ensures player is grounded on frame 1
-            _velocity.y = -5f;
+            // Snap player to ground on spawn — works on ramps and uneven terrain
+            // Raycast from above finds actual ground, positions player exactly on it
+            if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 10f))
+            {
+                float groundOffset = _controller.center.y - (_controller.height / 2f) + _controller.skinWidth;
+                transform.position = new Vector3(transform.position.x, hit.point.y - groundOffset, transform.position.z);
+            }
+            _velocity.y = -2f;
         }
 
         private void OnEnable()
