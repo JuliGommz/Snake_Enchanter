@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.8.0 - NavMeshAgent Component Integration (Phase 4)
+* Version: 1.8.1 - NavMeshAgent Activation (Phase 5)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -149,6 +149,13 @@
 *         CRITICAL: updateRotation=false prevents agent fighting LookAtPlayer() rotation
 *         RESULT: Agent registered with NavMesh but old movement code still in full control
 *         NEXT: Phase 5 will replace MoveTowardsSafe() with agent.SetDestination() (2026-02-17)
+* - v1.8.1: NavMeshAgent Activation (Phase 5) — Active dual-system replacement:
+*         CHANGED: updatePosition false→true (agent now drives position)
+*         ADDED: _agent.nextPosition = transform.position BEFORE enabling (prevents teleport snap)
+*         CHANGED: isStopped false (agent can now pathfind)
+*         ADDED: HasAgentArrived() helper (fixes remainingDistance=Infinity Unity bug)
+*         ADDED: SetState() agent isStopped/ResetPath control per state
+*         NEXT: Phase 5 Plans 02-03 will replace MoveTowardsSafe() calls (2026-02-17)
 ====================================================================
 */
 
@@ -393,18 +400,19 @@ namespace SnakeEnchanter.Snakes
                 Debug.Log($"SnakeAI ({_snakeName}): Detached MoveAwayTarget at START (World: {worldPos})");
             }
 
-            // NavMesh Agent setup (Phase 4) - passive initialization only
-            // updatePosition=false: CRITICAL - prevents agent from overriding MoveTowardsSafe() every frame
-            // updateRotation=false: prevents agent from overriding LookAtPlayer() rotation
-            // isStopped=true: agent present but not controlling movement (Phase 5 will activate it)
+            // NavMeshAgent activation (Phase 5) - agent now drives snake position
             _agent = GetComponent<NavMeshAgent>();
             if (_agent != null)
             {
-                _agent.updatePosition = false;  // CRITICAL: prevent position fight with MoveTowardsSafe()
-                _agent.updateRotation = false;  // prevent rotation fight with LookAtPlayer()
-                _agent.speed = _moveSpeed;
+                // CRITICAL: sync agent position BEFORE enabling updatePosition
+                // Without this sync, enabling updatePosition causes a teleport snap
+                // because the agent's internal position differs from transform.position
+                _agent.nextPosition = transform.position;
+                _agent.updatePosition = true;   // Agent now drives position (replaces MoveTowardsSafe)
+                _agent.updateRotation = false;  // Keep manual rotation — LookAtPlayer() still needed
+                _agent.speed = _moveSpeed * 0.75f;  // Patrol speed as default
                 _agent.stoppingDistance = 0.2f;
-                _agent.isStopped = true;
+                _agent.isStopped = false;
             }
         }
 
@@ -659,6 +667,21 @@ namespace SnakeEnchanter.Snakes
 
             _currentPatrolTarget = _originalPosition + offset;
             // Debug.Log($"SnakeAI ({_snakeName}): New patrol waypoint: {_currentPatrolTarget} (radius: {radius:F2})");
+        }
+
+        /// <summary>
+        /// Checks if the NavMeshAgent has arrived at its destination.
+        /// Simple remainingDistance check FAILS on multi-segment paths (returns Infinity).
+        /// This 3-condition check is the Unity-recommended workaround.
+        /// </summary>
+        private bool HasAgentArrived()
+        {
+            if (_agent == null || !_agent.isOnNavMesh) return false;
+            if (_agent.pathPending) return false;
+            if (_agent.remainingDistance > _agent.stoppingDistance) return false;
+            // Agent velocity still draining to zero — not fully stopped yet
+            if (_agent.hasPath && _agent.velocity.sqrMagnitude > 0.01f) return false;
+            return true;
         }
         #endregion
 
@@ -1078,6 +1101,35 @@ namespace SnakeEnchanter.Snakes
         {
             SnakeState previousState = _currentState;
             _currentState = newState;
+
+            // NavMeshAgent state control (Phase 5)
+            // isStopped=true preserves the current path (can resume with isStopped=false)
+            // ResetPath() clears destination entirely (for states that don't resume movement)
+            if (_agent != null && _agent.isOnNavMesh)
+            {
+                switch (newState)
+                {
+                    case SnakeState.Frozen:
+                        // Frozen: halt but keep path so we can resume when unfrozen
+                        _agent.isStopped = true;
+                        break;
+
+                    case SnakeState.Dazed:
+                    case SnakeState.Dead:
+                    case SnakeState.AttackingEnemy:
+                        // These states never resume agent movement — clear path
+                        _agent.isStopped = true;
+                        _agent.ResetPath();
+                        break;
+
+                    case SnakeState.Idle:
+                    case SnakeState.Aggressive:
+                    case SnakeState.MovedAway:
+                        // Mobile states — agent should be active
+                        _agent.isStopped = false;
+                        break;
+                }
+            }
 
             // Clear IsDazed bool + Reset attack cooldown when leaving Dazed state
             if (previousState == SnakeState.Dazed && newState != SnakeState.Dazed)
