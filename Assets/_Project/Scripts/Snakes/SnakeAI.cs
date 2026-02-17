@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.6.0 - Directional Slither & Debug Logging (Session 16)
+* Version: 1.8.0 - NavMeshAgent Component Integration (Phase 4)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -141,10 +141,19 @@
 *         ISSUE: Die animation not playing - Animator Controller missing Idle→Die transition on Die trigger
 *         REQUIRES: Manual fix in Unity Editor - add Idle→Die transition with Die trigger condition
 *         Result: Spells now require line-of-sight, no more targeting through walls (2026-02-15)
+* - v1.8.0: NavMeshAgent Component Integration (Phase 4) — Passive dual-system setup:
+*         ADDED: private NavMeshAgent _agent field
+*         ADDED: using UnityEngine.AI
+*         ADDED: Awake() initialization with updatePosition=false, updateRotation=false, isStopped=true
+*         CRITICAL: updatePosition=false prevents agent fighting MoveTowardsSafe() each frame
+*         CRITICAL: updateRotation=false prevents agent fighting LookAtPlayer() rotation
+*         RESULT: Agent registered with NavMesh but old movement code still in full control
+*         NEXT: Phase 5 will replace MoveTowardsSafe() with agent.SetDestination() (2026-02-17)
 ====================================================================
 */
 
 using UnityEngine;
+using UnityEngine.AI;
 using SnakeEnchanter.Core;
 using SnakeEnchanter.Tunes;
 
@@ -321,6 +330,9 @@ namespace SnakeEnchanter.Snakes
         // Proximity detection
         private bool _canSeePlayer = false;
         private float _playerDistance = Mathf.Infinity;
+
+        // NavMesh (Phase 4+)
+        private NavMeshAgent _agent;
         #endregion
 
         #region Properties
@@ -379,6 +391,20 @@ namespace SnakeEnchanter.Snakes
                 _moveAwayTarget.SetParent(null);
                 _moveAwayTarget.position = worldPos;
                 Debug.Log($"SnakeAI ({_snakeName}): Detached MoveAwayTarget at START (World: {worldPos})");
+            }
+
+            // NavMesh Agent setup (Phase 4) - passive initialization only
+            // updatePosition=false: CRITICAL - prevents agent from overriding MoveTowardsSafe() every frame
+            // updateRotation=false: prevents agent from overriding LookAtPlayer() rotation
+            // isStopped=true: agent present but not controlling movement (Phase 5 will activate it)
+            _agent = GetComponent<NavMeshAgent>();
+            if (_agent != null)
+            {
+                _agent.updatePosition = false;  // CRITICAL: prevent position fight with MoveTowardsSafe()
+                _agent.updateRotation = false;  // prevent rotation fight with LookAtPlayer()
+                _agent.speed = _moveSpeed;
+                _agent.stoppingDistance = 0.2f;
+                _agent.isStopped = true;
             }
         }
 
@@ -590,7 +616,7 @@ namespace SnakeEnchanter.Snakes
             // Start patrolling if not yet started
             if (!_isPatrolling)
             {
-                Debug.Log($"SnakeAI ({_snakeName}): Starting patrol from {_originalPosition}");
+                // Debug.Log($"SnakeAI ({_snakeName}): Starting patrol from {_originalPosition}");
                 GenerateNewPatrolWaypoint();
                 _isPatrolling = true;
             }
