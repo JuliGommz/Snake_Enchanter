@@ -2,10 +2,10 @@
 
 ## Current Position
 
-**Phase:** 4 (Component Integration — Ready for planning)
+**Phase:** 5 (Movement Migration — Ready for planning)
 **Plan:** —
-**Status:** Phase 3 complete. NavMesh baked in GameLevel scene. Ready to plan Phase 4.
-**Last activity:** 2026-02-17 — Phase 3 NavMesh Scene Setup complete
+**Status:** Phase 4 complete. NavMeshAgent added to all 6 prefabs, passive init in SnakeAI.cs v1.8.0. Ready to plan Phase 5.
+**Last activity:** 2026-02-17 — Phase 4 Component Integration complete
 
 ## Project Reference
 
@@ -16,12 +16,18 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 
 ## Recent Progress
 
+**2026-02-17 (Today - continued):**
+- ✅ Phase 4 complete: NavMeshAgent added to 6 snake prefabs
+- ✅ SnakeAI v1.8.0: Awake() passive init (updatePosition=false, updateRotation=false, isStopped=true)
+- ✅ NavMesh rebaked: snakes excluded from obstacle geometry
+- ✅ Play mode verified: no errors, dual system stable
+- 📋 Next: Plan Phase 5 (Movement Migration) via `/gsd:plan-phase 5`
+
 **2026-02-17 (Today):**
 - ✅ Phase 3 complete: NavMesh baked in GameLevel scene
 - ✅ NavMeshSurface configured (Collect Objects: All, Height: 0.5, Radius: 0.3)
 - ✅ Blue overlay confirmed on all cave floor surfaces
 - ✅ Play mode: snakes still patrol normally (animation bug still present — expected)
-- 📋 Next: Plan Phase 4 (Component Integration) via `/gsd:plan-phase 4`
 
 **2026-02-16 (Earlier):**
 - ✅ GSD milestone v0.3 initialized (PROJECT.md, STATE.md, MILESTONES.md)
@@ -57,7 +63,7 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 
 2. 🔄 **NavMesh migration**
    - ✅ Phase 3 complete (baked in GameLevel scene)
-   - 📋 Phase 4 next (add NavMeshAgent to prefabs, inactive)
+   - ✅ Phase 4 complete (NavMeshAgent on all 6 prefabs, passive init in code)
    - 📋 Phase 5 next (replace MoveTowardsSafe with SetDestination)
    - 📋 Phase 5 includes: Update animation triggers from boolean to velocity check
    - 📋 Phase 5 includes: State machine integration (enable/disable for Dazed/Frozen/Dead)
