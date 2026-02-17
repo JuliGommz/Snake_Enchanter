@@ -143,6 +143,14 @@ Plans:
 - Fixes patrol animation bug (velocity-based triggers)
 - Eliminates fragile collision detection code
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — NavMeshAgent activation + HasAgentArrived() + SetState() agent control
+- [ ] 05-02-PLAN.md — UpdatePatrol() replacement + GenerateNewPatrolWaypoint NavMesh validation
+- [ ] 05-03-PLAN.md — FollowPlayer() + MoveAway + velocity-based animation + delete MoveTowardsSafe()
+- [ ] 05-04-PLAN.md — Play mode verification checkpoint (patrol bug fix confirmed)
+
 **Tasks:**
 
 ### 5.1: Patrol Replacement (20 min)
