@@ -1,0 +1,264 @@
+# Requirements - v0.3 Bug Fixes & Stability
+
+**Milestone:** v0.3
+**Focus:** Fix Snake patrol animation bug via NavMesh migration + verify all Phase 2 features
+**Timeline:** 2-3 days (4-5 hours implementation + testing)
+
+---
+
+## Core Requirements
+
+### REQ-1: Player Ground Detection (✅ COMPLETE)
+
+**Priority:** P0 (Blocking)
+**Status:** ✅ COMPLETE (Commit aad1aac)
+
+**User Story:**
+As a player, I want to spawn standing ON the ground (not floating above it) so that the game feels polished and grounded from frame 1.
+
+**Acceptance Criteria:**
+- ✅ Player spawns with feet touching ground level (Y position at floor)
+- ✅ No visible "float then drop" animation on game start
+- ✅ CharacterController `isGrounded = true` on frame 1
+- ✅ No console warnings about ground detection
+
+**Implementation:**
+- Added `Start()` method to PlayerController.cs (after Awake, line 210)
+- Set `_velocity.y = -5f` to force immediate downward velocity
+- Gravity pulls player to ground on frame 1 before first render
+
+**Testing:**
+- [x] Open GameLevel scene
+- [x] Enter Play mode
+- [x] Observe: Player standing on ground (not floating)
+- [x] Move around: Player stays grounded during movement
+
+**Teacher Request:** "Player should find ground at start and stay at ground level" - ✅ ADDRESSED
+
+---
+
+### REQ-2: Snake Patrol Animation Fix
+
+**Priority:** P0 (Blocking)
+**Status:** 🔄 IN PROGRESS (Research complete, awaiting implementation)
+
+**User Story:**
+As a player, I want snake patrol animations to play smoothly without visual glitches (restart/jump) so that the game world feels alive and polished.
+
+**Acceptance Criteria:**
+- [ ] Snake patrol animations play continuously without restarting
+- [ ] Animation reflects actual movement (no animation when blocked by collider)
+- [ ] Directional slither (Forward/Left/Right) matches snake's movement direction
+- [ ] No frame-0 animation jumps when snake encounters obstacles
+
+**Root Cause:**
+Current implementation uses `_isPatrolling` boolean for animation trigger. When snake is blocked by collider, position doesn't change but `_isPatrolling` stays true → animation plays → frame 0 restart loop.
+
+**Solution:**
+Migrate to NavMeshAgent with velocity-based animation triggers:
+- Replace `_isPatrolling` bool with `agent.velocity.magnitude > 0.1f`
+- Animation only plays when snake is actually moving (velocity > threshold)
+- NavMeshAgent handles automatic obstacle avoidance (no blocking)
+
+**Implementation Tasks:**
+1. Bake NavMesh in GameLevel scene (15 min)
+2. Add NavMeshAgent component to 6 snake prefabs (10 min)
+3. Configure agent settings in Awake() (5 min)
+4. Replace UpdatePatrol() movement logic (20 min)
+5. Replace FollowPlayer() movement logic (10 min)
+6. Update UpdateMovementAnimation() to use agent.velocity (10 min)
+7. Add agent.isStopped control in SetState() (15 min)
+8. Delete obsolete movement methods (10 min)
+9. Full testing - all states/spells/animations (30 min)
+10. Documentation update (20 min)
+
+**Testing:**
+- [ ] Snake patrols without animation restart glitch
+- [ ] Snake stops moving when blocked (animation also stops)
+- [ ] Slither Forward animation when moving forward
+- [ ] Slither Left animation when moving left
+- [ ] Slither Right animation when moving right
+- [ ] Animation stops when snake is Dazed/Frozen/Dead
+
+**Teacher Request:** "Use NavMeshAgent + NavMeshObstacle instead of custom movement solution" - 🔄 IN PROGRESS
+
+---
+
+### REQ-3: State Machine Preservation
+
+**Priority:** P0 (Blocking - Must not break existing behaviors)
+**Status:** ⏳ PENDING (Part of NavMesh migration)
+
+**User Story:**
+As a developer, I want the existing 7-state machine to remain intact so that all spell responses and attack behaviors continue working after NavMesh migration.
+
+**Acceptance Criteria:**
+- [ ] All 7 states still exist (Idle, Aggressive, MovedAway, Dazed, AttackingEnemy, Frozen, Dead)
+- [ ] State transitions unchanged (SetState() logic preserved)
+- [ ] Spell responses work (Tune 1: Move, Tune 2: Daze, Tune 3: Attack, Tune 4: Freeze)
+- [ ] Attack system works (Bite/Breath/Projectile ranges)
+- [ ] Visual feedback works (Material Emission glow by state)
+- [ ] Debug logging works (State transitions, spell casts, attacks)
+
+**Implementation:**
+NavMeshAgent integration is **additive only** - state machine controls movement via `agent.isStopped`:
+- `SetState(Dazed/Frozen/Dead)` → `agent.isStopped = true`
+- `SetState(Idle/Aggressive/MovedAway/AttackingEnemy)` → `agent.isStopped = false`
+- State handlers (UpdatePatrol, FollowPlayer) call `agent.SetDestination()` instead of manual movement
+- All other state logic unchanged
+
+**Testing:**
+- [ ] Tune 1 (Move): Snake enters MovedAway state, moves to MoveAwayTarget
+- [ ] Tune 2 (Daze): Snake enters Dazed state, stops moving, 8s timer
+- [ ] Tune 3 (Attack): Snake enters AttackingEnemy state, attacks creature
+- [ ] Tune 4 (Freeze): Snake enters Frozen state, stops moving (if functional)
+- [ ] Failed spell: Snake enters Aggressive state, attacks player
+- [ ] Line-of-sight: Snake detects player, switches to Aggressive
+- [ ] Out of range: Snake loses player, returns to Idle patrol
+
+---
+
+### REQ-4: Full Feature Verification
+
+**Priority:** P1 (Important - Must verify no regressions)
+**Status:** ⏳ PENDING (After NavMesh migration)
+
+**User Story:**
+As a developer, I want all Phase 2 features tested end-to-end so that I can confidently merge feature/enemy-setup branch into main.
+
+**Acceptance Criteria:**
+- [ ] Player movement works (WASD, crouch, mouse look, camera)
+- [ ] Health system works (passive drain, restoration on success, death)
+- [ ] Tune casting works (hold key, slider moves, release in zone = success)
+- [ ] All 4 Tunes castable (even if Tune 4 Freeze doesn't work - known issue)
+- [ ] Snake proximity detection works (line-of-sight, command range)
+- [ ] Snake attacks work (Bite < 0.5m, Breath 4-7m, Projectile 8m+)
+- [ ] Win condition works (reach exit with HP > 0)
+- [ ] Lose condition works (HP reaches 0)
+- [ ] Mode selection works (Simple vs Advanced)
+
+**Untested Features (Phase 2):**
+- [ ] Slither Left animation (code exists, only Forward tested)
+- [ ] Slither Right animation (code exists, only Forward tested)
+- [ ] Death_by_Snakes animation (no test scenario - snakes don't damage player yet)
+
+**Testing:**
+- [ ] Full playthrough (Simple mode): Spawn → Cast 3-4 spells → Reach exit → Win
+- [ ] Full playthrough (Advanced mode): Spawn → Cast 3-4 spells → HP management → Win/Lose
+- [ ] Test all Tune types at least once each
+- [ ] Verify animations match actions (slither, daze, die, attack)
+- [ ] Check console for errors/warnings
+- [ ] Performance check (stable 60 FPS on school laptop)
+
+---
+
+## Out of Scope (Deferred)
+
+### ❌ Tune 4 (Freeze) Debugging
+
+**Reason:** Too complex for bug-fix milestone, not blocking
+**Status:** Deferred to Phase 3+
+
+- Code exists, UI unlocked, but spell doesn't freeze snakes
+- Likely requires debugging SnakeAI.cs ApplyTuneEffect() logic
+- Not critical - Tune 4 is Advanced mode bonus feature
+- Can be tested manually but doesn't need to work for v0.3 merge
+
+### ❌ 3 Areas Implementation
+
+**Reason:** Content expansion, not bug fix
+**Status:** Deferred to Phase 3+
+
+- Only 1 area (GameLevel) exists, need Tutorial → Main → Finale
+- Design decision needed (3 areas vs 1 polished area)
+- Not blocking Phase 2 merge
+
+### ❌ Backend API Integration
+
+**Reason:** External system, not gameplay-critical
+**Status:** Deferred to Phase 3+
+
+- POST `/api/game-session` - Session stats
+- GET `/api/leaderboard` - Bestenliste
+- GET `/api/player-stats` - Aggregated stats
+- Academic requirement but not needed for playable demo
+
+### ❌ Audio System
+
+**Reason:** Polish work, not bug fix
+**Status:** Deferred to Phase 3
+
+- Flute melodies (4 tracks)
+- Snake SFX (hiss, bite, breath, daze)
+- UI sounds (slider, success/fail feedback)
+- Ambient music (cave atmosphere)
+
+### ❌ Visual Effects
+
+**Reason:** Polish work, not bug fix
+**Status:** Deferred to Phase 3
+
+- Particle effects (spell cast, attack impact, HP restoration)
+- Screen effects (shake on fail/damage, vignette on low HP)
+- Animation polish (smooth transitions, hit reactions)
+
+### ❌ UI Polish
+
+**Reason:** Polish work, not bug fix
+**Status:** Deferred to Phase 3
+
+- Health Bar animations (drain/fill, gradient, pulse)
+- Timing Meter visual polish
+- Menu transitions
+
+---
+
+## Success Criteria (Milestone Complete)
+
+**v0.3 is DONE when:**
+- ✅ Player spawns grounded (REQ-1 COMPLETE)
+- [ ] Snake patrol animations don't jump/restart (REQ-2)
+- [ ] All Phase 2 features verified working (REQ-3, REQ-4)
+- [ ] No console errors in Play mode
+- [ ] feature/enemy-setup branch merged into main
+- [ ] Documentation updated (STATE.md, MILESTONES.md, Arbeitsprotokoll)
+- [ ] Screenshot: `Media/Screenshots/2026-02-16_v0.3Complete.png`
+
+**Ready for Phase 3 when:**
+- Branch merge complete
+- No regression bugs
+- NavMesh migration stable
+- User confirms: "v0.3 looks good, moving to Phase 3 polish"
+
+---
+
+## Dependencies & Constraints
+
+**Technical:**
+- Unity 2022 LTS with URP
+- com.unity.ai.navigation v2.0.9 (already installed)
+- New Input System only (NEVER legacy Input)
+- Cinemachine v3.x for camera
+- 6 snake prefabs need NavMeshAgent component
+- GameLevel scene needs NavMesh baked
+
+**Timeline:**
+- Target: 2-3 days total for v0.3 milestone
+- Implementation: 4-5 hours (NavMesh migration + testing)
+- User scene work: Parallel (placing snake prefabs in Unity)
+
+**Quality:**
+- No breaking changes to Phase 2 features
+- Incremental commits (atomic changes, testable)
+- No console errors/warnings
+- Stable 60 FPS on school laptops
+
+**Academic:**
+- Must meet PIP-3 Theme B requirements (not affected by v0.3)
+- Teacher feedback addressed (NavMesh migration, player ground detection)
+- Project documentation maintained (Arbeitsprotokoll, Projektplan)
+
+---
+
+*Requirements defined: 2026-02-16*
+*Source: Research findings (STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md)*

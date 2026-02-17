@@ -258,23 +258,169 @@
 ### 13.02.2026 (Donnerstag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| SnakeAI Props Collision Fix (Tag Typo "Enviroment") | | x | x |
+| Props Mesh Colliders auf Convex setzen (20 Prefabs) | | x | x |
+| SnakeAI Raycast Distance Fix (0.33 → 1.0 min) | | x | x |
+| MoveAwayTarget Hierarchy Fix (SetParent null) | | x | x |
+| Visual Color System Fix (URP _BaseColor) | | x | x |
+| Material Emission Glow System (v1.4.0) | x | x | x |
+| Particle Glow System Experiment (v1.4.1) | | x | ❌ |
+| Particle System Revert (git restore) | | x | x |
+| Documentation erstellen (4 MD files) | | x | x |
+| SnakeAI v1.3.11 - v1.3.14 Testing | x | x | x |
 
 **Screenshot:** `Media/Screenshots/2026-02-13_.png`
 
 **Notizen:**
+- **SnakeAI v1.3.14 COMPLETE** - Alle Core Behaviors funktionieren
+- **Props Collision:** Tag-Typo "Enviroment" in 20 Prefabs behoben (Bash-Script)
+- **MoveAwayTarget:** War Child von Snake → Endlos-Verfolgung. Fix: SetParent(null) in Awake()
+- **Visual Feedback:** Material Emission funktioniert (Augen leuchten in State-Farbe)
+- **Particle Glow:** Experiment fehlgeschlagen (kontinuierliche Emission trotz Settings)
+- **Git Revert:** Particle System Changes sauber entfernt (git restore + rm)
+- **Lessons Learned:**
+  - User-Vorschläge ernst nehmen (Props Collider waren das Problem)
+  - Targets niemals als Child von bewegten Objekten
+  - Tag Typos sind silent killers (keine Compiler-Warnung)
+  - URP Shader Properties sind nicht universal (_BaseColor statt .color)
+- **Documentation:** Movement Logic, Props Collision Fix, MoveAwayTarget Fix, Glow Setup
+- **Backlog:** External Glow System verschoben (Material Emission reicht erstmal)
+- **Status:** Phase 2 zu 90% complete, SnakeAI Core Features DONE
 
 
 ---
 
-### 14.02.2026 (Freitag)
+### 15.02.2026 (Samstag) - Session 17
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| Scene + Prefabs Setup (6 Snake Prefabs, MoveAwayTargets) | | x | x |
+| Unity Packages Update (URP, ShaderGraph) | | x | x |
+| SnakeAI v1.7.0: Line-of-Sight + Dead Code Cleanup (GSD Debug) | | x | x |
+| SnakeAI v1.7.1: Controller Fix + Attack Cooldown Reset | | x | x |
+| SnakeAI v1.7.2: Die Animation Loop Fixed | | x | x |
+| Tune 4 (Freeze) Unlock für Testing | | x | x |
+| Bug Testing Session (IsDazed, Attack Cooldown, Die Animation) | x | x | x |
+| GSD Debug Documentation | | x | x |
+| Projektplan Phase 2 Status Update | | x | x |
+| MERGE_CHECKLIST.md + PHASE3_SCOPE.md erstellen | | x | x |
 
-**Screenshot:** `Media/Screenshots/2026-02-14_.png`
+**Screenshot:** `Media/Screenshots/2026-02-15_Phase2Complete.png`
 
 **Notizen:**
+- **SnakeAI v1.7.0 → v1.7.2:** 4 Critical Bugs Fixed in 3 Commits
+- **Bug 1 (IsDazed Parameter ERROR):**
+  - Prefabs nutzten External_Assets controller ohne IsDazed parameter
+  - Fix: Alle 6 Snake Prefabs auf _Project controller umgestellt
+  - Result: "Parameter 'IsDazed' does not exist" ERROR behoben
+- **Bug 2 (Attack Cooldown):**
+  - Snake konnte 4s nicht angreifen nach Dazed → Idle transition
+  - Fix: `_lastAttackTime = 0f` beim Verlassen von Dazed state
+- **Bug 3 (Die Animation Loop):**
+  - Root Cause: Dead state setzte IsDazed NICHT → Die → Idle Transition
+  - Fix: `IsDazed=true` in Dead state setzen
+  - Result: Snake bleibt in Die Animation (collapsed)
+- **Bug 4 (Tune 4 UI Missing):**
+  - `_tune4Unlocked = false` by default
+  - Fix: Changed to `true` for Phase 2 testing
+- **Testing Results:**
+  - ✅ Tune 1 (Move): Works perfectly
+  - ✅ Tune 2 (Daze): 8s timer, Blue glow, Die animation
+  - ✅ Tune 3 (Attack): Snake attacks RobotKyle, both die (Phase 1 design)
+  - ⏳ Tune 4 (Freeze): Unlocked but not functional → Phase 3 backlog
+  - ⏳ Slither Left/Right: Untested
+- **Phase 2 Declaration:** User declared Phase 2 feature-complete
+  - Tune 4 Freeze: Moved to Phase 3 backlog (code exists, not working)
+  - Manual work: User placing Snake prefabs + MoveAwayTargets in scene
+- **Documentation:**
+  - GSD Debug Session: 3 files in `.planning/debug/`
+  - MERGE_CHECKLIST.md: Branch merge workflow
+  - PHASE3_SCOPE.md: Audio, Visual, UI Polish scope
+- **Status:** Phase 2 COMPLETE (95%), awaiting scene placement → Branch merge
+- **Git:** 7 commits on feature/enemy-setup, 4 critical bugs fixed
+
+---
+
+### 16.02.2026 (Samstag) - Session 18
+| Aufgabe | geplant | in Bearbeitung | erledigt |
+|---------|:-------:|:--------------:|:--------:|
+| PlayerController Ground Detection Fix | | x | x |
+| GSD Milestone v0.3 Initialization | | x | x |
+| NavMesh Research (4 research files) | | x | x |
+| Requirements Definition (REQUIREMENTS.md) | | x | x |
+| Roadmap Creation (ROADMAP.md - 5 phases) | | x | x |
+| Documentation Updates (STATE.md, PROJECT.md, MILESTONES.md) | | x | x |
+
+**Screenshot:** `Media/Screenshots/2026-02-16_v0.3Initialized.png`
+
+**Notizen:**
+- **PlayerController v1.8 → v1.9:** Ground Detection Fix (Commit aad1aac)
+  - Added Start() method with `_velocity.y = -5f`
+  - Player no longer floats above ground on spawn
+  - Teacher request addressed: "Player should find ground at start"
+- **GSD Milestone v0.3 Initialized:** Bug Fixes & Stability
+  - PROJECT.md: Project context, validated requirements, constraints
+  - STATE.md: Current position, active issues, accumulated context
+  - MILESTONES.md: v0.1 (Phase 1) and v0.2 (Phase 2) completion history
+  - Total: 3 initialization commits (b1f1aac, 3a6dd07, bb689bb)
+- **Research Phase Complete:** (HIGH confidence, 2500+ lines total)
+  - STACK.md: com.unity.ai.navigation v2.0.9 installed, baking workflow
+  - FEATURES.md: NavMesh feature mapping to SnakeAI behaviors
+  - ARCHITECTURE.md: 10-step migration plan, integration points
+  - PITFALLS.md: 7 critical pitfalls with prevention strategies
+  - SUMMARY.md: Executive summary, 2.5-3 hours estimated
+- **Requirements Defined:** (REQUIREMENTS.md)
+  - REQ-1: Player ground detection ✅ COMPLETE
+  - REQ-2: Snake patrol animation fix (NavMesh migration)
+  - REQ-3: State machine preservation (must not break)
+  - REQ-4: Full feature verification (all Phase 2 features)
+- **Roadmap Created:** (ROADMAP.md - 5 phases, 5 hours total)
+  - Phase 3: NavMesh Scene Setup (1 hour, LOW risk)
+  - Phase 4: Component Integration (1 hour, LOW risk)
+  - Phase 5: Movement Migration (1.5 hours, MEDIUM risk)
+  - Phase 6: Cleanup & Polish (30 min, LOW risk)
+  - Phase 7: Testing & Verification (1 hour, ZERO risk)
+- **Key Findings:**
+  - NavMeshAgent integration is architecturally feasible with minimal risk
+  - Use `agent.isStopped` to control movement (NOT `agent.enabled`)
+  - Animation trigger: `agent.velocity.magnitude > 0.1f` (replaces `_isPatrolling` bool)
+  - 10-step incremental migration plan ensures safety
+  - Zero blockers identified
+- **Status:** Requirements phase complete, ready for Phase 3 planning
+- **Next Action:** `/gsd:plan-phase 3` to begin NavMesh Scene Setup implementation
+- **Git:** 4 commits on feature/enemy-setup (aad1aac, b1f1aac, 3a6dd07, bb689bb)
+
+---
+
+### 14.02.2026 (Freitag) - Session 16
+| Aufgabe | geplant | in Bearbeitung | erledigt |
+|---------|:-------:|:--------------:|:--------:|
+| Tune 2: Sleep → Daze Rename (alle Files) | | x | x |
+| Tune 2 Behavior: 8s Timer, Die Animation, Blue Glow | x | x | x |
+| Tune 3 Behavior: Attack Non-Snake Creatures (tag-based) | x | x | x |
+| Directional Slither Animations (Forward/Left/Right) | x | x | x |
+| Debug Logging System (Spells, Attacks, States) | | x | x |
+| SnakeAI v1.5.0 → v1.6.0 Implementation | x | x | x |
+| DESIGN_CHANGES.md Backlog Section erstellen | | x | x |
+
+**Screenshot:** `Media/Screenshots/2026-02-14_Session16.png`
+
+**Notizen:**
+- **SnakeAI v1.6.0** - Directional Slither + Debug Logging
+- **Sleep → Daze:** Komplettes Rename (SnakeState, SnakeEffect, UI, Editor Scripts)
+- **Tune 2 (Daze):** Code funktioniert (IsDazed Bool, 8s Timer, Blue Glow, Collision OFF)
+- **Tune 3 (Attack):** FindNearestCreature() skips ALL snakes (nur non-snake creatures)
+- **Directional Slither:** UpdateMovementAnimation() setzt Forward/Left/Right basierend auf InverseTransformDirection
+- **Debug Logging:** Alle Spell States, Attack Types, Daze Transitions vollständig geloggt
+- **Testing:** Slither funktioniert, Tune 1-3 Spells loggen korrekt
+- **BACKLOG Items dokumentiert:**
+  - Two-Level Success System (Spell Cast + Enemy Enchanted)
+  - Player Spell Cooldown (Inspector-konfigurierbar)
+  - Player Success Rate (50-90% basierend auf Health)
+  - Spell Range System (Inspector-definierbar)
+  - Dynamic Slider Balancing (Speed/Zone Variation)
+  - Particle Glow System (ersetzt Material Color Change)
+  - Enemy Attack System Completion
+- **Status:** Phase 2 Core Features COMPLETE, Backlog für Phase 3 definiert
 
 
 ---
@@ -284,11 +430,29 @@
 ### 17.02.2026 (Montag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| v0.3 Milestone: NavMesh Migration (Phase 3–5) | x | x | x |
+| NavMeshSurface baken (GameLevel Scene) | x | x | x |
+| NavMeshAgent auf 6 Snake-Prefabs konfigurieren | x | x | x |
+| SnakeAI v1.8.1: NavMeshAgent Aktivierung (updatePosition=true) | x | x | x |
+| SnakeAI v1.8.2: UpdatePatrol() → SetDestination + SamplePosition | x | x | x |
+| SnakeAI v1.8.3: FollowPlayer + MoveAway → SetDestination, MoveTowardsSafe() gelöscht | x | x | x |
+| Bug-Fix: Patrol-Animation-Sprung (Root Motion → In Place Clips) | x | x | x |
+| Animator Controller: W Root → In Place für alle 3 Slither-States | x | x | x |
+| LateUpdate() Sync: transform.position = agent.nextPosition | x | x | x |
+| applyRootMotion = false im Script | x | x | x |
 
-**Screenshot:** `Media/Screenshots/2026-02-17_.png`
+**Screenshot:** `Media/Screenshots/2026-02-17_NavMeshMigration.png`
 
 **Notizen:**
+- **Kern-Bug behoben:** Schlangen-Patrol-Animation sprang zu Frame 0 zurück wenn Collider getroffen
+- **Root Cause (Dozent bestätigt):** MoveTowardsSafe() blockiert → _isPatrolling bool blieb true → Animation-Reset
+- **Lösung Teil 1:** NavMeshAgent.SetDestination() ersetzt MoveTowardsSafe() — NavMesh navigiert um Hindernisse
+- **Lösung Teil 2:** Animator-Clips getauscht: "Slither Forward/Left/Right W Root" → "In Place" Versionen
+  - "W Root" Clips enthielten Root-Motion-Positions-Daten die gegen den NavMeshAgent kämpften
+  - "In Place" Clips: nur Pose-Animation, keine Positions-Daten
+- **Zusatz:** applyRootMotion = false im Script + LateUpdate() für manuellen Position-Sync
+- NavMeshAgent: updatePosition=false, manuelle Sync via agent.nextPosition in LateUpdate()
+- Commits: 355a6be (v1.8.1), 5d8ac55 (v1.8.2), 7ef80c6 (v1.8.3)
 
 
 ---

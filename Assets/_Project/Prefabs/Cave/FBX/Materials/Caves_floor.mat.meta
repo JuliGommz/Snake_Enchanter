@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b7fbe2e2a579c924499c2c27952b161b
+timeCreated: 1425363784
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33385
+  packageName: Caves Parts Set
+  packageVersion: 1.0.0
+  assetPath: Assets/Caves Parts Set/model/Materials/Caves_floor.mat
+  uploadId: 57304

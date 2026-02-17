@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 3
   tags:
   - Enemy
+  - MoveAwayTarget
+  - Environment
+  - Enviroment
+  - CinemachineTarget
+  - Creature
   layers:
   - Default
   - TransparentFX

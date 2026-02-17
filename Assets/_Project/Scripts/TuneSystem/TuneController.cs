@@ -73,7 +73,7 @@ namespace SnakeEnchanter.Tunes
         [Header("Tune Configurations (ScriptableObjects)")]
         [Tooltip("Tune 1 - Move Command")]
         [SerializeField] private TuneConfig _tune1Config;
-        [Tooltip("Tune 2 - Sleep Command")]
+        [Tooltip("Tune 2 - Daze Command")]
         [SerializeField] private TuneConfig _tune2Config;
         [Tooltip("Tune 3 - Attack Command")]
         [SerializeField] private TuneConfig _tune3Config;
@@ -89,7 +89,8 @@ namespace SnakeEnchanter.Tunes
         [SerializeField] private float _defaultZoneEnd = 0.65f;
 
         [Header("Tune 4 Availability")]
-        [SerializeField] private bool _tune4Unlocked = false;
+        [Tooltip("Set to true for testing - normally unlocked via progression")]
+        [SerializeField] private bool _tune4Unlocked = true; // TESTING: Default true for Phase 2
 
         [Header("Mode Settings")]
         [Tooltip("Simple Mode adds this to zone size")]

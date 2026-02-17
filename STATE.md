@@ -1,103 +1,211 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-13 (Session 14 - CAMERA PITCH FIXED via Git Reset)
+**Letzte Aktualisierung:** 2026-02-15 (Session 17 - SnakeAI v1.7.2 Bug Fixes COMPLETE)
 
 ---
 
 ## ⚡ QUICK START FÜR NÄCHSTE SESSION
 
-**Lies zuerst:** `PHASE_2_ROADMAP.md` (kompletter 3-Tage Plan)
+**Aktueller Branch:** `feature/enemy-setup`
+**Letzter Commit:** `9cc945d` - "fix: SnakeAI v1.7.2 - Die Animation Loop Fixed"
 
-**Starte mit:** Main Menu Scene erstellen (2h Task)
-
-**Phase 2 Deadline:** 14.02.2026 (3 Tage)
-**Status:** 55% Complete (6/11 Tasks)
-**Kritisch fehlend:** Main Menu, Result Screen, Mock-API, Win Transition
+**Status:** SnakeAI v1.7.2 COMPLETE ✅ | 4 Critical Bugs FIXED ✅
+**Nächster Schritt:** Phase 2 Final Testing (Slither L/R, Tune 4) → Branch Merge
 
 ---
 
-## ✅ PIRATE CHARACTER SETUP - ABGESCHLOSSEN
+## 🎯 SESSION 17 ZUSAMMENFASSUNG (2026-02-15)
 
-### Was ist fertig:
+### 🔧 Bug Fixes - SnakeAI v1.7.0 → v1.7.2
 
-#### ✅ 1. Pirate FBX + Avatar
-- Pirate.FBX importiert (`Assets/_Project/Animations/Pirate/Mesh/`)
-- Humanoid Rig konfiguriert (`animationType: 3`, `avatarSetup: 1`)
-- PirateAvatar erstellt (GUID: `619359b845787a443af41cf1ed1cfed0`)
+**3 Commits, 4 Critical Bugs Fixed:**
 
-#### ✅ 2. Materials
-- 8 URP/Lit Materials manuell auf SkinnedMeshRenderer zugewiesen
-- Pirate rendert korrekt mit allen Texturen
+#### ✅ Commit `14b7df5` - SnakeAI v1.7.1
+1. **IsDazed Parameter ERROR** - Controller Mismatch
+   - Problem: Prefabs nutzten External_Assets controller (OHNE IsDazed)
+   - Fix: Alle 6 Snake Prefabs auf _Project controller umgestellt
+   - Result: "Parameter 'IsDazed' does not exist" ERROR behoben
 
-#### ✅ 3. Animations
-- 13 Pirate-spezifische Mixamo Animations importiert
-- Alle Animations auf PirateAvatar retargeted
-- Ordnerstruktur: `Idle/`, `Walk/`, `Crouch/`, `Death/`, `Spell/`, `Others/`
+2. **Attack Cooldown nach Daze**
+   - Problem: Snake konnte 4s nicht angreifen nach Dazed → Idle
+   - Fix: `_lastAttackTime = 0f` beim Verlassen von Dazed state
+   - Result: Snake greift sofort an nach Daze-Ende
 
-#### ✅ 4. Animator Setup
-- MC_Controller.controller konfiguriert
-- **States:** Idle, Walk, Crouch Idle, Crouch Walk
-- **Parameters:** Speed (float), IsCrouching (bool)
-- **Transitions:** Alle korrekt mit Conditions
+3. **Spell 1 stoppt Patrol** (KEIN BUG - Working as Intended)
+   - Analyse: Spell out-of-range → Snake ignoriert ✅
+   - Player visible → Snake beobachtet statt Patrol ✅
 
-#### ✅ 5. Scene Setup
-- Pirate als Child vom Player GameObject
-- Animator Component: Controller + Avatar + Root Motion OFF
-- PlayerController.Animator Feld zugewiesen
-- Pirate als Prefab gespeichert (`Assets/_Project/Prefabs/Pirate.prefab`)
+#### ✅ Commit `9cc945d` - SnakeAI v1.7.2
+4. **Die Animation Loop**
+   - Problem: Snake fiel 2x runter + stand sofort auf
+   - Root Cause: Dead state setzte IsDazed NICHT → Die → Idle Transition
+   - Fix: `IsDazed=true` in Dead state setzen
+   - Result: Snake bleibt in Die Animation (collapsed)
 
-#### ✅ 6. CameraTarget + Camera View
-- Leeres GameObject unter Pirate Head Bone erstellt
-- CM_PlayerCamera Tracking Target zugewiesen
-- Kamera folgt smooth dem Kopf
-- **View:** First-person mit sichtbaren Armen + Füßen (full body model)
+### 📊 Testing Results (User)
 
----
+**✅ Tune 2 (Daze):**
+- Works perfectly, no debug errors
+- IsDazed parameter error RESOLVED
 
-## ✅ MC SPELL + DEATH ANIMATIONS - ABGESCHLOSSEN
+**✅ Tune 3 (Attack):**
+- Snake greift RobotKyle an (Tag "Creature")
+- Both Snake + Creature die (Phase 1 simplified design)
+- **BACKLOG (Phase 3):** Kampf-System mit HP (Snake kann überleben/sterben basierend auf Creature Interaction)
 
-### Was ist fertig (Session 9):
+**⏳ Still TODO:**
+- Slither Left/Right testen (nur Forward getestet)
+- Tune 4 (Freeze) testen
 
-#### ✅ Animator Erweitert
-- **10 States total:** 4 Movement + 4 Spell + 2 Death
-- **Spell States:** Spell_Move, Spell_Daze, Spell_Attack, Spell_Fear
-- **Death States:** Death_by_Drain, Death_by_Snakes
-- **7 Parameters:** Speed, IsCrouching, 4x Spell Triggers, IsDead
+### 📚 Documentation Created
 
-#### ✅ TuneController v2.4
-- Animator Referenz hinzugefügt (`GetComponentInChildren<Animator>()`)
-- Bei Tune Success: Trigger Spell Animation basierend auf Tune Number
-  - Tune 1 → SpellMove → "Spell Casting.fbx"
-  - Tune 2 → SpellDaze → "Wide Arm Spell Casting.fbx"
-  - Tune 3 → SpellAttack → "Standing 2H Cast Spell.fbx"
-  - Tune 4 → SpellFear → "Magic Spell Casting.fbx"
-
-#### ✅ HealthSystem v1.3
-- Animator Referenz hinzugefügt
-- `Die()` erweitert mit `deathBySnakeAttack` Parameter
-- Bei Death: `animator.Play()` für passende Animation
-  - Drain Death → "Death_by_Drain" (Standing React Death Forward)
-  - Snake Attack → "Death_by_Snakes" (Standing React Death Left)
-
-#### ✅ Testing
-- ✅ Alle 4 Spell Animations getestet und funktionieren
-- ✅ Death_by_Drain getestet und funktioniert
-- ⏳ Death_by_Snakes noch nicht testbar (Snakes machen noch keinen Damage)
+**GSD Debug Session:**
+- `.planning/debug/resolved/snake-ai-detection-targeting-bugs.md` - Full investigation
+- `.planning/debug/ANIMATOR_FIX_INSTRUCTIONS.md` - Unity Editor fix guide
+- `.planning/debug/FIX_SUMMARY.md` - Comprehensive fix summary
 
 ---
 
-## 🟡 OFFENE AUFGABEN
+## 🎯 SESSION 16 ZUSAMMENFASSUNG (2026-02-14)
 
-### Enemy System + Snake Animations
-- **Status:** Nächster großer Schritt
-  - Standing 2H Cast Spell.fbx
-  - Two Hand Spell Casting.fbx
-  - Wide Arm Spell Casting.fbx
-- **Nächster Schritt:** TuneController mit Spell Animation verknüpfen (für Tune Success Feedback)
+### Was funktioniert (SnakeAI v1.6.0):
+
+#### ✅ 1. Tune 2 (Daze) - Complete Rename & Behavior
+- **Rename:** Sleep → Daze (SnakeState, SnakeEffect, UI, Editor, Documentation)
+- **Behavior:** 8s timer, Blue glow, collision OFF
+- **Animation:** Die (snake collapses)
+- **Transition:** After timer → Idle (IsDazed=false)
+- **Code:** SnakeAI.cs SetState(), ApplyTuneEffect()
+
+#### ✅ 2. Tune 3 (Attack Creature) - Non-Snake Targeting
+- **Design:** Snakes do NOT attack other snakes
+- **Targeting:** FindNearestCreature() skips ALL GameObjects with SnakeAI component
+- **Future-Proof:** Allows adding non-snake enemies (monsters, etc.)
+- **Phase 1 Test:** Attacks RobotKyle (no real enemies exist yet)
+- **Code:** SnakeAI.cs FindNearestCreature(), StartAttackingEnemy()
+
+#### ✅ 3. Directional Slither Animations
+- **3 Directions:** Forward, Left, Right (Bool parameters)
+- **Logic:** InverseTransformDirection() converts world movement to local
+- **Selection:** Compare forward (z) vs right (x) magnitude
+- **Tracking:** _lastMoveDirection updated in MoveTowardsSafe()
+- **Code:** SnakeAI.cs UpdateMovementAnimation()
+
+#### ✅ 4. Debug Logging System
+- **Spell States:** All 4 Tunes log entry/exit with parameters
+- **Attacks:** Bite/Breath/Projectile log damage, distance, delay
+- **Daze:** IsDazed transitions logged (true/false)
+- **Attack Creature:** Target name, distance, neutralization
+- **Result:** Full visibility for testing
+
+### Dateien geändert (Session 16):
+
+**✅ Committed:**
+- SnakeAI.cs v1.6.0 (Directional Slither, Debug Logging)
+- TuneConfig.cs (SnakeEffect.Daze)
+- TuneController.cs (Tooltip update)
+- TuneConfigCreator.cs (Tune2_Daze)
+- TuneSliderUI.cs (Label "Daze")
+- DESIGN_CHANGES.md (NEW - Session 16 documentation + BACKLOG)
+- Arbeitsprotokoll (Session 16 entry)
+
+**⏳ Uncommitted:**
+- GameLevel.unity (Scene changes)
+- Snake Prefabs (Animator parameters, Material Emission)
+- Toon Cobra Controller (IsDazed, Slither parameters)
+- TagManager.asset (neue Tags)
+- SpaceRobotKyle asset (Test enemy for Tune 3)
 
 ---
 
-## AKTUELLER STAND
+## 📚 BACKLOG - Phase 3 Features (Session 16)
+
+### 🔴 Spell System Enhancements:
+
+1. **Two-Level Success System:**
+   - Level 1: Spell Cast Success (Player timing)
+   - Level 2: Enemy Enchanted Success (Random chance)
+
+2. **Player Spell Cooldown:**
+   - Prevents spam-casting
+   - Inspector-configurable per spell
+
+3. **Player Success Rate System:**
+   - 50-90% chance based on PlayerHealth
+   - Random roll per enemy in range
+
+4. **Spell Range System:**
+   - Inspector-definable range per spell
+   - Only enemies in range affected
+
+5. **Dynamic Slider Balancing:**
+   - Speed variation per spell
+   - Success zone variation
+   - Health-based difficulty scaling
+
+6. **Particle Glow System:**
+   - Replace Material Color Change
+   - Maintain original snake color
+   - State-based particle colors
+
+7. **Enemy Attack System Completion:**
+   - Current implementation incomplete
+
+**Priority:** Medium (Phase 3 - Polish)
+
+---
+
+## ✅ SNAKE AI v1.6.0 - COMPLETE FEATURE LIST
+
+### Core Behaviors (alle funktionieren):
+
+**1. Patrol System:**
+- Random waypoints in 2-3 unit radius
+- Movement via MoveTowardsSafe()
+- Collider-aware (stoppt bei Hindernissen)
+
+**2. Proximity Detection:**
+- Line-of-Sight Raycast zu Player
+- Range-based Behavior Selection
+- State Machine (Idle/Aggressive/MovedAway/Dazed/AttackingEnemy/Frozen/Dead)
+
+**3. Attack System:**
+- **Bite Attack:** < 0.5 units
+- **Breath Attack:** 4-7 units (Animation + Damage)
+- **Projectile Attack:** 8+ units
+- 4s Cooldown zwischen Attacken
+
+**4. Spell Responses:**
+- **Tune 1 (Move):** Snake bewegt sich zu MoveAwayTarget
+- **Tune 2 (Daze):** Snake wird dazed (8s timer, Blue glow)
+- **Tune 3 (Attack):** Snake greift non-snake creature an
+- **Tune 4 (Freeze):** Alle Snakes eingefroren
+
+**5. Movement Animations:**
+- **Directional Slither:** Forward/Left/Right
+- **Auto-enable:** Aggressive, Patrol, MovedAway states
+- **Auto-disable:** Idle, Dazed, Frozen, Dead states
+
+**6. Visual Feedback:**
+- **Material Emission:** Augen leuchten in State-Farbe
+- **Glow Intensity:** Adjustable via Inspector
+- **State Colors:** Idle=None, MovedAway=White, Dazed=Blue, Aggressive=Red, Frozen=Cyan
+
+**7. Collision Detection:**
+- Environment (Walls + Props)
+- Other Snakes (SphereCast)
+- Player
+- Raycast-basiert (1.0 unit minimum distance)
+
+**8. Debug Logging:**
+- Spell state transitions
+- Attack triggers
+- Daze timer events
+- Attack creature targeting
+
+---
+
+## 📦 AKTUELLER STAND
 
 ### Phase: 2 - KOMPLETT (von 4)
 ### Branch: `feature/enemy-setup`
@@ -106,13 +214,15 @@
 - ✅ Player Controller v1.7 (New Input System, Crouch, Cinemachine)
 - ✅ Health System v1.3 (Drain, Events, Death Animations)
 - ✅ Tune System (TuneController v2.4, Spell Animations, 4 TuneConfig SOs)
-- ✅ **Snake AI v1.3.1** + 6 Toon Snake Prefabs
-  - ✅ **Patrol System** (random waypoints, 2-3 units radius)
-  - ✅ **Proximity Detection** (line-of-sight raycast)
-  - ✅ **Range-based Behaviors** (Bite/Follow/Breath/Projectile)
-  - ✅ **Attack System** (3 attack types, 4s cooldown, raycast damage)
-  - 🔴 **Breath Attack Animation** (damage works, animation doesn't play)
-  - 🔴 **Patrol Movement** (not moving, debugging with logs)
+- ✅ **Snake AI v1.6.0** - COMPLETE
+  - ✅ Patrol System (random waypoints)
+  - ✅ Proximity Detection (line-of-sight)
+  - ✅ Range-based Attacks (Bite/Breath/Projectile)
+  - ✅ Spell Responses (Move/Daze/Attack/Freeze)
+  - ✅ Collision Detection (Environment + Props + Snakes)
+  - ✅ Directional Slither (Forward/Left/Right)
+  - ✅ Visual Feedback (Material Emission)
+  - ✅ Debug Logging (All behaviors)
 - ✅ Cave Map (Caves Parts Set + Dwarven Pack)
 - ✅ Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
 - ✅ Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
@@ -120,132 +230,80 @@
 - ✅ Game Loop (GameManager v1.1.1)
 - ✅ **Pirate Character komplett setup**
 - ✅ **MC Animations komplett: Movement (4), Spells (4), Death (2)**
-- ✅ **Camera Pitch (Look Up/Down)** → Session 14 Fix via Git Reset
 
 ### Was noch nicht fertig ist:
-- 🔴 **Spell Animation Timing** (triggert bei Key Release statt Key Press)
-- 🔴 **Breath Attack Animation Debug** (highest priority)
-- 🔴 **Patrol System Debug** (not moving)
-- 🟡 **Failed Tune Behavior** (Follow + Bite once)
-- 🟡 **Player Look Up/Down** (Mouse Y for camera pitch)
-- ⬜ Death_by_Snakes Animation Testing (wartet auf Snake Damage)
+- ⬜ BACKLOG Items (Phase 3 - Polish)
 
 ---
 
-## SCRIPTS (alle funktionieren)
+## 🧪 TESTING STATUS (Session 16)
 
-| Script | Version | Status |
-|--------|---------|--------|
-| PlayerController.cs | v1.7 | ✅ Cinemachine Final |
-| HealthSystem.cs | v1.2.1 | ✅ |
-| TuneController.cs | v2.3 | ✅ |
-| TuneConfig.cs | v1.0 | ✅ |
-| GameEvents.cs | v1.1 | ✅ |
-| GameManager.cs | v1.1.1 | ✅ |
-| SnakeAI.cs | v1.3.1 | ✅ Patrol + Proximity |
-| HealthBarUI.cs | v3.1 | ✅ |
-| TuneSliderUI.cs | v2.1 | ✅ |
-| ExitTrigger.cs | v1.0 | ✅ |
-| CanvasUICreator.cs | v2.0 | ✅ Editor |
-| TuneConfigCreator.cs | v1.0 | ✅ Editor |
+### ✅ Getestet & Funktioniert:
+- Tune 1 (Move) - Snake moves away, White glow
+- Tune 2 (Daze) - Code korrekt (IsDazed Bool, 8s timer, Blue glow)
+- Tune 3 (Attack) - Finds RobotKyle, attacks, neutralizes
+- Directional Slither - Forward animation plays during chase
+- Debug Logging - All spell states log correctly
+- Attack System (Bite/Breath/Projectile)
+
+### ⏳ Noch nicht getestet:
+- Slither Left/Right (nur Forward getestet)
+- Death_by_Snakes Animation
+- Tune 4 (Freeze) - No testing this session
 
 ---
 
-## SCENE (GameLevel.unity)
+## 📝 LESSONS LEARNED (Session 16)
 
-| GameObject | Status |
-|------------|--------|
-| **Player** (CharacterController, PlayerController, HealthSystem, TuneController) | ✅ |
-| └─ **Pirate** (Prefab Instance, Animator, SkinnedMeshRenderer, 8 Materials) | ✅ |
-|    └─ **CameraTarget** (unter Head Bone) | ✅ |
-| **Main Camera** (CinemachineBrain) | ✅ |
-| **CM_PlayerCamera** (CinemachineCamera, Tracking Target = CameraTarget) | ✅ |
-| **Cave Map** | ✅ |
-| **ExitTrigger** | ✅ |
-| **GameManager** | ✅ |
-| **Snake(s)** | ✅ 6 Prefabs |
-| **Canvas (UI)** | ✅ |
+### Lesson 1: Code Works, Animations Don't Always Follow
+**Problem:** IsDazed Bool set correctly, 8s timer works, but animation behavior unclear
+**Lesson:** Code logic can be correct while visual result differs - not always a code bug
+**Rule:** Test code logic separately from animation system
 
----
+### Lesson 2: Backlog Management
+**Context:** User identified 7 features that don't belong in current scope
+**Action:** Created BACKLOG section in DESIGN_CHANGES.md
+**Rule:** When features expand scope, document in BACKLOG instead of abandoning
 
-## PIRATE ASSET-STRUKTUR
-
-```
-_Project/Animations/Pirate/
-├── Mesh/
-│   └── Pirate.FBX (Humanoid Rig, PirateAvatar)
-├── Materials/ (8 .mat files, alle URP/Lit, alle Textures zugewiesen)
-│   ├── Pirate_Body_01.mat
-│   ├── Pirate_Body_02.mat
-│   ├── Pirate_Cloth.mat
-│   ├── Pirate_Hair_01.mat
-│   ├── Pirate_Hair_02.mat
-│   ├── Pirate_Hair_03.mat
-│   ├── Pirate_Details_Weapon.mat
-│   └── Stand.mat
-└── Animations/ (13 FBX files, alle auf PirateAvatar retargeted)
-    ├── Idle/ (3 files)
-    │   ├── Breathing Idle.fbx ✅ (in MC_Controller)
-    │   ├── Crouch Idle.fbx ✅ (in MC_Controller)
-    │   └── Crouch Idle 02 Looking Around.fbx
-    ├── Walk/ (2 files)
-    │   ├── Walking.fbx ✅ (in MC_Controller)
-    │   └── Injured Walk.fbx
-    ├── Crouch/ (1 file)
-    │   └── Crouched Walking.fbx ✅ (in MC_Controller)
-    ├── Death/ (2 files)
-    │   ├── Standing React Death Forward.fbx
-    │   └── Standing React Death Left.fbx
-    └── Spell/ (5 files) 🟡 Nicht im Animator
-        ├── Magic Spell Casting.fbx
-        ├── Spell Casting.fbx
-        ├── Standing 2H Cast Spell.fbx
-        ├── Two Hand Spell Casting.fbx
-        └── Wide Arm Spell Casting.fbx
-```
+### Lesson 3: Directional Movement Requires Local Space
+**Implementation:** InverseTransformDirection() converts world to local
+**Reason:** Snake's forward direction != world forward
+**Rule:** Character-relative directions always use local space calculations
 
 ---
 
-## MC_CONTROLLER ANIMATOR
+## 🎯 NÄCHSTE SCHRITTE (Priorität)
 
-### States (Base Layer)
-**Movement States:**
-1. **Idle** → Motion: `Breathing Idle.fbx` (Pirate)
-2. **Walk** → Motion: `Walking.fbx` (Pirate)
-3. **Crouch Idle** → Motion: `Crouch Idle.fbx` (Pirate)
-4. **Crouch Walk** → Motion: `Crouched Walking.fbx` (Pirate)
+### ✅ Phase 2 Fast Fertig - Noch 2 Tests:
 
-**Spell States:** (Triggered by successful Tune)
-5. **Spell_Move** → Motion: `Spell Casting.fbx` (Tune 1)
-6. **Spell_Daze** → Motion: `Wide Arm Spell Casting.fbx` (Tune 2)
-7. **Spell_Attack** → Motion: `Standing 2H Cast Spell.fbx` (Tune 3)
-8. **Spell_Fear** → Motion: `Magic Spell Casting.fbx` (Tune 4)
+1. **Slither Left/Right testen**
+   - Forward funktioniert ✅
+   - Left/Right Logik implementiert, aber ungetestet
 
-**Death States:** (Triggered by HP = 0)
-9. **Death_by_Drain** → Motion: `Standing React Death Forward.fbx`
-10. **Death_by_Snakes** → Motion: `Standing React Death Left.fbx`
+2. **Tune 4 (Freeze) testen**
+   - Code vorhanden, nicht getestet
 
-### Parameters
-- **Speed** (Float) - Horizontal movement speed
-- **IsCrouching** (Bool) - Crouch state
-- **SpellMove** (Trigger) - Tune 1 success
-- **SpellDaze** (Trigger) - Tune 2 success
-- **SpellAttack** (Trigger) - Tune 3 success
-- **SpellFear** (Trigger) - Tune 4 success
-- **IsDead** (Bool) - Player death (not used in v1.3, script-based)
+3. **DANN Branch Merge:** feature/enemy-setup → main
 
-### Transitions
-**Movement:**
-- Idle ↔ Walk: Speed threshold (0.1)
-- Idle ↔ Crouch Idle: IsCrouching bool
-- Crouch Idle ↔ Crouch Walk: Speed threshold (0.1)
+### BACKLOG Features (Phase 3)
 
-**Spells:**
-- Any State → Spell States (via Triggers)
-- Spell States → Idle (Exit Time 0.9-0.96)
+**Spell System Enhancements:**
+- Two-Level Success System (Player Timing + Enemy Enchantment)
+- Player Spell Cooldown (Inspector-konfigurierbar)
+- Player Success Rate (50-90% basierend auf Health)
+- Spell Range System (Inspector-definierbar)
+- Dynamic Slider Balancing (Speed/Zone Variation)
+- Particle Glow System (ersetzt Material Color Change)
 
-**Death:**
-- Script calls `animator.Play("Death_by_Drain")` or `animator.Play("Death_by_Snakes")`
+**Creature Combat System (NEW):**
+- Kampf-System: Snake vs Creature mit HP
+- Creature kann Snake angreifen
+- Snake überlebt/stirbt basierend auf HP-Interaktion
+- Aktuell: Beide sterben (Phase 1 simplified)
+
+### Empfehlung: Phase 2 ABSCHLIESSEN
+- 4 Critical Bugs FIXED ✅
+- Slither/Freeze testen → Branch Merge → Phase 3
 
 ---
 
@@ -253,91 +311,22 @@ _Project/Animations/Pirate/
 
 ```
 Branch: feature/enemy-setup (aktiv)
-Letzter Commit: 6642e2a "Fix Animator parameter names to match Toon Cobra Controller"
+Letzter Commit: 9cc945d "fix: SnakeAI v1.7.2 - Die Animation Loop Fixed"
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 
-Recent Commits (2026-02-10):
-  6642e2a - Fix Animator parameter names to match Toon Cobra Controller
-  6b69a9e - Add debug logs for patrol system troubleshooting
-  8851f7e - Implement patrol system and proximity-based behaviors
-  c0f3450 - Add spell animation delay and separate movement speeds
-  a1a58ed - Add chase behavior for aggressive snakes within 5 units
-  0a03a14 - Fix Attack System v1.1.1 - Breath Attack Bool + Advanced Mode timing
-
-Uncommitted Changes: JA (dokumentation updates pending)
-  - SESSION_NOTES_2026-02-10.md (new)
-  - CLAUDE.md (updated with Snake AI info)
-  - STATE.md (updated for Session 10)
+Working tree: MODIFIED (STATE.md uncommitted)
 ```
 
-**Nächster Commit:** "Update documentation for Session 10 - Snake AI behaviors"
+**Commits Session 17:**
+1. `c146b1f` - Scene + Prefabs setup (Snake Prefabs, TagManager, RobotKyle)
+2. `8f00a58` - Unity package dependencies update (URP, ShaderGraph)
+3. `43feec9` - SnakeAI v1.7.0 - Spell line-of-sight + Dead code cleanup (GSD Debug)
+4. `ed2a970` - Debug session documentation (GSD)
+5. `1b2aef3` - Debug session resolved (GSD)
+6. `14b7df5` - SnakeAI v1.7.1 - Controller Fix + Attack Cooldown Reset
+7. `9cc945d` - SnakeAI v1.7.2 - Die Animation Loop Fixed
 
----
-
-## NÄCHSTE SCHRITTE (Priorität)
-
-### ✅ SESSION 11 COMPLETE - Unity Audit + Documentation
-
-**Session 11 Achievements:**
-1. ✅ **Python 3.12 installiert** — Für automatisierte DOCX-Generierung
-2. ✅ **GDD v1.6 erstellt** — TXT + DOCX (formatiert wie PDF v1.3)
-3. ✅ **Unity Audit durchgeführt** — `/unity-audit` skill verwendet
-4. ✅ **Audit Report erstellt** — `UNITY_AUDIT_2026-02-11.md`
-5. ✅ **BACKLOG aktualisiert** — Performance optimization tasks hinzugefügt
-6. ✅ **CARL System Setup** — 9 Domains mit 41 Rules für Snake Enchanter
-
-**Audit Ergebnisse:**
-- ✅ Code Quality: **GOOD** (8.5/10 Performance Score)
-- ✅ No critical issues
-- ⚠️ 2 minor GetComponent calls in SnakeAI.cs (cacheable für +5-10% performance)
-
-**Nächste Session Empfehlung:**
-1. 🟡 **SnakeAI Performance Fix** (5-10min) — Cache HealthSystem reference
-2. 🔴 **Exit Trigger Animation Hang** (1-2h) — GameManager State Machine erweitern
-3. 🐍 **Snake AI Debugging** — Breath Attack Animation + Patrol Movement fixes
-
-### Phase 2 - KOMPLETT: 85% Complete
-
-**Noch offen:**
-- 🔴 Exit Trigger Animation Hang (Win Condition UX)
-- 🔴 Breath Attack Animation Debug (damage works, animation doesn't play)
-- 🔴 Patrol System Debug (snakes don't move)
-- 🟡 SnakeAI Performance Optimization (GetComponent caching)
-- 🟡 Cave Textures Fix (Neon-Yellow Materials)
-- 🟡 Camera Position bei Crouch
-
-Siehe `BACKLOG.md` für alle Issues mit Prioritäten.
-
----
-
-## DOCUMENTATION STATUS
-
-### ✅ Up-to-Date (Session 11)
-- ✅ **GDD v1.6** — TXT + DOCX mit Snake AI v1.3.1 Changes
-- ✅ **UNITY_AUDIT_2026-02-11.md** — Kompletter Audit Report
-- ✅ **BACKLOG.md** — Aktualisiert mit Audit-Ergebnissen
-- ✅ **STATE.md** — Diese Datei
-- ✅ **.carl/** — CARL System konfiguriert (9 Domains)
-
-### ⏳ Pending Updates
-- ⬜ **Arbeitsprotokoll** — Session 11 eintragen
-- ⬜ **SESSION_NOTES** — Session 11 Summary erstellen
-- ⬜ **Git Commit** — "Add Unity Audit + GDD v1.6 + CARL Setup"
-
----
-
-## BACKLOG
-
-Alle identifizierten Issues sind im `BACKLOG.md` dokumentiert und priorisiert:
-- 🔴 High Priority: Exit Trigger Animation Hang
-- 🟡 Medium Priority: SnakeAI Performance, Cave Textures, Camera Crouch
-- 🟢 Low Priority: Crouch Transitions, Injured Walk, Snake Stacking
-
-**Unity Audit Integration:**
-- ✅ GetComponent Performance Issue hinzugefügt (Medium Priority)
-- ✅ Audit Results Section in BACKLOG.md
-
-**Siehe:** `BACKLOG.md` für Details
+**Total:** 7 commits, 4 critical bugs fixed
 
 ---
 
@@ -354,80 +343,13 @@ AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
 - KEINE Flöte (zu komplex) → Spell Animation stattdessen
 - Root Motion OFF (CharacterController steuert Movement)
 
----
-
-## LESSONS LEARNED
-
-### Session 9 (2026-02-09): MC Spell + Death Animations
-
-**✅ Durchgeführt:**
-- 4 Spell Animations in MC_Controller integriert (Any State → Spell → Idle)
-- 2 Death Animations hinzugefügt (script-basiert via `animator.Play()`)
-- TuneController v2.4: Trigger Spell Animation bei Success
-- HealthSystem v1.3: Death Animation basierend auf Death Cause
-- Alle Spell Animations getestet und funktionieren
-
-**🎯 Entscheidung:**
-- Death Animations via Script statt Animator Transitions (Option B)
-  - Vorteil: Sauber, keine zusätzlichen Parameter nötig
-  - Code entscheidet welche Animation via `animator.Play("Death_by_Drain" or "Death_by_Snakes")`
-
-**📝 Neues Backlog Item:**
-- Camera Position bei Crouch (folgt nicht dem Ducken)
-
-**⏳ Nicht testbar:**
-- Death_by_Snakes Animation (Snakes machen noch keinen Damage)
+### Git Workflow
+- Feature Branches: `feature/<name>` from main
+- Ein Feature = Ein Branch
+- Nach Merge: Branch löschen
+- NIEMALS uncommitted changes committen ohne User-Bestätigung
 
 ---
 
-### Session 8 (2026-02-09): Pirate Character Setup
-
-### ✅ Was funktioniert hat:
-- Worktree/Main Repo Workflow (Commits im Main, dann merge ins Worktree)
-- Manuelles Material Assignment direkt auf SkinnedMeshRenderer
-- Pirate Avatar Configure in Unity (statt .meta Edit)
-- Crouch Idle State hinzufügen löste Animation-Sprünge
-
-### ❌ Fehler vermieden:
-- FBX.meta manuell editieren (zerstört Humanoid Rig)
-- Old Man Idle Prefab mit falschem Avatar verwenden
-- Halluzinieren statt Unity Setup direkt prüfen
-- Assumptions über Animator States ohne User zu fragen
-
-### 📝 Memory Updates:
-- DEBUGGING: Always Check Live Setup First (ask user what they see)
-- NEVER assume files match Unity's current state
-- READ COMPLETE files before making claims
-
----
-
-**Status**: ✅ PHASE 1 - SPIELBAR: COMPLETE
-**Next**: Dokumentation finalisieren → Git Push → Phase 2 Start
-
----
-
-## SESSION 8 ZUSAMMENFASSUNG
-
-**Erledigt:**
-- ✅ Pirate Character komplett setup (FBX, Avatar, Materials, Animations)
-- ✅ Animator konfiguriert (4 States, 2 Parameters, alle Transitions)
-- ✅ Scene Integration (Prefab, CameraTarget, PlayerController)
-- ✅ Core Loop getestet und funktional
-- ✅ Git Commit: bd472c0 (79 files, 16323 insertions)
-- ✅ Backlog erstellt mit priorisierten Issues
-
-**Issues identifiziert (Backlog):**
-- Exit Trigger Animation Hang
-- Cave Textures Neon-Yellow
-- Crouch Transition Tuning
-- Injured Walk Animation (optional)
-
-**Lessons Learned:**
-- Worktree/Main Repo Workflow funktioniert gut
-- Manuelles Material Assignment statt FBX Remapping
-- Unity Setup direkt prüfen statt Dateien lesen
-- NEVER assume files match Unity's current state
-
----
-
-**END OF STATE - Session 8 COMPLETE**
+**Status:** ✅ SNAKE AI v1.6.0 COMPLETE + BACKLOG DEFINED
+**Next:** Phase 2 abschließen ODER BACKLOG Features (Phase 3)

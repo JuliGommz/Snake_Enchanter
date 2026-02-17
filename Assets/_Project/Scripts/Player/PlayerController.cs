@@ -207,6 +207,12 @@ namespace SnakeEnchanter.Player
             SetupInputActions();
         }
 
+        private void Start()
+        {
+            // Apply initial downward velocity so gravity grounds player on frame 1
+            _velocity.y = -5f;
+        }
+
         private void OnEnable()
         {
             EnableInput();
