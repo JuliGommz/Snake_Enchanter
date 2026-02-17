@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 639270c4118da80498de79cca550bb10
+timeCreated: 1424162484
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33385
+  packageName: Caves Parts Set
+  packageVersion: 1.0.0
+  assetPath: Assets/Caves Parts Set/model/Materials/Caves_water.mat
+  uploadId: 57304

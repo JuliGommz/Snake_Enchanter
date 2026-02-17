@@ -171,6 +171,13 @@
 *         DELETED: MoveTowardsSafe() method (~40 lines)
 *         DELETED: _lastMoveDirection field
 *         RESULT: Animation bug fixed — velocity is 0 only when truly stopped (2026-02-17)
+* - v1.8.4: Root Motion Fix (Phase 5 Bug-Fix) — Patrol animation snap FIXED:
+*         CHANGED: updatePosition false (manual LateUpdate sync via agent.nextPosition)
+*         ADDED: LateUpdate() — transform.position = agent.nextPosition (prevents mesh/agent desync)
+*         ADDED: applyRootMotion = false in Awake() (prevents animation position fighting agent)
+*         FIXED: Animator Controller W Root → In Place clips (root motion data removed from clips)
+*         ROOT CAUSE: "W Root" FBX clips contained position keyframes that fought NavMeshAgent
+*         RESULT: Mesh and NavMeshAgent body move in sync, no frame-0 reset (2026-02-17)
 ====================================================================
 */
 
@@ -400,6 +407,12 @@ namespace SnakeEnchanter.Snakes
             _originalPosition = transform.position;
             _originalRotation = transform.rotation;
 
+            // CRITICAL (Phase 5): Disable Root Motion — NavMeshAgent drives position.
+            // Apply Root Motion = true in Animator fights with agent.updatePosition = true,
+            // causing the snake to snap back to spawn every frame.
+            if (_animator != null)
+                _animator.applyRootMotion = false;
+
             if (_renderer != null)
             {
                 _originalColor = _renderer.material.color;
@@ -415,17 +428,16 @@ namespace SnakeEnchanter.Snakes
                 Debug.Log($"SnakeAI ({_snakeName}): Detached MoveAwayTarget at START (World: {worldPos})");
             }
 
-            // NavMeshAgent activation (Phase 5) - agent now drives snake position
+            // NavMeshAgent activation (Phase 5)
+            // updatePosition = FALSE: we manually sync transform.position from agent.nextPosition
+            // in LateUpdate(). This prevents the agent-body vs root-motion mesh desync.
             _agent = GetComponent<NavMeshAgent>();
             if (_agent != null)
             {
-                // CRITICAL: sync agent position BEFORE enabling updatePosition
-                // Without this sync, enabling updatePosition causes a teleport snap
-                // because the agent's internal position differs from transform.position
                 _agent.nextPosition = transform.position;
-                _agent.updatePosition = true;   // Agent now drives position (replaces MoveTowardsSafe)
-                _agent.updateRotation = false;  // Keep manual rotation — LookAtPlayer() still needed
-                _agent.speed = _moveSpeed * 0.75f;  // Patrol speed as default
+                _agent.updatePosition = false;  // Manual sync in LateUpdate()
+                _agent.updateRotation = false;  // Manual rotation via LookAtPlayer()
+                _agent.speed = _moveSpeed * 0.75f;
                 _agent.stoppingDistance = 0.2f;
                 _agent.isStopped = false;
             }
@@ -474,6 +486,17 @@ namespace SnakeEnchanter.Snakes
             UpdateState();
             CheckAndTriggerAttack();
             UpdateMovementAnimation();
+        }
+
+        private void LateUpdate()
+        {
+            // Sync transform.position from NavMeshAgent internal position.
+            // updatePosition=false gives us control over WHEN the write happens —
+            // after animation, so root-motion can't fight the agent this frame.
+            if (_agent != null && _agent.isOnNavMesh)
+            {
+                transform.position = _agent.nextPosition;
+            }
         }
 
         /// <summary>

@@ -430,11 +430,29 @@
 ### 17.02.2026 (Montag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| v0.3 Milestone: NavMesh Migration (Phase 3–5) | x | x | x |
+| NavMeshSurface baken (GameLevel Scene) | x | x | x |
+| NavMeshAgent auf 6 Snake-Prefabs konfigurieren | x | x | x |
+| SnakeAI v1.8.1: NavMeshAgent Aktivierung (updatePosition=true) | x | x | x |
+| SnakeAI v1.8.2: UpdatePatrol() → SetDestination + SamplePosition | x | x | x |
+| SnakeAI v1.8.3: FollowPlayer + MoveAway → SetDestination, MoveTowardsSafe() gelöscht | x | x | x |
+| Bug-Fix: Patrol-Animation-Sprung (Root Motion → In Place Clips) | x | x | x |
+| Animator Controller: W Root → In Place für alle 3 Slither-States | x | x | x |
+| LateUpdate() Sync: transform.position = agent.nextPosition | x | x | x |
+| applyRootMotion = false im Script | x | x | x |
 
-**Screenshot:** `Media/Screenshots/2026-02-17_.png`
+**Screenshot:** `Media/Screenshots/2026-02-17_NavMeshMigration.png`
 
 **Notizen:**
+- **Kern-Bug behoben:** Schlangen-Patrol-Animation sprang zu Frame 0 zurück wenn Collider getroffen
+- **Root Cause (Dozent bestätigt):** MoveTowardsSafe() blockiert → _isPatrolling bool blieb true → Animation-Reset
+- **Lösung Teil 1:** NavMeshAgent.SetDestination() ersetzt MoveTowardsSafe() — NavMesh navigiert um Hindernisse
+- **Lösung Teil 2:** Animator-Clips getauscht: "Slither Forward/Left/Right W Root" → "In Place" Versionen
+  - "W Root" Clips enthielten Root-Motion-Positions-Daten die gegen den NavMeshAgent kämpften
+  - "In Place" Clips: nur Pose-Animation, keine Positions-Daten
+- **Zusatz:** applyRootMotion = false im Script + LateUpdate() für manuellen Position-Sync
+- NavMeshAgent: updatePosition=false, manuelle Sync via agent.nextPosition in LateUpdate()
+- Commits: 355a6be (v1.8.1), 5d8ac55 (v1.8.2), 7ef80c6 (v1.8.3)
 
 
 ---

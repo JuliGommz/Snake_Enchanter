@@ -2,10 +2,10 @@
 
 ## Current Position
 
-**Phase:** 5 (Movement Migration — In progress)
-**Plan:** 04 (next)
-**Status:** Plan 05-03 complete. SnakeAI v1.8.3 — all movement via NavMeshAgent (FollowPlayer, StartMoveAwayMovement, MovedAway arrival). MoveTowardsSafe() deleted. Animation bug fixed via velocity-based detection. Ready for Plan 05-04 (final validation).
-**Last activity:** 2026-02-17 — Plan 05-03 NavMesh Full Migration complete (commit 7ef80c6)
+**Phase:** 5 (Movement Migration — COMPLETE ✅)
+**Plan:** all done
+**Status:** Phase 5 complete. Patrol animation bug FIXED. SnakeAI v1.8.4 — NavMesh migration done, In Place animation clips, LateUpdate sync. Snakes patrol without frame-0 reset.
+**Last activity:** 2026-02-17 — Phase 5 complete, bug fixed (Root Motion W Root → In Place clips)
 
 ## Project Reference
 
@@ -74,24 +74,22 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 ## Active Issues
 
 **HIGH PRIORITY (v0.3 Scope):**
-1. ⚠️ **Snake patrol animation jump bug**
-   - When blocked by collider, animation restarts from frame 0
-   - Root cause confirmed: MoveTowardsSafe() + boolean _isPatrolling. Fix requires BOTH NavMesh movement AND velocity-based animation trigger (Phase 5). Teacher confirmed.
-   - Solution: Migrate to NavMeshAgent (Phase 5.3: velocity-based animation triggers)
-   - Teacher-approved approach
+1. ✅ **Snake patrol animation jump bug — FIXED**
+   - Root cause: MoveTowardsSafe() blocked → _isPatrolling bool stayed true → animation reset frame 0
+   - Fix 1: NavMeshAgent.SetDestination() replaces MoveTowardsSafe() — pathfinding around obstacles
+   - Fix 2: Animator clips W Root → In Place (removed position data from animation)
+   - Fix 3: applyRootMotion=false + LateUpdate() manual sync (updatePosition=false)
+   - Verified in Play mode: snakes patrol without snapping ✅
 
-2. 🔄 **NavMesh migration**
-   - ✅ Phase 3 complete (baked in GameLevel scene)
-   - ✅ Phase 4 complete (NavMeshAgent on all 6 prefabs, passive init in code)
-   - ✅ Plan 05-01 complete (NavMeshAgent active, HasAgentArrived(), SetState wired)
-   - ✅ Plan 05-02 complete (UpdatePatrol → SetDestination + SamplePosition validation)
-   - 📋 Plan 05-03 next: FollowPlayer() + MovedAway state → SetDestination
-   - 📋 Phase 5 includes: Update animation triggers from boolean to velocity check
+2. ✅ **NavMesh migration — COMPLETE**
+   - ✅ Phase 3: NavMesh baked in GameLevel scene
+   - ✅ Phase 4: NavMeshAgent on all 6 prefabs
+   - ✅ Phase 5: Full migration — SetDestination, HasAgentArrived(), velocity animation, MoveTowardsSafe() deleted
 
-3. ⏳ **Full feature testing** (After NavMesh)
-   - Test Slither Left/Right (code exists, only Forward tested)
+3. ⏳ **Full feature testing** (Next: Phase 6)
+   - Test Slither Left/Right in game
    - Verify all 4 Tunes work correctly
-   - Confirm no regressions from ground fix
+   - Confirm no regressions from NavMesh migration
 
 **DEFERRED (Phase 3+):**
 - Tune 4 (Freeze): Implemented but not functional — Phase 3 debugging
@@ -124,6 +122,9 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - Velocity-based animation triggers more robust than booleans
 - Teacher feedback: Use Unity native solutions over custom code
 - Documentation must be kept in sync with actual implementation
+- **NavMesh + Animation:** Use "In Place" animation clips (not "W Root") when NavMeshAgent drives position
+- **Root Motion:** applyRootMotion=false alone is not enough — the FBX clip type must also be "In Place"
+- **updatePosition=false + LateUpdate sync** = safest NavMesh setup for animated characters
 
 **Key Decisions (Plan 05-01):**
 - NavMeshAgent position sync (nextPosition before updatePosition=true) prevents teleport snap
