@@ -2,7 +2,7 @@
 
 **Milestone:** v0.3
 **Goal:** Fix Snake patrol animation bug + verify all Phase 2 features
-**Status:** Phase 3 (Ready for planning)
+**Status:** Phase 3 (Planned — ready to execute)
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Phase | Name | Status | Duration | Focus |
 |-------|------|--------|----------|-------|
-| 3 | NavMesh Scene Setup | ⏳ Ready | 1 hour | Bake NavMesh, zero code changes |
+| 3 | NavMesh Scene Setup | ⏳ Planned | 1 hour | Bake NavMesh, zero code changes |
 | 4 | Component Integration | ⏳ Pending | 1 hour | Add NavMeshAgent to prefabs, configure |
 | 5 | Movement Migration | ⏳ Pending | 1.5 hours | Replace custom movement with NavMesh |
 | 6 | Cleanup & Polish | ⏳ Pending | 30 min | Delete obsolete code, clean up |
@@ -23,6 +23,11 @@
 ## Phase 3: NavMesh Scene Setup
 
 **Goal:** Bake NavMesh in GameLevel scene with zero code changes
+
+**Plans:** 1 plan
+
+Plans:
+- [ ] 03-01-PLAN.md — Fix FBX compression, create NavMeshSurface, bake, verify
 
 **Why this phase:**
 - Zero-risk first step validates environment is NavMesh-compatible
@@ -454,4 +459,5 @@
 ---
 
 *Roadmap created: 2026-02-16*
-*Next action: `/gsd:plan-phase 3` to begin Phase 3 planning*
+*Phase 3 planned: 2026-02-17*
+*Next action: `/gsd:execute-phase 03-navmesh-scene-setup` to execute Phase 3*
