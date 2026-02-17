@@ -68,6 +68,12 @@ Plans:
 
 **Goal:** Add NavMeshAgent to snake prefabs, configure settings, but don't connect to movement code yet
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Add NavMeshAgent component to 6 snake prefabs (Inspector, user action)
+- [ ] 04-02-PLAN.md — SnakeAI.cs Awake() initialization + NavMesh rebake
+
 **Why this phase:**
 - Component configured but not controlling movement (dual systems exist)
 - Snakes can have both old and new systems running side-by-side
@@ -82,8 +88,8 @@ Plans:
    - Speed: 1.5f (patrolSpeed default)
    - Stopping Distance: 0.2f (matches arrival threshold)
    - Auto Braking: true
-   - Update Position: true
-   - Update Rotation: true
+   - Update Position: true (Inspector default — code overrides to false in Awake)
+   - Update Rotation: true (Inspector default — code overrides to false in Awake)
 3. Add Awake() initialization in SnakeAI.cs:
    ```csharp
    private NavMeshAgent _agent;
@@ -91,16 +97,19 @@ Plans:
    void Awake() {
        // Existing code...
 
-       // NavMesh setup
+       // NavMesh setup (Phase 4) - passive initialization only
        _agent = GetComponent<NavMeshAgent>();
        if (_agent != null) {
-           _agent.speed = patrolSpeed;
+           _agent.updatePosition = false;  // CRITICAL: prevent position fight with MoveTowardsSafe()
+           _agent.updateRotation = false;  // prevent rotation fight with LookAtPlayer()
+           _agent.speed = _moveSpeed;
            _agent.stoppingDistance = 0.2f;
-           _agent.isStopped = true; // Start stopped, state machine controls movement
+           _agent.isStopped = true;
        }
    }
    ```
-4. Test: Snakes still use old movement (agent present but isStopped=true)
+4. Rebake NavMesh (snakes now excluded as geometry, not obstacles)
+5. Test: Snakes still use old movement (agent present but isStopped=true)
 
 **Success Criteria:**
 - [ ] All 6 snake prefabs have NavMeshAgent component
@@ -460,4 +469,5 @@ Plans:
 
 *Roadmap created: 2026-02-16*
 *Phase 3 planned: 2026-02-17*
-*Next action: `/gsd:execute-phase 03-navmesh-scene-setup` to execute Phase 3*
+*Phase 4 planned: 2026-02-17*
+*Next action: `/gsd:execute-phase 04-component-integration` to execute Phase 4*
