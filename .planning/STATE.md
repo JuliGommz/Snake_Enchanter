@@ -3,9 +3,9 @@
 ## Current Position
 
 **Phase:** 5 (Movement Migration — In progress)
-**Plan:** 02 (next)
-**Status:** Plan 05-01 complete. SnakeAI v1.8.1 — NavMeshAgent active (updatePosition=true), HasAgentArrived() added, SetState() wired. Ready for Plan 05-02 (patrol refactor).
-**Last activity:** 2026-02-17 — Plan 05-01 NavMeshAgent Activation complete (commit 355a6be)
+**Plan:** 03 (next)
+**Status:** Plan 05-02 complete. SnakeAI v1.8.2 — patrol now uses SetDestination + NavMesh.SamplePosition waypoint validation + HasAgentArrived() arrival check. Ready for Plan 05-03 (FollowPlayer + MovedAway NavMesh migration).
+**Last activity:** 2026-02-17 — Plan 05-02 NavMesh Patrol Replacement complete (commit 5d8ac55)
 
 ## Project Reference
 
@@ -17,11 +17,17 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 ## Recent Progress
 
 **2026-02-17 (Today - continued):**
+- ✅ Plan 05-02 complete: SnakeAI v1.8.2 — patrol via SetDestination (commit 5d8ac55)
+- ✅ UpdatePatrol() MoveTowardsSafe() → _agent.SetDestination(_currentPatrolTarget)
+- ✅ Arrival check: Vector3.Distance → HasAgentArrived() (fixes remainingDistance=Infinity bug)
+- ✅ Waypoint validation: GenerateNewPatrolWaypoint() now uses NavMesh.SamplePosition (5 attempts, fallback to _originalPosition)
+- ✅ Velocity-based rotation in patrol (agent.velocity direction, not target-based)
+- ✅ _agent.ResetPath() on player-spotted and on waypoint arrival
+- 📋 Next: Plan 05-03 (FollowPlayer + MovedAway NavMesh migration)
 - ✅ Plan 05-01 complete: SnakeAI v1.8.1 — NavMeshAgent active (updatePosition=true)
 - ✅ nextPosition sync before enabling (prevents teleport snap)
 - ✅ HasAgentArrived() helper added (4-condition, fixes remainingDistance=Infinity bug)
 - ✅ SetState() wired: Frozen→isStopped, Dazed/Dead/AttackingEnemy→isStopped+ResetPath, Idle/Aggressive/MovedAway→isStopped=false
-- 📋 Next: Plan 05-02 (patrol refactor: replace MoveTowardsSafe in UpdatePatrol with SetDestination)
 
 **2026-02-17 (Earlier):**
 - ✅ Phase 4 complete: NavMeshAgent added to 6 snake prefabs
@@ -70,9 +76,10 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 2. 🔄 **NavMesh migration**
    - ✅ Phase 3 complete (baked in GameLevel scene)
    - ✅ Phase 4 complete (NavMeshAgent on all 6 prefabs, passive init in code)
-   - 📋 Phase 5 next (replace MoveTowardsSafe with SetDestination)
+   - ✅ Plan 05-01 complete (NavMeshAgent active, HasAgentArrived(), SetState wired)
+   - ✅ Plan 05-02 complete (UpdatePatrol → SetDestination + SamplePosition validation)
+   - 📋 Plan 05-03 next: FollowPlayer() + MovedAway state → SetDestination
    - 📋 Phase 5 includes: Update animation triggers from boolean to velocity check
-   - 📋 Phase 5 includes: State machine integration (enable/disable for Dazed/Frozen/Dead)
 
 3. ⏳ **Full feature testing** (After NavMesh)
    - Test Slither Left/Right (code exists, only Forward tested)
@@ -96,12 +103,12 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - PlayerController v1.8 (First-person, crouch, Cinemachine pitch-only)
 - HealthSystem v1.3 (Drain, restoration, death animations)
 - TuneController v2.5 (4 Tunes, Genshin-style slider, Tune 4 unlocked)
-- SnakeAI v1.8.1 (7-state machine, NavMeshAgent active, HasAgentArrived(), SetState agent control)
+- SnakeAI v1.8.2 (7-state machine, NavMeshAgent active, patrol via SetDestination+SamplePosition, HasAgentArrived(), SetState agent control)
 - GameManager v1.1.1 (Win/Lose, Mode selection)
 
 **Key Files:**
 - `Assets/_Project/Scripts/Player/PlayerController.cs` - Player movement + camera
-- `Assets/_Project/Scripts/Snakes/SnakeAI.cs` - Snake behavior (NEEDS NavMesh migration)
+- `Assets/_Project/Scripts/Snakes/SnakeAI.cs` - Snake behavior (patrol migrated, FollowPlayer+MovedAway still pending)
 - `Assets/_Project/Scripts/TuneSystem/TuneController.cs` - Spell casting
 - `Assets/_Project/Scenes/GameLevel.unity` - Main gameplay scene
 
@@ -116,5 +123,10 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - 4-condition HasAgentArrived() required — Unity remainingDistance returns Infinity on multi-segment paths
 - Frozen uses isStopped only (preserves path for resume); Dazed/Dead/AttackingEnemy use ResetPath()
 
+**Key Decisions (Plan 05-02):**
+- GenerateNewPatrolWaypoint() uses 5 attempts with sampleRadius=1.0f (2x agent height, per Unity docs)
+- ResetPath() chosen over isStopped=true at waypoint arrival — definitively stopped, not a pause
+- _isPatrolling bool retained (still used in UpdateMovementAnimation) — velocity-based animation is 05-03+ scope
+
 ---
-*Last updated: 2026-02-17 after Plan 05-01 completion*
+*Last updated: 2026-02-17 after Plan 05-02 completion*
