@@ -40,8 +40,8 @@ namespace SnakeEnchanter.Tunes
         [Tooltip("Display name of the tune")]
         public string tuneName = "New Tune";
 
-        [Tooltip("Key number (1-4)")]
-        [Range(1, 4)]
+        [Tooltip("Key number (1-3)")]
+        [Range(1, 3)]
         public int keyNumber = 1;
 
         [Tooltip("Effect on snake when successful")]
@@ -127,12 +127,12 @@ namespace SnakeEnchanter.Tunes
 
     /// <summary>
     /// Effect types for successful tune casts.
+    /// Phase 7: Reduced to 3 tunes — Attack removed (needs creature system), Freeze removed (overlaps Daze).
     /// </summary>
     public enum SnakeEffect
     {
-        Move,       // Snake moves out of the way
-        Daze,       // Snake becomes dazed/stunned (benommen)
-        Attack,     // Snake attacks enemies
-        Freeze      // All creatures freeze (Advanced Mode)
+        Move,   // Tune 1 — Snake moves out of the player's path
+        Daze,   // Tune 2 — Snake becomes dazed/stunned (benommen)
+        Shield  // Tune 3 — Player gains a shield that absorbs the next snake attack
     }
 }
