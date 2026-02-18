@@ -1,4 +1,4 @@
-﻿/*
+/*
 ====================================================================
 * HealthSystem - Manages player health with drain, damage, and healing
 ====================================================================
@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.4 - Shield intercept in TakeSnakeAttack
+* Version: 1.5 - Heal-on-charm: only heals when snake is actually charmed
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -42,6 +42,9 @@
 * - v1.2.1: Fixed namespace references + Unity 2023 API
 * - v1.3: Death animation integration (IsDead bool, death cause tracking)
 * - v1.4: Shield intercept in TakeSnakeAttack (ShieldComponent optional via GetComponent)
+* - v1.5: Heal-on-charm: subscribes to OnSnakeCharmed instead of OnTuneSuccess.
+*          HP heals ONLY when a snake is actually charmed by Move or Daze.
+*          Shield casts and empty casts produce no healing.
 ====================================================================
 */
 
@@ -54,6 +57,7 @@ namespace SnakeEnchanter.Player
     /// Manages player health including passive drain, damage, healing, and death.
     /// Integrates with GameEvents for decoupled communication.
     /// Single source of truth for mode-specific drain rates.
+    /// Heals via OnSnakeCharmed (not OnTuneSuccess) — only when a snake is actually charmed.
     /// </summary>
     public class HealthSystem : MonoBehaviour
     {
@@ -76,7 +80,7 @@ namespace SnakeEnchanter.Player
         [SerializeField] private bool _enablePassiveDrain = false;
 
         [Header("Balancing Values - Phase 2 Tuning")]
-        [Tooltip("HP restored per successful tune cast")]
+        [Tooltip("HP restored per successfully charmed snake (Move or Daze only)")]
         [SerializeField] private int _healPerTuneSuccess = 15;
 
         [Tooltip("Damage from snake attack")]
@@ -136,12 +140,14 @@ namespace SnakeEnchanter.Player
 
         private void OnEnable()
         {
-            GameEvents.OnTuneSuccess += OnTuneSuccessHealing;
+            // Subscribe to OnSnakeCharmed — heal ONLY when a snake is actually charmed
+            // (not on Shield casts, not on empty-range casts)
+            GameEvents.OnSnakeCharmed += OnSnakeCharmedHealing;
         }
 
         private void OnDisable()
         {
-            GameEvents.OnTuneSuccess -= OnTuneSuccessHealing;
+            GameEvents.OnSnakeCharmed -= OnSnakeCharmedHealing;
         }
 
         private void Update()
@@ -236,10 +242,19 @@ namespace SnakeEnchanter.Player
             GameEvents.HealthChanged(Mathf.RoundToInt(_currentHealth));
         }
 
-        /// <summary>Event handler for successful tune casts.</summary>
-        private void OnTuneSuccessHealing()
+        /// <summary>
+        /// Event handler for snake charmed events.
+        /// Heals ONLY when Move (tune 1) or Daze (tune 2) actually charms a snake.
+        /// Shield casts (tune 3) do NOT heal — shield has no snake effect.
+        /// </summary>
+        private void OnSnakeCharmedHealing(int tuneNumber)
         {
-            Heal(_healPerTuneSuccess);
+            // Only heal when a snake is actually charmed (Move or Daze)
+            // Shield casts (tune 3) do NOT heal
+            if (tuneNumber >= 1 && tuneNumber <= 2)
+            {
+                Heal(_healPerTuneSuccess);
+            }
         }
         #endregion
 
