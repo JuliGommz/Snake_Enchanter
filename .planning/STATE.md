@@ -3,9 +3,9 @@
 ## Current Position
 
 **Phase:** 6 (Cleanup & Polish — IN PROGRESS)
-**Plan:** 06-01 (checkpoint:human-verify — awaiting user)
-**Status:** Plan 06-01 Task 1 done. SnakeAI v1.8.5 committed (fd41f0d). Awaiting human verification in Unity Editor (Console check in Play mode).
-**Last activity:** 2026-02-17 — Phase 6 Plan 01: SnakeAI v1.8.5 cleanup committed, checkpoint reached
+**Plan:** 06-01 COMPLETE
+**Status:** Plan 06-01 done. SnakeAI v1.8.5 committed (fd41f0d), checkpoint APPROVED by user. Console clean, behavior unchanged.
+**Last activity:** 2026-02-17 — Phase 6 Plan 01 complete: SnakeAI v1.8.5 cleanup verified
 
 ## Project Reference
 
@@ -17,10 +17,10 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 ## Recent Progress
 
 **2026-02-17 (Phase 6 - Cleanup & Polish):**
-- ⏳ Plan 06-01: SnakeAI v1.8.5 — Debug.Log cleanup (checkpoint:human-verify pending)
-- ✅ Task 1 done: Removed 16 Debug.Log calls, updated NOTES + version header (commit fd41f0d)
+- ✅ Plan 06-01 COMPLETE: SnakeAI v1.8.5 — Debug.Log cleanup (checkpoint APPROVED)
+- ✅ Task 1: Removed 16 Debug.Log calls, updated NOTES + version header (commit fd41f0d)
+- ✅ Task 2: Human verification PASSED — Console clean in Play mode, behavior unchanged
 - ✅ Preserved: all 5 Debug.LogWarning, LookAtPlayer(), _isPatrolling bool
-- 🔔 NEXT STEP: Open Unity, Play mode, verify Console has no log spam, type "approved"
 
 **2026-02-17 (Phase 5 - NavMesh Migration COMPLETE):**
 - ✅ Plan 05-03 complete: SnakeAI v1.8.3 — all movement via NavMeshAgent (commit 7ef80c6)
@@ -148,4 +148,4 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - Debug.LogWarning kept for 5 edge cases (no player, no patrol waypoint, no MoveAwayTarget, no creature target, renderer not found)
 
 ---
-*Last updated: 2026-02-17 after Plan 06-01 Task 1 (checkpoint:human-verify pending)*
+*Last updated: 2026-02-17 after Plan 06-01 complete (checkpoint approved)*
