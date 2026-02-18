@@ -5,29 +5,29 @@
 See: `.planning/PROJECT.md` (updated 2026-02-18)
 
 **Core value:** Precise timing gameplay that feels rewarding when mastered and punishing when failed
-**Current focus:** Phase 7 — Spell System (07-04 auto tasks done, Task 4 human-verify checkpoint pending)
+**Current focus:** Phase 7 — Spell System (ALL CODE DONE, Unity Editor setup in progress)
 
 ## Current Position
 
 Phase: 7 of 13 (Spell System)
-Plan: 4 of 4 in current phase (07-01, 07-02, 07-03 complete; 07-04 auto tasks complete, awaiting human verify)
-Status: Checkpoint — awaiting human verification in Unity Editor
-Last activity: 2026-02-18 — 07-04 auto tasks: range check, cooldown, charges, heal-on-charm, HUD polish
+Plan: 4 of 4 in current phase — all code committed, Unity Editor manual setup partially done
+Status: Inspector setup — user building UI panels, prefabs, and placing scroll objects
+Last activity: 2026-02-18 — Editor setup: TuneConfigs assigned, ShieldComponent added, ScrollUnlockPanel built, SpellHUD partially built
 
-Progress: [###░░░░░░░] 30% (v1.0 phases, 3/10 executable plans done — 07-04 counts when checkpoint clears)
+Progress: [###░░░░░░░] 30% (v1.0 phases, code for 4/4 plans done — needs Editor setup + play-test verification)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3 (v1.0) + 07-04 auto tasks done
-- Average duration: ~10 min
-- Total execution time: ~44 min
+- Total plans completed: 4 code plans (v1.0), Editor setup in progress
+- Average duration: ~10 min per code plan
+- Total execution time: ~44 min code + manual Editor work
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 07-spell-system | 3/4 done (4th at checkpoint) | ~44 min | ~11 min |
+| 07-spell-system | 4/4 code done, Editor setup WIP | ~44 min code | ~11 min |
 
 *Updated after each plan completion*
 
@@ -58,24 +58,35 @@ Recent decisions affecting current work:
 - **TuneSuccessWithId only fires for tuneNumber <= 2** — Shield never fires snake-targeting event
 - **SnakeCharmed fires AFTER SetState()** — state applied before subscribers (HealthSystem) run
 
-### Pending Todos
+### Pending Todos — Unity Editor Setup
 
-- Wire up SpellScrollPickup on scroll prefabs in scene (trigger collider + Inspector fields)
-- Create SpellUnlockManager GameObject, attach SpellUnlockSystem, assign panel + TMPro labels
-- Disable scroll panel UI by default in Hierarchy
-- Attach ShieldComponent to Player GameObject, create border/vignette UI Image on Overlay Canvas, assign to ShieldComponent Inspector field
-- Attach SpellHUDController to HUD Canvas, assign tune slot prefabs and container
-- **Add CooldownOverlay Image child to SlotPrefab** (new for v1.1) — Filled, Radial 360, initially disabled
-- Verify 14-point checklist in Task 4 (human-verify checkpoint)
+**Done:**
+- ✅ TuneConfigs Array zugewiesen (3 SOs: Move, Daze, Shield) auf TuneController
+- ✅ ShieldComponent auf Player hinzugefügt
+- ✅ ScrollUnlockPanel gebaut (3 TMPro Labels, deaktiviert)
+- ✅ SpellUnlockManager erstellt + SpellUnlockSystem zugewiesen
+- ✅ ShieldBorderGlow Image erstellt (fullscreen, deaktiviert)
+- ✅ ShieldComponent → Border Glow Image zugewiesen
+- ✅ SpellSlotsContainer erstellt (HorizontalLayoutGroup)
+- ✅ SpellSlotPrefab gebaut (Background, KeyIcon/KeyLabel, SpellName, CooldownOverlay)
+- ✅ fix(07): UnlockTune4 aus GameManager + TuneConfigCreator bereinigt
+
+**Noch offen:**
+- ☐ SpellSlotPrefab als Prefab-Asset speichern (nach Assets/_Project/Prefabs/UI/)
+- ☐ SpellHUDManager erstellen + SpellHUDController zuweisen
+- ☐ 3 Scroll-GameObjects in der Cave platzieren (3D, mit Collider + SpellScrollPickup)
+- ☐ 14-Punkte Play-Test Verification
 
 ### Blockers/Concerns
 
 - ~~Tune 4 (Freeze) non-functional~~ — RESOLVED: Tune system reduced to 3 tunes (Move, Daze, Shield). Freeze removed.
+- ~~UnlockTune4 compile error~~ — RESOLVED: Removed from GameManager.cs + TuneConfigCreator.cs updated
 - FindObjectsByType O(n) scan per tune event — acceptable for now, flag if performance issues appear
-- **CURRENT BLOCKER**: Task 4 human-verify checkpoint — user must enter Play Mode and run 14-point checklist
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: 07-04 checkpoint (Tasks 1-3 auto tasks committed c482e2d, cbe9151, 12c1b03, f139ff4). Task 4 = human-verify.
+Stopped at: Phase 7 Editor setup — SpellSlotPrefab needs to be saved as asset, SpellHUDManager + Scrolls in Cave remaining
+Next steps: Complete Editor setup (Teil 5c + Teil 6), then 14-point play-test
 Resume file: .planning/phases/07-spell-system/07-04-SUMMARY.md
+Git: main branch, last commit df665e1

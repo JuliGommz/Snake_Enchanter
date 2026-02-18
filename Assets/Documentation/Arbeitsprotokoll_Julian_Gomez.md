@@ -457,14 +457,41 @@
 
 ---
 
-### 18.02.2026 (Dienstag)
+### 18.02.2026 (Dienstag) - Session 20: Phase 7 Spell System
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| GameEvents.cs: 9 neue Spell System Events + Invokers | x | x | x |
+| TuneConfig.cs: SnakeEffect Enum auf Move/Daze/Shield reduziert | x | x | x |
+| SpellScrollPickup.cs: Walk-over + Raycast Collection + Proximity Glow | x | x | x |
+| SpellUnlockSystem.cs: Zelda-Style Pause Panel (TMPro + WaitForSecondsRealtime) | x | x | x |
+| TuneController v3.0: 4 Einzelfelder → 3-Element Array + Unlock Gate | x | x | x |
+| SpellHUDController.cs: Dynamische Slots (startet leer, wächst mit Scrolls) | x | x | x |
+| ShieldComponent.cs: 8s Shield, Absorb/Expire Lifecycle, Screen-Edge-Glow | x | x | x |
+| HealthSystem v1.4→v1.5: Shield Intercept + Heal-on-Charm (OnSnakeCharmed statt OnTuneSuccess) | x | x | x |
+| SnakeAI v1.9: SnakeCharmed Event + Attack/Freeze Dead Code entfernt | x | x | x |
+| TuneController v3.1: Range Check, Cooldown, Charges, Shield Wiring | x | x | x |
+| SpellHUDController v1.1: Cooldown Overlay + Range Indicator | x | x | x |
+| fix: UnlockTune4 aus GameManager + TuneConfigCreator auf 3 Tunes | x | x | x |
+| Unity Editor: TuneConfigs Array, ShieldComponent, ScrollUnlockPanel, HUD Setup | x | x | |
+| Unity Editor: 3 Scroll-GameObjects in Cave platzieren | x | | |
+| 14-Punkte Play-Test Verification | x | | |
 
 **Screenshot:** `Media/Screenshots/2026-02-18_.png`
 
 **Notizen:**
+- **Phase 7 Spell System — Code komplett, Editor Setup begonnen**
+- **Kern-Änderung:** Von 4 Tunes (Move/Sleep/Attack/Freeze) auf 3 (Move/Daze/Shield)
+  - Attack entfernt (braucht Creature System), Freeze entfernt (überlappt mit Daze)
+  - Shield ist neue defensive Mechanik (8s, blockt nächsten Snake-Angriff)
+- **Scroll Collection System:** Zelda-style — Scroll aufheben → Spiel pausiert → Panel zeigt Name/Beschreibung/Taste → Any Key → weiter
+- **Unlock Progression:** Spieler startet mit 0 Tunes. Jeder Scroll schaltet 1 Tune frei. HUD wächst dynamisch.
+- **Heal-on-Charm:** HP heilt NUR wenn Move/Daze tatsächlich eine Schlange charmt. Shield heilt nicht.
+- **Casting Rules:** Range Check (Move/Daze brauchen Snake in Nähe), Cooldown (alle), Charges (Advanced Mode)
+- **Dead Code Cleanup:** ~50 Zeilen Attack/Freeze Code aus SnakeAI entfernt (States, Methoden, Felder)
+- **Bug Fix:** GameManager.cs rief noch UnlockTune4() auf → Compile Error → behoben
+- **Editor Setup Status:** TuneConfigs zugewiesen, ShieldComponent auf Player, ScrollUnlockPanel + HUD teilweise gebaut
+- **OFFEN:** SpellSlotPrefab als Asset speichern, SpellHUDManager erstellen, 3 Scrolls in Cave platzieren, Play-Test
+- **Git:** 14 Commits auf main (b40d554 → df665e1), davon 12 Phase 7 Code + 1 Bug Fix + 1 Audio Feature
 
 
 ---
