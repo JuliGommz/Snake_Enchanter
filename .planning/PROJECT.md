@@ -8,31 +8,34 @@ A Unity 3D timing-based puzzle game where a wounded warrior trapped in a collaps
 
 Precise timing gameplay that feels rewarding when mastered and punishing when failed. Every slider release must feel consequential - success extends survival, mistakes cost health.
 
-## Current State (after v0.3)
+## Current Milestone: v1.0 Submission Ready
 
-**Branch:** `main` (all feature branches merged)
-**SnakeAI:** v1.8.5 (NavMesh, submission-clean)
-**PlayerController:** v1.8 (ground detection, Cinemachine)
+**Goal:** Complete the game for PIP-3 Theme B academic submission by ~Mar 3, 2026.
 
-**What works:**
-- Player movement (WASD, mouse look, crouch) with Cinemachine FP camera
-- 4 Tune slider system (Move, Daze, Attack — Freeze non-functional)
-- Snake AI: 7-state machine with NavMesh pathfinding, 3 attack types
-- Health system with passive drain + spell restoration
-- Win/Lose conditions (ExitTrigger, HP=0)
-- 3 QuestRooms in GameLevel scene
-- Pirate character with full animation set
+**Target features (MUST):**
+- Spell Gathering System (scroll pickups permanently unlock tunes)
+- Menu Scene with UI (mode selection, start game)
+- Backend API + Leaderboard (academic requirement: database stats)
+- Audio basics (flute melodies, snake SFX, ambient)
+- Tune 4 (Freeze) fix
+- Win Screen with brief transition (fade-out + stats)
+- Submission prep (final build, balancing, presentation)
 
-**What doesn't work / is missing:**
-- Tune 4 (Freeze) — code exists, non-functional
-- Spell gathering system — tunes should require scroll collection
-- Menu Scene UI — scene exists, no UI
-- Backend API — academic requirement, not started
-- Audio — no sounds at all
-- Visual polish — no particles, screen effects, lighting polish
-- Jump — not implemented
-- MiniMap — not implemented
-- Story/narrative intro — not implemented
+**Target features (SHOULD — after MUST is done):**
+- Jump mechanic
+- Dynamic Slider Balancing (speed/zone variation)
+- Essential visual polish (yellow light fix, damage flash, low HP vignette)
+- Story/narrative intro after menu
+- SerializeField tooltips → English
+
+**Target features (COULD — if time allows):**
+- MiniMap
+- Second Enemy system (RobotKyle with HP)
+- Spell Cooldown per spell
+- Player Success Rate (HP-based)
+- Spell Range System with visual indicator
+- Particle Glow System (replace Material Emission)
+- Arm animation clipping fix
 
 ## Requirements
 
@@ -67,9 +70,21 @@ Precise timing gameplay that feels rewarding when mastered and punishing when fa
 
 ### Active
 
-<!-- Next milestone — to be defined by /gsd:new-milestone -->
+<!-- v1.0 - Submission Ready -->
 
-(Empty — next milestone will define requirements)
+- [ ] Spell gathering system (scroll pickups unlock tunes permanently)
+- [ ] Menu Scene with UI (mode selection, start game)
+- [ ] Backend API integration (POST session, GET leaderboard, GET stats)
+- [ ] Basic audio (flute melodies, snake SFX, ambient)
+- [ ] Tune 4 (Freeze) functional
+- [ ] Win screen with brief fade transition + stats
+- [ ] Jump mechanic
+- [ ] Dynamic slider balancing
+- [ ] Story/narrative intro
+- [ ] Essential visual polish (yellow lights, damage flash, vignette)
+- [ ] MiniMap
+- [ ] Second enemy system
+- [ ] Submission prep (build, balancing, presentation)
 
 ### Out of Scope
 
@@ -118,9 +133,12 @@ Precise timing gameplay that feels rewarding when mastered and punishing when fa
 | Cinemachine v3.x for camera | Industry standard, handles FP camera smoothly | ✓ Good - PlayerController v1.8 stable |
 | Material Emission for visual feedback | Simple, works with URP, no particle complexity | ✓ Good - snakes glow in state colors |
 | NavMesh migration for snakes | Fix animation jump bug, teacher-approved approach | ✓ Good - v0.3 complete, patrol smooth |
-| Defer Tune 4 debugging | Too complex for bug-fix milestone, not blocking | — Pending (next milestone) |
+| Defer Tune 4 debugging | Too complex for bug-fix milestone, not blocking | — Pending (v1.0) |
 | Discard Two-Level Success System | Too complex for timeline | ✓ Good - keeps scope realistic |
 | 3 QuestRooms in 1 scene | Simpler than 3 separate scenes | ✓ Good - already implemented |
+| Scroll permanent unlock | Zelda-style item progression, simpler than consumables | — Pending (v1.0) |
+| Nothing cut, only deprioritized | Keep all features in scope, prioritize MUST first | — Pending (v1.0) |
+| Presentation = current state + slides | No feature deadline pressure for Feb 24 | — Pending |
 
 ---
-*Last updated: 2026-02-18 after v0.3 milestone completion*
+*Last updated: 2026-02-18 after v1.0 milestone start*

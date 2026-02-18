@@ -2,45 +2,29 @@
 
 ## Current Position
 
-**Milestone:** v0.3 complete — planning next milestone
-**Branch:** `main` (all feature branches merged)
-**Status:** Between milestones. v0.3 archived. Ready for `/gsd:new-milestone`.
-**Last activity:** 2026-02-18 — v0.3 milestone archived
+**Milestone:** v1.0 Submission Ready
+**Phase:** Not started (defining requirements)
+**Plan:** —
+**Status:** Defining requirements
+**Last activity:** 2026-02-18 — Milestone v1.0 started
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-02-18)
 
 **Core value:** Precise timing gameplay that feels rewarding when mastered and punishing when failed
-**Current focus:** Planning next milestone (final push to submission ~03.03)
+**Current focus:** v1.0 Submission Ready (~Mar 3 deadline)
 
 ## Recent Progress
 
-**2026-02-18 (Milestone Completion):**
-- ✅ v0.3 Bug Fixes & Stability — SHIPPED
-- ✅ Archives created: `milestones/v0.3-ROADMAP.md`, `milestones/v0.3-REQUIREMENTS.md`
-- ✅ PROJECT.md evolved with current state
-- ✅ ROADMAP.md reorganized with milestone groupings
-
-**What shipped in v0.3:**
-- NavMesh migration (SnakeAI v1.7.2 → v1.8.5)
-- Patrol animation bug fixed (velocity-based triggers)
-- Player ground detection fixed
-- Debug.Log cleanup (submission-clean)
+**2026-02-18:**
+- ✅ v0.3 milestone archived (tag pushed to remote)
+- ✅ v1.0 milestone scope defined through questioning
+- ✅ PROJECT.md updated with v1.0 target features
 
 ## Active Issues
 
-**None blocking.** All v0.3 issues resolved.
-
-**Deferred to next milestone:**
-- Tune 4 (Freeze) non-functional
-- Spell gathering system (scroll collection)
-- Menu Scene UI
-- Backend API integration
-- Audio system
-- Visual polish
-- Jump, MiniMap, Story (new features)
-- Second enemy system
+**None blocking.**
 
 ## Accumulated Context
 
@@ -57,6 +41,7 @@ See: `.planning/PROJECT.md` (updated 2026-02-18)
 - `Assets/_Project/Scripts/Snakes/SnakeAI.cs`
 - `Assets/_Project/Scripts/TuneSystem/TuneController.cs`
 - `Assets/_Project/Scenes/GameLevel.unity`
+- `Assets/_Project/Scenes/MainMenu.unity`
 
 **Timeline:**
 - ~2 weeks remaining (Feb 18 - Mar 3, 2026)
@@ -64,4 +49,4 @@ See: `.planning/PROJECT.md` (updated 2026-02-18)
 - Finale Abgabe: ~Mar 3
 
 ---
-*Last updated: 2026-02-18 after v0.3 milestone archived*
+*Last updated: 2026-02-18 after v1.0 milestone started*
