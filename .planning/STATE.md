@@ -5,29 +5,29 @@
 See: `.planning/PROJECT.md` (updated 2026-02-18)
 
 **Core value:** Precise timing gameplay that feels rewarding when mastered and punishing when failed
-**Current focus:** Phase 7 — Spell System (07-02 next)
+**Current focus:** Phase 7 — Spell System (07-04 next)
 
 ## Current Position
 
 Phase: 7 of 13 (Spell System)
-Plan: 2 of 4 in current phase (07-01 complete)
+Plan: 4 of 4 in current phase (07-01, 07-02, 07-03 complete)
 Status: Executing
-Last activity: 2026-02-18 — 07-01 complete: event foundation + scroll pickup + unlock system
+Last activity: 2026-02-18 — 07-03 complete: ShieldComponent + HealthSystem shield intercept
 
-Progress: [#░░░░░░░░░] 10% (v1.0 phases, 1/10 executable plans done)
+Progress: [###░░░░░░░] 30% (v1.0 phases, 3/10 executable plans done)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1 (v1.0)
-- Average duration: 15 min
-- Total execution time: 15 min
+- Total plans completed: 3 (v1.0)
+- Average duration: ~12 min
+- Total execution time: ~35 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 07-spell-system | 1/4 done | 15 min | 15 min |
+| 07-spell-system | 3/4 done | ~35 min | ~12 min |
 
 *Updated after each plan completion*
 
@@ -50,12 +50,17 @@ Recent decisions affecting current work:
 - **No OnMouseDown in pickups** — legacy callback, violates New Input System rule. Use Interact() called by PlayerController raycast.
 - **WaitForSecondsRealtime required** when Time.timeScale=0 — WaitForSeconds never resumes at timeScale 0.
 - **Instance material for glow** — _renderer.material (instance) not .sharedMaterial — avoids modifying shared asset.
+- **WaitForSeconds correct for ShieldTimerCoroutine** — shield timer should pause with game (timeScale=0), opposite of SpellUnlockSystem
+- **AbsorbFlashCoroutine owns glow hide on absorb** — DeactivateShield(absorbed:true) skips SetActive(false) to avoid race with flash coroutine
+- **ShieldComponent is optional in HealthSystem** — no warning if null, game fully functional without shield attached
 
 ### Pending Todos
 
 - Wire up SpellScrollPickup on scroll prefabs in scene (trigger collider + Inspector fields)
 - Create SpellUnlockManager GameObject, attach SpellUnlockSystem, assign panel + TMPro labels
 - Disable scroll panel UI by default in Hierarchy
+- Attach ShieldComponent to Player GameObject, create border/vignette UI Image on Overlay Canvas, assign to ShieldComponent Inspector field
+- Attach SpellHUDController to HUD Canvas, assign tune slot prefabs and container
 
 ### Blockers/Concerns
 
@@ -65,5 +70,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: 07-01 complete — event infrastructure + SpellScrollPickup + SpellUnlockSystem committed (b40d554, d46844f)
-Resume file: .planning/phases/07-spell-system/07-01-SUMMARY.md
+Stopped at: 07-03 complete — ShieldComponent + HealthSystem shield intercept committed (245d489, dd8a818)
+Resume file: .planning/phases/07-spell-system/07-03-SUMMARY.md
