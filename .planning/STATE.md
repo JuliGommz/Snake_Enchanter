@@ -5,29 +5,29 @@
 See: `.planning/PROJECT.md` (updated 2026-02-18)
 
 **Core value:** Precise timing gameplay that feels rewarding when mastered and punishing when failed
-**Current focus:** Phase 7 — Spell System (v1.0 start)
+**Current focus:** Phase 7 — Spell System (07-02 next)
 
 ## Current Position
 
 Phase: 7 of 13 (Spell System)
-Plan: 0 of 4 in current phase
-Status: Ready to plan
-Last activity: 2026-02-18 — v1.0 roadmap created, phases 7-13 defined
+Plan: 2 of 4 in current phase (07-01 complete)
+Status: Executing
+Last activity: 2026-02-18 — 07-01 complete: event foundation + scroll pickup + unlock system
 
-Progress: [░░░░░░░░░░] 0% (v1.0 phases)
+Progress: [#░░░░░░░░░] 10% (v1.0 phases, 1/10 executable plans done)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v1.0)
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1 (v1.0)
+- Average duration: 15 min
+- Total execution time: 15 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| — | — | — | — |
+| 07-spell-system | 1/4 done | 15 min | 15 min |
 
 *Updated after each plan completion*
 
@@ -47,10 +47,15 @@ Recent decisions affecting current work:
 - EXT-03 (cooldown) and EXT-05 (range) promoted from Phase 12 COULD → Phase 7 MUST
 - Phase 12 (EXT) skippable — all COULD features, execute only if time allows after Phase 11
 - Submission prep (SUB) is Phase 13, always last
+- **No OnMouseDown in pickups** — legacy callback, violates New Input System rule. Use Interact() called by PlayerController raycast.
+- **WaitForSecondsRealtime required** when Time.timeScale=0 — WaitForSeconds never resumes at timeScale 0.
+- **Instance material for glow** — _renderer.material (instance) not .sharedMaterial — avoids modifying shared asset.
 
 ### Pending Todos
 
-None.
+- Wire up SpellScrollPickup on scroll prefabs in scene (trigger collider + Inspector fields)
+- Create SpellUnlockManager GameObject, attach SpellUnlockSystem, assign panel + TMPro labels
+- Disable scroll panel UI by default in Hierarchy
 
 ### Blockers/Concerns
 
@@ -60,5 +65,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Phase 7 context gathered (07-CONTEXT.md written) — ready to plan
-Resume file: None
+Stopped at: 07-01 complete — event infrastructure + SpellScrollPickup + SpellUnlockSystem committed (b40d554, d46844f)
+Resume file: .planning/phases/07-spell-system/07-01-SUMMARY.md
