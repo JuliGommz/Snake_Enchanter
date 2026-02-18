@@ -9,10 +9,12 @@ Requirements for submission release. Each maps to roadmap phases.
 
 ### Spell System
 
-- [ ] **SPELL-01**: Player can collect scroll prefabs placed at key positions in cave
-- [ ] **SPELL-02**: Collecting a scroll permanently unlocks the corresponding tune
-- [ ] **SPELL-03**: Tunes are locked until their scroll is collected (UI reflects locked state)
-- [ ] **SPELL-04**: Tune 4 (Freeze) freezes all snakes when cast successfully
+- [ ] **SPELL-01**: Player can collect 3 scroll prefabs placed at key positions in cave (1 per QuestRoom path)
+- [ ] **SPELL-02**: Collecting a scroll permanently unlocks the corresponding tune + shows pause panel with description
+- [ ] **SPELL-03**: HUD starts empty; each scroll adds a tune slot (key icon + name + color). Unassigned keys do nothing.
+- [ ] **SPELL-04**: Tune 3 (Shield) gives player an 8s shield blocking the next snake attack (screen-edge glow, shatter on block, no recast while active)
+
+*Scope change: Reduced from 4 tunes to 3. Old Tune 3 (Attack) removed — needs creature system. Old Tune 4 (Freeze) removed — overlaps Daze. New Tune 3 = Shield.*
 
 ### Menu & UI
 

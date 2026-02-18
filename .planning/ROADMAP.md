@@ -44,20 +44,21 @@ See: `.planning/milestones/v0.3-ROADMAP.md` for full details
 ---
 
 ### Phase 7: Spell System
-**Goal**: Players earn spells by finding scrolls, tunes are locked until collected, and Tune 4 (Freeze) works
+**Goal**: Players earn spells by finding scrolls (3 tunes: Move, Daze, Shield), tunes are locked until collected, HUD grows dynamically
 **Depends on**: Phase 6 (TuneController v2.5, SnakeAI v1.8.5)
 **Requirements**: SPELL-01, SPELL-02, SPELL-03, SPELL-04
+**Scope change**: Reduced from 4 tunes to 3. Tune 3 (Attack) removed (needs creature system). Tune 4 (Freeze) removed (overlaps Daze). New Tune 3 = Shield (defensive, blocks next attack for 8s).
 **Success Criteria** (what must be TRUE):
-  1. Scroll prefabs exist in the cave at fixed positions and can be walked over to collect
-  2. Collecting a scroll permanently unlocks the matching tune slot and the unlock survives room transitions
-  3. Locked tune slots appear grayed-out in the UI and cannot be cast
-  4. Casting Tune 4 (Freeze) successfully freezes all snakes in the scene simultaneously
+  1. 3 scroll prefabs exist in the cave (1 per QuestRoom path) and can be collected via walk-over or click
+  2. Collecting a scroll permanently unlocks the matching tune slot, fires event, shows pause panel with description
+  3. HUD starts empty — each scroll pickup adds a tune slot (key icon + spell name + color)
+  4. Casting Tune 3 (Shield) gives player an 8s shield that blocks the next snake attack with screen-edge glow + shatter feedback
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: Scroll pickup prefabs + SpellUnlockSystem (collect, persist unlock state, fire events)
-- [ ] 07-02: TuneController lock/unlock integration + UI locked state visuals
-- [ ] 07-03: Tune 4 Freeze debugging and activation
+- [ ] 07-01: Scroll pickup prefabs + SpellUnlockSystem (collect, persist unlock state, pause panel, fire events)
+- [ ] 07-02: TuneController 3-tune refactor + dynamic HUD (empty→grow) + lock integration
+- [ ] 07-03: Tune 3 Shield implementation (duration, block, visual feedback, no-recast-while-active)
 
 ### Phase 8: Menu & Win Screen
 **Goal**: Players start a game from a proper menu with mode selection and see stats when they win

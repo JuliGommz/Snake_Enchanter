@@ -38,7 +38,9 @@ Progress: [░░░░░░░░░░] 0% (v1.0 phases)
 Recent decisions affecting current work:
 
 - Scroll permanent unlock (Zelda-style) — simpler than consumables, chosen for v1.0
-- Tune 4 debug deferred from v0.3, now fixed in Phase 7 alongside Spell System
+- **3 tunes (not 4)**: Move, Daze, Shield. Attack removed (needs creature system), Freeze removed (overlaps Daze)
+- Tune 3 Shield: 8s duration, blocks next attack, screen-edge glow, no recast while active
+- 1 scroll per QuestRoom path, fixed unlock order, HUD grows dynamically from empty
 - Phase 12 (EXT) skippable — all COULD features, execute only if time allows after Phase 11
 - Submission prep (SUB) is Phase 13, always last
 
@@ -48,11 +50,11 @@ None.
 
 ### Blockers/Concerns
 
-- Tune 4 (Freeze) non-functional — root cause unknown, Phase 7 must diagnose
+- ~~Tune 4 (Freeze) non-functional~~ — RESOLVED: Tune system reduced to 3 tunes (Move, Daze, Shield). Freeze removed.
 - FindObjectsByType O(n) scan per tune event — acceptable for now, flag if performance issues appear
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Roadmap created for v1.0 — Phase 7 ready to plan
+Stopped at: Phase 7 context gathered (07-CONTEXT.md written) — ready to plan
 Resume file: None
