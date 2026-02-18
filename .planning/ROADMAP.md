@@ -53,12 +53,16 @@ See: `.planning/milestones/v0.3-ROADMAP.md` for full details
   2. Collecting a scroll permanently unlocks the matching tune slot, fires event, shows pause panel with description
   3. HUD starts empty — each scroll pickup adds a tune slot (key icon + spell name + color)
   4. Casting Tune 3 (Shield) gives player an 8s shield that blocks the next snake attack with screen-edge glow + shatter feedback
+  5. HP heals only when Move/Daze actually charms a snake (not on Shield, not on empty casts)
+  6. Move/Daze require snake in range to cast; Shield castable anywhere; HUD shows range indicator
+  7. All spells have cooldown (both modes). Advanced mode: limited charges per spell (SerializeField configurable)
 **Plans**: TBD
 
 Plans:
 - [ ] 07-01: Scroll pickup prefabs + SpellUnlockSystem (collect, persist unlock state, pause panel, fire events)
 - [ ] 07-02: TuneController 3-tune refactor + dynamic HUD (empty→grow) + lock integration
 - [ ] 07-03: Tune 3 Shield implementation (duration, block, visual feedback, no-recast-while-active)
+- [ ] 07-04: Spell casting rules — range check, cooldown, charges (Advanced), heal-on-charm-only, HUD indicators
 
 ### Phase 8: Menu & Win Screen
 **Goal**: Players start a game from a proper menu with mode selection and see stats when they win
@@ -123,19 +127,18 @@ Plans:
 ### Phase 12: Extended Features (COULD)
 **Goal**: Optional extras that add depth — only executed if time remains after Phase 11
 **Depends on**: Phase 11
-**Requirements**: EXT-01, EXT-02, EXT-03, EXT-04, EXT-05, EXT-06, EXT-07
+**Requirements**: EXT-01, EXT-02, EXT-04, EXT-06, EXT-07
+**Note**: EXT-03 (Spell cooldown) and EXT-05 (Spell range) moved to Phase 7 as core spell mechanics.
 **Success Criteria** (what must be TRUE):
   1. A minimap shows player position within the cave layout in real time
   2. A second enemy type (RobotKyle) exists with HP-based melee combat
-  3. Each spell has a configurable cooldown timer visible in the Inspector
-  4. Success rate scaling, spell range indicator, snake particle glow, and arm clip fix are each implemented as capacity allows
+  3. Success rate scaling, snake particle glow, and arm clip fix are each implemented as capacity allows
 **Plans**: TBD
 
 Plans:
 - [ ] 12-01: MiniMap — camera + RenderTexture + UI panel (EXT-01)
 - [ ] 12-02: Second enemy RobotKyle with HP and melee combat (EXT-02)
-- [ ] 12-03: Spell cooldown per tune (Inspector configurable) (EXT-03)
-- [ ] 12-04: Success rate system (EXT-04), Spell range indicator (EXT-05), Snake particle glow (EXT-06), Arm clip fix (EXT-07)
+- [ ] 12-03: Success rate system (EXT-04), Snake particle glow (EXT-06), Arm clip fix (EXT-07)
 
 ### Phase 13: Submission
 **Goal**: A stable 60 FPS Windows .exe is packaged and the full game plays through without crashes
@@ -165,10 +168,10 @@ Plans:
 | 4. Component Integration | v0.3 | 2/2 | Complete | 2026-02-17 |
 | 5. Movement Migration | v0.3 | 4/3 | Complete | 2026-02-17 |
 | 6. Cleanup & Polish | v0.3 | 1/1 | Complete | 2026-02-17 |
-| 7. Spell System | v1.0 | 0/3 | Not started | - |
+| 7. Spell System | v1.0 | 0/4 | Not started | - |
 | 8. Menu & Win Screen | v1.0 | 0/2 | Not started | - |
 | 9. Backend API | v1.0 | 0/2 | Not started | - |
 | 10. Audio | v1.0 | 0/2 | Not started | - |
 | 11. Gameplay Enhancements | v1.0 | 0/3 | Not started | - |
-| 12. Extended Features | v1.0 | 0/4 | Not started | - |
+| 12. Extended Features | v1.0 | 0/3 | Not started | - |
 | 13. Submission | v1.0 | 0/2 | Not started | - |

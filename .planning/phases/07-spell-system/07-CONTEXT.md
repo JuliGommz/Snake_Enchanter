@@ -57,6 +57,16 @@ Players earn spells by finding scrolls in the cave. Tunes are locked until their
 - **Cannot recast while active** — Tune 3 key is locked/non-responsive while shield is up
 - Shield state tracked on player (HealthSystem or new ShieldComponent)
 
+### Spell Casting Rules
+- **HP heal only when snake is charmed** — Move/Daze must actually affect a snake to restore HP. Shield casts do NOT heal. Casting with no snake in range = no heal.
+- **Range requirement for Move/Daze**: Player must be within spell range of a snake to cast Move or Daze. If no snake in range, cast is blocked.
+- **Shield castable anywhere**: Shield is self-targeted, no range check needed.
+- **HUD range indicator**: Subtle indicator on tune slots when a castable snake is in range. No world-space visuals.
+- **Spell cooldown (both modes)**: Each spell has a `[SerializeField]` cooldown timer. Cannot recast until cooldown expires.
+- **Basic mode**: Unlimited spell charges, only cooldown limits casting.
+- **Advanced mode**: Limited charges per spell (`[SerializeField]` configurable per spell). When charges are depleted, spell is unavailable. Charges do NOT regenerate.
+- Charge counts deferred to Phase 13 balancing pass — implement the system, use placeholder values.
+
 ### Claude's Discretion
 - Scroll 3D model/visual design (can be a simple glowing scroll mesh or particle placeholder)
 - Exact proximity glow curve (linear, ease-in, etc.)
@@ -64,6 +74,9 @@ Players earn spells by finding scrolls in the cave. Tunes are locked until their
 - Shield screen-edge glow implementation approach (post-processing, UI overlay, etc.)
 - HUD slot layout/positioning (horizontal bar, vertical stack, etc.)
 - Exact shield color palette
+- Cooldown UI representation (timer overlay, grayed slot, radial fill, etc.)
+- Range detection method (sphere overlap, distance check, etc.)
+- Charge display on HUD (number, pips, etc.)
 
 </decisions>
 
@@ -74,6 +87,8 @@ Players earn spells by finding scrolls in the cave. Tunes are locked until their
 - Key icon on HUD should look like a physical key shape with the number on it — not just a plain number
 - Shield is NOT stackable — strategic timing matters
 - Scroll proximity glow = player can spot scrolls from a distance but they become more noticeable as you approach
+- Basic vs Advanced modes create fundamentally different spell economies: Basic = cooldown management, Advanced = resource management
+- Heal-on-charm means missed casts (no snake in range) are pure waste — creates risk/reward tension
 
 </specifics>
 

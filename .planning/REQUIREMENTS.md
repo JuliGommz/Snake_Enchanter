@@ -13,8 +13,12 @@ Requirements for submission release. Each maps to roadmap phases.
 - [ ] **SPELL-02**: Collecting a scroll permanently unlocks the corresponding tune + shows pause panel with description
 - [ ] **SPELL-03**: HUD starts empty; each scroll adds a tune slot (key icon + name + color). Unassigned keys do nothing.
 - [ ] **SPELL-04**: Tune 3 (Shield) gives player an 8s shield blocking the next snake attack (screen-edge glow, shatter on block, no recast while active)
+- [ ] **SPELL-05**: HP heals only when Move/Daze actually charms a snake (not on Shield, not on empty casts)
+- [ ] **SPELL-06**: Move/Daze require snake in range to cast; Shield castable anywhere; HUD shows range indicator
+- [ ] **SPELL-07**: All spells have cooldown timer (SerializeField). Basic mode: unlimited charges. Advanced mode: limited charges per spell (SerializeField configurable).
 
 *Scope change: Reduced from 4 tunes to 3. Old Tune 3 (Attack) removed — needs creature system. Old Tune 4 (Freeze) removed — overlaps Daze. New Tune 3 = Shield.*
+*Scope change: EXT-03 (cooldown) and EXT-05 (range) promoted to MUST — moved from Phase 12 to Phase 7.*
 
 ### Menu & UI
 
@@ -31,14 +35,14 @@ Requirements for submission release. Each maps to roadmap phases.
 
 ### Audio
 
-- [ ] **AUDIO-01**: Flute melody plays during each tune cast (4 melodies, 5-12s each)
+- [ ] **AUDIO-01**: Flute melody plays during each tune cast (3 melodies, 5-12s each)
 - [ ] **AUDIO-02**: Snake SFX (hiss ambient, bite, breath attack)
 - [ ] **AUDIO-03**: Cave ambient music loop
 - [ ] **AUDIO-04**: UI feedback sounds (slider, success, fail)
 
 ### Submission
 
-- [ ] **SUB-01**: Game balancing pass (HP drain rates, timing windows, trigger zones)
+- [ ] **SUB-01**: Game balancing pass (HP drain rates, timing windows, trigger zones, charge counts)
 - [ ] **SUB-02**: Windows .exe build + ZIP package
 - [ ] **SUB-03**: Stable 60 FPS on school laptops
 
@@ -54,11 +58,12 @@ Requirements for submission release. Each maps to roadmap phases.
 
 - [ ] **EXT-01**: MiniMap showing player position in cave
 - [ ] **EXT-02**: Second enemy system (RobotKyle with HP-based combat)
-- [ ] **EXT-03**: Player spell cooldown (Inspector-configurable per spell)
 - [ ] **EXT-04**: Player success rate system (50-90% based on HP)
-- [ ] **EXT-05**: Spell range system with visual indicator
 - [ ] **EXT-06**: Particle glow system (replace Material Emission for snakes)
 - [ ] **EXT-07**: Arm animation clipping fix (spell animation through wall collider)
+
+*EXT-03 (Spell cooldown) → promoted to SPELL-07 (Phase 7)*
+*EXT-05 (Spell range) → promoted to SPELL-06 (Phase 7)*
 
 ## Out of Scope
 
@@ -77,6 +82,9 @@ Requirements for submission release. Each maps to roadmap phases.
 | SPELL-02 | Phase 7 | Pending |
 | SPELL-03 | Phase 7 | Pending |
 | SPELL-04 | Phase 7 | Pending |
+| SPELL-05 | Phase 7 | Pending |
+| SPELL-06 | Phase 7 | Pending |
+| SPELL-07 | Phase 7 | Pending |
 | MENU-01 | Phase 8 | Pending |
 | MENU-02 | Phase 8 | Pending |
 | MENU-03 | Phase 8 | Pending |
@@ -95,9 +103,7 @@ Requirements for submission release. Each maps to roadmap phases.
 | GAME-05 | Phase 11 | Pending |
 | EXT-01 | Phase 12 | Pending |
 | EXT-02 | Phase 12 | Pending |
-| EXT-03 | Phase 12 | Pending |
 | EXT-04 | Phase 12 | Pending |
-| EXT-05 | Phase 12 | Pending |
 | EXT-06 | Phase 12 | Pending |
 | EXT-07 | Phase 12 | Pending |
 | SUB-01 | Phase 13 | Pending |
@@ -105,10 +111,10 @@ Requirements for submission release. Each maps to roadmap phases.
 | SUB-03 | Phase 13 | Pending |
 
 **Coverage:**
-- v1.0 requirements: 30 total (18 MUST, 5 SHOULD, 7 COULD)
+- v1.0 requirements: 30 total (21 MUST, 5 SHOULD, 5 COULD — 2 promoted from COULD to MUST)
 - Mapped to phases: 30
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 — traceability mapped to phases 7-13*
+*Last updated: 2026-02-18 — SPELL-05/06/07 added, EXT-03/EXT-05 promoted to Phase 7*

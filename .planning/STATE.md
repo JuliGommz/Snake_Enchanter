@@ -10,7 +10,7 @@ See: `.planning/PROJECT.md` (updated 2026-02-18)
 ## Current Position
 
 Phase: 7 of 13 (Spell System)
-Plan: 0 of 3 in current phase
+Plan: 0 of 4 in current phase
 Status: Ready to plan
 Last activity: 2026-02-18 — v1.0 roadmap created, phases 7-13 defined
 
@@ -41,6 +41,10 @@ Recent decisions affecting current work:
 - **3 tunes (not 4)**: Move, Daze, Shield. Attack removed (needs creature system), Freeze removed (overlaps Daze)
 - Tune 3 Shield: 8s duration, blocks next attack, screen-edge glow, no recast while active
 - 1 scroll per QuestRoom path, fixed unlock order, HUD grows dynamically from empty
+- **Heal-on-charm only**: HP restores only when Move/Daze actually charms a snake. Shield/empty casts = no heal.
+- **Range check**: Move/Daze need snake in range. Shield castable anywhere. HUD shows range indicator.
+- **Cooldown + Charges**: All spells have cooldown (both modes). Advanced mode adds limited charges per spell (SerializeField).
+- EXT-03 (cooldown) and EXT-05 (range) promoted from Phase 12 COULD → Phase 7 MUST
 - Phase 12 (EXT) skippable — all COULD features, execute only if time allows after Phase 11
 - Submission prep (SUB) is Phase 13, always last
 
