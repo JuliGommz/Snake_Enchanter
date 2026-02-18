@@ -6,7 +6,7 @@
 * EDITOR ONLY — This script only runs in Unity Editor
 *
 * USAGE: Unity Menu → SnakeEnchanter → Create Tune Configs
-* Creates 4 TuneConfig ScriptableObjects with GDD values.
+* Creates 3 TuneConfig ScriptableObjects (Move, Daze, Shield).
 ====================================================================
 */
 
@@ -58,44 +58,29 @@ namespace SnakeEnchanter.Editor
                 zoneColor = new Color(0.3f, 0.5f, 0.9f) // Blue
             });
 
-            // Tune 3 — Attack (GDD: 5s, Zone 30-55%)
-            CreateTuneConfig(folder, "Tune3_Attack", new TuneConfigData
+            // Tune 3 — Shield (Phase 7: 5s slider, Zone 30-55%)
+            CreateTuneConfig(folder, "Tune3_Shield", new TuneConfigData
             {
-                tuneName = "Attack",
+                tuneName = "Shield",
                 keyNumber = 3,
-                effect = SnakeEffect.Attack,
-                description = "Commands the snake to attack the nearest enemy. High risk, high reward.",
+                effect = SnakeEffect.Shield,
+                description = "Activates a protective shield that blocks the next snake attack.",
                 duration = 5.0f,
                 zoneStart = 0.30f,
                 zoneEnd = 0.55f,
                 simpleModeBonus = 0.10f,
-                zoneColor = new Color(0.9f, 0.5f, 0.1f) // Orange
-            });
-
-            // Tune 4 — Freeze (GDD: 6s, Zone 25-50%, Advanced only)
-            CreateTuneConfig(folder, "Tune4_Freeze", new TuneConfigData
-            {
-                tuneName = "Freeze",
-                keyNumber = 4,
-                effect = SnakeEffect.Freeze,
-                description = "Freezes all creatures in range. Emergency tool for Advanced mode.",
-                duration = 6.0f,
-                zoneStart = 0.25f,
-                zoneEnd = 0.50f,
-                simpleModeBonus = 0.0f, // Advanced only, no simple bonus
-                zoneColor = new Color(0.2f, 0.8f, 0.8f) // Cyan
+                zoneColor = new Color(1f, 0.85f, 0f) // Gold
             });
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("TuneConfigCreator: All 4 TuneConfig assets created in " + folder);
+            Debug.Log("TuneConfigCreator: All 3 TuneConfig assets created in " + folder);
             EditorUtility.DisplayDialog("Tune Configs Created",
-                "4 TuneConfig ScriptableObjects created:\n" +
+                "3 TuneConfig ScriptableObjects created:\n" +
                 "• Tune1_Move (3s, 40-65%)\n" +
                 "• Tune2_Daze (4s, 35-60%)\n" +
-                "• Tune3_Attack (5s, 30-55%)\n" +
-                "• Tune4_Freeze (6s, 25-50%)\n\n" +
+                "• Tune3_Shield (5s, 30-55%)\n\n" +
                 "Location: " + folder +
                 "\n\nAssign them to TuneController in Inspector!",
                 "OK");

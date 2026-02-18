@@ -294,11 +294,6 @@ namespace SnakeEnchanter.Core
             if (_tuneController != null)
             {
                 _tuneController.SetSimpleMode(mode == GameMode.Simple);
-
-                if (mode == GameMode.Advanced)
-                {
-                    _tuneController.UnlockTune4(); // Available in Advanced
-                }
             }
 
             Debug.Log($"GameManager: Mode settings applied — {mode}");
