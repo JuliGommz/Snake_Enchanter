@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.3 - DEATH ANIMATION INTEGRATION
+* Version: 1.4 - Shield intercept in TakeSnakeAttack
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -41,6 +41,7 @@
 * - v1.2: Refactored to Single Source of Truth pattern
 * - v1.2.1: Fixed namespace references + Unity 2023 API
 * - v1.3: Death animation integration (IsDead bool, death cause tracking)
+* - v1.4: Shield intercept in TakeSnakeAttack (ShieldComponent optional via GetComponent)
 ====================================================================
 */
 
@@ -88,6 +89,7 @@ namespace SnakeEnchanter.Player
         private bool _isDead = false;
         private int _lastReportedHealth = -1;
         private Animator _animator;
+        private ShieldComponent _shieldComponent;
         #endregion
 
         #region Properties
@@ -122,6 +124,9 @@ namespace SnakeEnchanter.Player
             {
                 Debug.LogWarning("HealthSystem: No Animator found! Death animations will not play.");
             }
+
+            // Cache ShieldComponent (optional — game works without it)
+            _shieldComponent = GetComponent<ShieldComponent>();
         }
 
         private void Start()
@@ -200,9 +205,14 @@ namespace SnakeEnchanter.Player
             }
         }
 
-        /// <summary>Convenience method for snake attack damage.</summary>
+        /// <summary>Convenience method for snake attack damage. Checks shield before applying damage.</summary>
         public void TakeSnakeAttack()
         {
+            // Shield intercept — check before applying damage
+            if (_shieldComponent != null && _shieldComponent.TryAbsorbAttack())
+            {
+                return; // Attack absorbed by shield!
+            }
             TakeDamage(_snakeAttackDamage);
         }
         #endregion
