@@ -2,10 +2,10 @@
 
 ## Current Position
 
-**Phase:** 5 (Movement Migration — COMPLETE ✅)
-**Plan:** all done
-**Status:** Phase 5 complete. Patrol animation bug FIXED. SnakeAI v1.8.4 — NavMesh migration done, In Place animation clips, LateUpdate sync. Snakes patrol without frame-0 reset.
-**Last activity:** 2026-02-17 — Phase 5 complete, bug fixed (Root Motion W Root → In Place clips)
+**Phase:** 6 (Cleanup & Polish — IN PROGRESS)
+**Plan:** 06-01 COMPLETE
+**Status:** Plan 06-01 done. SnakeAI v1.8.5 committed (fd41f0d), checkpoint APPROVED by user. Console clean, behavior unchanged.
+**Last activity:** 2026-02-17 — Phase 6 Plan 01 complete: SnakeAI v1.8.5 cleanup verified
 
 ## Project Reference
 
@@ -16,7 +16,13 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 
 ## Recent Progress
 
-**2026-02-17 (Today - continued):**
+**2026-02-17 (Phase 6 - Cleanup & Polish):**
+- ✅ Plan 06-01 COMPLETE: SnakeAI v1.8.5 — Debug.Log cleanup (checkpoint APPROVED)
+- ✅ Task 1: Removed 16 Debug.Log calls, updated NOTES + version header (commit fd41f0d)
+- ✅ Task 2: Human verification PASSED — Console clean in Play mode, behavior unchanged
+- ✅ Preserved: all 5 Debug.LogWarning, LookAtPlayer(), _isPatrolling bool
+
+**2026-02-17 (Phase 5 - NavMesh Migration COMPLETE):**
 - ✅ Plan 05-03 complete: SnakeAI v1.8.3 — all movement via NavMeshAgent (commit 7ef80c6)
 - ✅ FollowPlayer() → _agent.SetDestination(_playerTransform.position) at _chaseSpeed
 - ✅ StartMoveAwayMovement() → _agent.SetDestination(_moveAwayTarget.position) at _moveSpeed
@@ -108,12 +114,12 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - PlayerController v1.8 (First-person, crouch, Cinemachine pitch-only)
 - HealthSystem v1.3 (Drain, restoration, death animations)
 - TuneController v2.5 (4 Tunes, Genshin-style slider, Tune 4 unlocked)
-- SnakeAI v1.8.2 (7-state machine, NavMeshAgent active, patrol via SetDestination+SamplePosition, HasAgentArrived(), SetState agent control)
+- SnakeAI v1.8.5 (7-state machine, NavMeshAgent, full NavMesh movement, submission-clean, zero Debug.Log spam)
 - GameManager v1.1.1 (Win/Lose, Mode selection)
 
 **Key Files:**
 - `Assets/_Project/Scripts/Player/PlayerController.cs` - Player movement + camera
-- `Assets/_Project/Scripts/Snakes/SnakeAI.cs` - Snake behavior (patrol migrated, FollowPlayer+MovedAway still pending)
+- `Assets/_Project/Scripts/Snakes/SnakeAI.cs` - Snake behavior v1.8.5 (full NavMesh, submission-clean)
 - `Assets/_Project/Scripts/TuneSystem/TuneController.cs` - Spell casting
 - `Assets/_Project/Scenes/GameLevel.unity` - Main gameplay scene
 
@@ -136,5 +142,10 @@ See: `.planning/PROJECT.md` (updated 2026-02-16)
 - ResetPath() chosen over isStopped=true at waypoint arrival — definitively stopped, not a pause
 - _isPatrolling bool retained (still used in UpdateMovementAnimation) — velocity-based animation is 05-03+ scope
 
+**Key Decisions (Plan 06-01):**
+- LookAtPlayer() RETAINED — NavMeshAgent drives position only, not rotation; LookAtPlayer() is required for Y-axis facing in all idle interaction ranges
+- _isPatrolling bool RETAINED — live state guard in UpdatePatrol() prevents per-frame waypoint regeneration
+- Debug.LogWarning kept for 5 edge cases (no player, no patrol waypoint, no MoveAwayTarget, no creature target, renderer not found)
+
 ---
-*Last updated: 2026-02-17 after Plan 05-02 completion*
+*Last updated: 2026-02-17 after Plan 06-01 complete (checkpoint approved)*

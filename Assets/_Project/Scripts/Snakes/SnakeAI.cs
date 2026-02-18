@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.8.3 - NavMesh Full Migration (Phase 5 Plan 03)
+* Version: 1.8.5 - Cleanup & Polish (Phase 6)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -36,9 +36,10 @@
 * - Phase 2: Add NavMeshAgent patrol, animations
 
 * NOTES:
-* - Phase 1 implementation — minimal viable snake
-* - No NavMesh patrol yet (Phase 2)
-* - No animations yet (waiting for Toon Snakes Pack import)
+* - Phase 5 implementation — full NavMesh movement
+* - NavMeshAgent drives position (updatePosition=false, manual LateUpdate sync)
+* - LookAtPlayer() handles rotation — NavMeshAgent updateRotation=false
+* - Toon Snakes Pack animations: Slither Forward/Left/Right, Bite, Breath, Die
 * - Collider damage on contact when aggressive
 
 * VERSION HISTORY:
@@ -178,6 +179,13 @@
 *         FIXED: Animator Controller W Root → In Place clips (root motion data removed from clips)
 *         ROOT CAUSE: "W Root" FBX clips contained position keyframes that fought NavMeshAgent
 *         RESULT: Mesh and NavMeshAgent body move in sync, no frame-0 reset (2026-02-17)
+* - v1.8.5: Cleanup & Polish (Phase 6) — Submission-ready:
+*         REMOVED: All verbose Debug.Log() calls (runtime noise for submission)
+*         KEPT: Debug.LogWarning() (legitimate edge case reporting)
+*         UPDATED: Code comments to reflect NavMesh implementation (Phase 5 complete)
+*         NOTES: LookAtPlayer() RETAINED — handles player-facing in idle state ranges
+*         NOTES: _isPatrolling bool RETAINED — live state guard in UpdatePatrol()
+*         Result: Zero console spam in play mode, accurate documentation (2026-02-17)
 ====================================================================
 */
 
@@ -425,7 +433,6 @@ namespace SnakeEnchanter.Snakes
                 Vector3 worldPos = _moveAwayTarget.position;
                 _moveAwayTarget.SetParent(null);
                 _moveAwayTarget.position = worldPos;
-                Debug.Log($"SnakeAI ({_snakeName}): Detached MoveAwayTarget at START (World: {worldPos})");
             }
 
             // NavMeshAgent activation (Phase 5)
@@ -787,7 +794,6 @@ namespace SnakeEnchanter.Snakes
                         {
                             _isMoving = false;
                             TransitionFromMoveAwayToRootState();
-                            Debug.Log($"SnakeAI ({_snakeName}): Reached MoveAwayTarget via NavMesh, transitioning to root state");
                         }
                     }
                     else
@@ -982,8 +988,6 @@ namespace SnakeEnchanter.Snakes
                     _animator.SetTrigger("Bite Attack");
                 }
 
-                Debug.Log($"SnakeAI ({_snakeName}): [ATTACK CREATURE] Target: '{targetCreature.name}' at distance {Vector3.Distance(transform.position, targetCreature.transform.position):F2}");
-
                 // Neutralize both creatures after attack (simplified Phase 1 implementation)
                 // Both attacker and target become "Dead" or disabled
                 Invoke(nameof(NeutralizeAfterAttack), 1.5f); // Wait for attack animation
@@ -992,13 +996,11 @@ namespace SnakeEnchanter.Snakes
                 SnakeAI targetSnakeAI = targetCreature.GetComponent<SnakeAI>();
                 if (targetSnakeAI != null)
                 {
-                    Debug.Log($"SnakeAI ({_snakeName}): [ATTACK CREATURE] Target is Snake, both will neutralize in 1.5s");
                     targetSnakeAI.Invoke(nameof(NeutralizeAfterAttack), 1.5f);
                 }
                 else
                 {
                     // Target is not a snake - just disable it (Phase 1 simplified)
-                    Debug.Log($"SnakeAI ({_snakeName}): [ATTACK CREATURE] Target is NOT Snake, destroying in 1.5s");
                     Destroy(targetCreature, 1.5f);
                 }
             }
@@ -1051,7 +1053,6 @@ namespace SnakeEnchanter.Snakes
             // Simplified Phase 1: Set to Dead state (effectively removed from game)
             SetState(SnakeState.Dead);
             EnableCollider(false); // Disable collision
-            Debug.Log($"SnakeAI ({_snakeName}): Neutralized after attack (Dead state)");
         }
 
         /// <summary>
@@ -1066,8 +1067,6 @@ namespace SnakeEnchanter.Snakes
             // Idle state logic will handle player interaction if visible
             // Or resume patrol if player not visible
             SetState(SnakeState.Idle);
-
-            Debug.Log($"SnakeAI ({_snakeName}): MoveAway complete → Idle (Player visible: {_canSeePlayer}, Distance: {_playerDistance:F1})");
         }
 
         /// <summary>
@@ -1116,7 +1115,6 @@ namespace SnakeEnchanter.Snakes
                 }
                 // Reset attack cooldown so snake can attack immediately after daze
                 _lastAttackTime = 0f;
-                Debug.Log($"SnakeAI ({_snakeName}): [DAZE END] Leaving Dazed state, IsDazed=false, attack cooldown reset");
             }
 
             switch (newState)
@@ -1124,14 +1122,12 @@ namespace SnakeEnchanter.Snakes
                 case SnakeState.Idle:
                     SetVisualColor(_idleColor);
                     EnableCollider(true);
-                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Idle");
                     break;
 
                 case SnakeState.Aggressive:
                     _stateTimer = _aggressiveDuration;
                     SetVisualColor(_aggressiveColor);
                     EnableCollider(true);
-                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Aggressive (timer: {_stateTimer:F1}s, Red glow)");
                     break;
 
                 case SnakeState.MovedAway:
@@ -1140,7 +1136,6 @@ namespace SnakeEnchanter.Snakes
                     EnableCollider(false);
                     // Start movement after spell animation delay
                     Invoke(nameof(StartMoveAwayMovement), _spellAnimationDelay);
-                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 1 (Move) → MovedAway (White glow, collision OFF, delay: {_spellAnimationDelay}s)");
                     break;
 
                 case SnakeState.Dazed:
@@ -1152,7 +1147,6 @@ namespace SnakeEnchanter.Snakes
                     {
                         _animator.SetBool("IsDazed", true);
                     }
-                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 2 (Daze) → Dazed (Blue glow, IsDazed=true, collision OFF, timer: {_stateTimer:F1}s)");
                     break;
 
                 case SnakeState.AttackingEnemy:
@@ -1160,14 +1154,12 @@ namespace SnakeEnchanter.Snakes
                     EnableCollider(false);
                     // Start attacking nearest enemy snake after animation delay
                     Invoke(nameof(StartAttackingEnemy), _spellAnimationDelay);
-                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 3 (Attack) → AttackingEnemy (Yellow glow, collision OFF, delay: {_spellAnimationDelay}s)");
                     break;
 
                 case SnakeState.Frozen:
                     _stateTimer = _freezeDuration;
                     SetVisualColor(_frozenColor);
                     EnableCollider(true); // Still blocks path when frozen
-                    Debug.Log($"SnakeAI ({_snakeName}): [SPELL] Tune 4 (Freeze) → Frozen (Cyan glow, collision ON, timer: {_stateTimer:F1}s)");
                     break;
 
                 case SnakeState.Dead:
@@ -1179,7 +1171,6 @@ namespace SnakeEnchanter.Snakes
                         _animator.SetTrigger("Die");
                         _animator.SetBool("IsDazed", true); // Prevents Die → Idle transition
                     }
-                    Debug.Log($"SnakeAI ({_snakeName}): [STATE] {previousState} → Dead (Gray, collision OFF, Die trigger, IsDazed=true)");
                     break;
             }
         }
@@ -1400,8 +1391,6 @@ namespace SnakeEnchanter.Snakes
 
             // Spawn attack VFX
             SpawnAttackFX(attackType);
-
-            Debug.Log($"SnakeAI ({_snakeName}): [ATTACK] {attackType} triggered! (Damage: {damage}, Distance: {_playerDistance:F2}, Delay: {damageDelay}s)");
         }
 
         private int _scheduledDamage = 0;

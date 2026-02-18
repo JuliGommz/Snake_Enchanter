@@ -275,41 +275,51 @@ Plans:
 
 ## Phase 6: Cleanup & Polish
 
-**Goal:** Remove obsolete movement code and clean up SnakeAI.cs
+**Goal:** Remove verbose Debug.Log spam and update stale comments in SnakeAI.cs
+
+**Plans:** 1 plan
+
+Plans:
+- [ ] 06-01-PLAN.md — Remove Debug.Log calls, update comments, verify no behavior regression
 
 **Why this phase:**
-- Eliminates dead code (MoveTowardsSafe, LookAtPlayer)
-- Removes unused fields (_lastMoveDirection, _isPatrolling bool)
-- Improves code maintainability
+- 16+ active Debug.Log calls from development sessions pollute the console at runtime
+- File header NOTES section still references "Phase 1 static snakes" and "No NavMesh yet"
+- Version header still reads v1.8.3 (needs updating to v1.8.5)
+
+**Analysis (completed pre-planning):**
+- `LookAtPlayer()` — RETAINED. Still live: handles Y-axis player-facing in Idle state ranges
+  (bite range, breath range, projectile range). NavMeshAgent.updateRotation=false means rotation
+  is fully manual. Removing this would break snake facing.
+- `_isPatrolling` bool — RETAINED. Still live: guards GenerateNewPatrolWaypoint() from
+  being called every frame in UpdatePatrol(). Not dead code.
+- `MoveTowardsSafe()` — Already deleted in Phase 5. Nothing to remove.
+- `_lastMoveDirection` — Already deleted in Phase 5. Nothing to remove.
 
 **Tasks:**
-1. Delete obsolete methods:
-   - `MoveTowardsSafe(Vector3 target, float speed)` - ~50 lines
-   - `LookAtPlayer()` - ~10 lines
-2. Remove unused fields:
-   - `private Vector3 _lastMoveDirection;` (if not used elsewhere)
-   - Can keep `_isPatrolling` bool if used for other logic checks
-3. Update code comments to reflect NavMesh usage
-4. Clean up debug logs (remove temporary logging)
-5. Test: No compiler errors, all features still work
+1. Remove 16 verbose Debug.Log() calls from SetState(), TriggerAttack(), StartAttackingEnemy(),
+   NeutralizeAfterAttack(), TransitionFromMoveAwayToRootState(), UpdateState()
+2. Keep all Debug.LogWarning() calls (5 calls — legitimate edge case reporting)
+3. Update file header: version to v1.8.5, NOTES section to reflect NavMesh implementation
+4. Add v1.8.5 entry to VERSION HISTORY
 
 **Success Criteria:**
-- [ ] No unused methods in SnakeAI.cs
-- [ ] No unused fields (or commented with "kept for X reason")
-- [ ] No compiler warnings
-- [ ] Code comments accurate (reflect NavMesh implementation)
-- [ ] All Phase 5 features still work
+- [ ] Zero Debug.Log() calls remaining (only Debug.LogWarning preserved)
+- [ ] Version header reads v1.8.5
+- [ ] NOTES section accurate (Phase 5 NavMesh, not Phase 1 static)
+- [ ] All Phase 5 behaviors identical (LookAtPlayer + _isPatrolling untouched)
+- [ ] Unity Console clean during normal play mode
 
 **Deliverables:**
-- SnakeAI.cs v1.8.5 (cleaned up, production-ready)
-- Commit: "refactor: SnakeAI v1.8.5 - Remove obsolete movement methods"
+- SnakeAI.cs v1.8.5 (submission-ready, no console spam)
+- Commit: "refactor(06-01): SnakeAI v1.8.5 - remove Debug.Log spam, update comments"
 
 **Rollback Plan:**
-- Git revert commit (brings back deleted code)
+- Git revert commit (brings back Debug.Log calls if needed for debugging)
 
 **Time:** 30 minutes
-**Risk:** LOW (only deleting dead code)
-**Blocking:** Phase 5 (needs new movement working first)
+**Risk:** LOW (no logic changes — only removing Debug.Log calls and updating comments)
+**Blocking:** Phase 5 (needs new movement working first) — COMPLETE
 
 ---
 
@@ -373,7 +383,7 @@ Plans:
 1. Update STATE.md:
    - Current position: v0.3 complete
    - Recent progress: NavMesh migration, full testing
-   - Next milestone: Phase 3 (SCHÖN - Polish)
+   - Next milestone: Phase 3 (SCHOEN - Polish)
 
 2. Update MILESTONES.md:
    - Add v0.3 section with completion details
@@ -429,7 +439,7 @@ Plans:
 - Follow `.planning/MERGE_CHECKLIST.md`
 - Merge feature/enemy-setup → main
 - Delete branch (local + remote)
-- Begin Phase 3 (SCHÖN - Polish)
+- Begin Phase 3 (SCHOEN - Polish)
 
 ---
 
@@ -438,7 +448,7 @@ Plans:
 **LOW RISK Phases:**
 - Phase 3 (Scene Setup): Zero code changes, reversible
 - Phase 4 (Component Integration): Dual systems, old movement still works
-- Phase 6 (Cleanup): Only deleting dead code
+- Phase 6 (Cleanup): Only removing Debug.Log calls + updating comments
 - Phase 7 (Testing): Readonly, no changes
 
 **MEDIUM RISK Phases:**
@@ -478,4 +488,5 @@ Plans:
 *Roadmap created: 2026-02-16*
 *Phase 3 planned: 2026-02-17*
 *Phase 4 planned: 2026-02-17*
-*Next action: `/gsd:execute-phase 04-component-integration` to execute Phase 4*
+*Phase 6 planned: 2026-02-17*
+*Next action: `/gsd:execute-phase 06-cleanup-polish` to execute Phase 6*
