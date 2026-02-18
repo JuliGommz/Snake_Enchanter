@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-14
-* Version: 1.8.5 - Cleanup & Polish (Phase 6)
+* Version: 1.9 - Phase 7: fires SnakeCharmed event, removes Attack/Freeze dead code
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -30,7 +30,7 @@
 
 * DESIGN RATIONALE:
 * - GDD Section 4: Snakes are both danger and tool
-* - State machine: Idle → Charmed/Dazed/Attacking/Frozen
+* - State machine: Idle → Charmed/Dazed
 * - Player must be in command range to cast tunes
 * - Phase 1: Static snakes, no patrol (boceto approach)
 * - Phase 2: Add NavMeshAgent patrol, animations
@@ -112,80 +112,33 @@
 *         Result: Props collision WORKING, Snakes no longer overlap (2026-02-14)
 * - v1.5.0: Tune 2 & 3 Spell Behaviors (Session 16) — Complete spell response system:
 *         TUNE 2 (Daze): Snake becomes dazed/stunned, collider disabled, DIE animation, 8s timer
-*         TUNE 3 (Attack): Snake finds nearest NON-SNAKE creature (tag "Creature"), attacks, both neutralized
 *         RENAME: Sleeping → Dazed (no sleep animation, Die animation shows unconscious/collapsed)
-*         RENAME: FindNearestTargetableSnake → FindNearestCreature (excludes ALL snakes)
-*         ADDED: StartAttackingEnemy() - NON-SNAKE creature target selection + attack logic
-*         ADDED: FindNearestCreature() - Searches "Creature" tag, SKIPS all SnakeAI components
-*         ADDED: NeutralizeAfterAttack() - Phase 1 simplified (both creatures → Dead/Destroyed)
-*         ADDED: Dead state handling in SetState() - Gray visual, Die animation, no collision
-*         ADDED: UpdateMovementAnimation() - Slither Forward bool for player chase/patrol
-*         DESIGN: Snakes do NOT attack other snakes, only non-snake creatures (future enemies)
-*         Result: All 4 Tune behaviors functional (Move, Daze, Attack, Freeze) (2026-02-14)
-* - v1.6.0: Directional Slither & Debug Logging (Session 16) — Movement animations + comprehensive logs:
-*         SLITHER DIRECTIONAL: UpdateMovementAnimation() now supports all 3 directions (Forward/Left/Right)
+*         Result: Tune behaviors functional (Move, Daze) (2026-02-14)
+* - v1.6.0: Directional Slither & Debug Logging (Session 16) — Movement animations + logs:
+*         SLITHER DIRECTIONAL: UpdateMovementAnimation() supports all 3 directions (Forward/Left/Right)
 *         ADDED: _lastMoveDirection Vector3 - Tracks movement vector for directional slither
 *         UPDATED: MoveTowardsSafe() - Captures movement direction from position delta
-*         LOGIC: InverseTransformDirection calculates local movement (relative to snake's forward)
-*         LOGIC: Compares forward vs right amount to determine which slither animation to play
-*         DEBUG LOGGING: All spell states (Move, Daze, Attack, Freeze) with detailed parameters
-*         DEBUG LOGGING: Attack triggers (Bite/Breath/Projectile) with damage, distance, delay
-*         DEBUG LOGGING: Slither direction selection (Forward/Left/Right) with local direction values
-*         DEBUG LOGGING: Daze state transitions (IsDazed bool, timer, collision, glow color)
-*         DEBUG LOGGING: Attack Creature targeting (creature name, distance, neutralization logic)
-*         Result: Directional slither animations + full debug visibility for all behaviors (2026-02-14)
-* - v1.7.0: Spell Targeting & Animation Fixes (Session 17) — Critical bug fixes for detection + animator:
+*         DEBUG LOGGING: All spell states (Move, Daze) with detailed parameters
+*         Result: Directional slither animations (2026-02-14)
+* - v1.7.0: Spell Targeting & Animation Fixes (Session 17) — Critical bug fixes:
 *         FIXED: IsPlayerInRange now checks BOTH distance AND line-of-sight (_canSeePlayer)
-*         REASON: Spells were targeting snakes through walls (only checked distance, not visibility)
-*         REMOVED: Unused _playerLayer field (declared but never used in code, m_Bits: 0 in prefabs)
-*         DOCS: Added Animator Controller fix instructions (.planning/debug/ANIMATOR_FIX_INSTRUCTIONS.md)
-*         ISSUE: Die animation not playing - Animator Controller missing Idle→Die transition on Die trigger
-*         REQUIRES: Manual fix in Unity Editor - add Idle→Die transition with Die trigger condition
-*         Result: Spells now require line-of-sight, no more targeting through walls (2026-02-15)
-* - v1.8.0: NavMeshAgent Component Integration (Phase 4) — Passive dual-system setup:
-*         ADDED: private NavMeshAgent _agent field
-*         ADDED: using UnityEngine.AI
-*         ADDED: Awake() initialization with updatePosition=false, updateRotation=false, isStopped=true
-*         CRITICAL: updatePosition=false prevents agent fighting MoveTowardsSafe() each frame
-*         CRITICAL: updateRotation=false prevents agent fighting LookAtPlayer() rotation
-*         RESULT: Agent registered with NavMesh but old movement code still in full control
-*         NEXT: Phase 5 will replace MoveTowardsSafe() with agent.SetDestination() (2026-02-17)
-* - v1.8.1: NavMeshAgent Activation (Phase 5) — Active dual-system replacement:
-*         CHANGED: updatePosition false→true (agent now drives position)
-*         ADDED: _agent.nextPosition = transform.position BEFORE enabling (prevents teleport snap)
-*         CHANGED: isStopped false (agent can now pathfind)
-*         ADDED: HasAgentArrived() helper (fixes remainingDistance=Infinity Unity bug)
-*         ADDED: SetState() agent isStopped/ResetPath control per state
-*         NEXT: Phase 5 Plans 02-03 will replace MoveTowardsSafe() calls (2026-02-17)
-* - v1.8.2: NavMesh Patrol Replacement (Phase 5 Plan 02) — Patrol via SetDestination:
-*         REPLACED: UpdatePatrol() MoveTowardsSafe → agent.SetDestination(_currentPatrolTarget)
-*         REPLACED: Distance arrival check → HasAgentArrived() (fixes remainingDistance=Infinity)
-*         REPLACED: GenerateNewPatrolWaypoint() → NavMesh.SamplePosition validation
-*         ADDED: Velocity-based rotation in patrol (agent.velocity direction)
-*         RESULT: Patrol animation no longer restarts when snake blocked (2026-02-17)
-* - v1.8.3: NavMesh Full Migration (Phase 5 Plan 03) — All movement via NavMeshAgent:
-*         REPLACED: FollowPlayer() MoveTowardsSafe → agent.SetDestination(_playerTransform.position)
-*         REPLACED: StartMoveAwayMovement() _isMoving flag → agent.SetDestination(_moveAwayTarget.position)
-*         REPLACED: MovedAway arrival Vector3.Distance → HasAgentArrived()
-*         REPLACED: UpdateMovementAnimation() _isPatrolling bool → agent.velocity.magnitude check
-*         REPLACED: _lastMoveDirection field → agent.velocity.normalized inline
-*         DELETED: MoveTowardsSafe() method (~40 lines)
-*         DELETED: _lastMoveDirection field
-*         RESULT: Animation bug fixed — velocity is 0 only when truly stopped (2026-02-17)
-* - v1.8.4: Root Motion Fix (Phase 5 Bug-Fix) — Patrol animation snap FIXED:
-*         CHANGED: updatePosition false (manual LateUpdate sync via agent.nextPosition)
-*         ADDED: LateUpdate() — transform.position = agent.nextPosition (prevents mesh/agent desync)
-*         ADDED: applyRootMotion = false in Awake() (prevents animation position fighting agent)
-*         FIXED: Animator Controller W Root → In Place clips (root motion data removed from clips)
-*         ROOT CAUSE: "W Root" FBX clips contained position keyframes that fought NavMeshAgent
-*         RESULT: Mesh and NavMeshAgent body move in sync, no frame-0 reset (2026-02-17)
-* - v1.8.5: Cleanup & Polish (Phase 6) — Submission-ready:
-*         REMOVED: All verbose Debug.Log() calls (runtime noise for submission)
-*         KEPT: Debug.LogWarning() (legitimate edge case reporting)
-*         UPDATED: Code comments to reflect NavMesh implementation (Phase 5 complete)
-*         NOTES: LookAtPlayer() RETAINED — handles player-facing in idle state ranges
-*         NOTES: _isPatrolling bool RETAINED — live state guard in UpdatePatrol()
-*         Result: Zero console spam in play mode, accurate documentation (2026-02-17)
+*         REASON: Spells were targeting snakes through walls (only checked distance)
+*         REMOVED: Unused _playerLayer field
+*         Result: Spells now require line-of-sight (2026-02-15)
+* - v1.8.0: NavMeshAgent Component Integration (Phase 4) — Passive dual-system setup
+* - v1.8.1: NavMeshAgent Activation (Phase 5) — Active dual-system replacement
+* - v1.8.2: NavMesh Patrol Replacement (Phase 5 Plan 02) — Patrol via SetDestination
+* - v1.8.3: NavMesh Full Migration (Phase 5 Plan 03) — All movement via NavMeshAgent
+* - v1.8.4: Root Motion Fix (Phase 5 Bug-Fix) — Patrol animation snap FIXED
+* - v1.8.5: Cleanup & Polish (Phase 6) — Submission-ready, zero console spam
+* - v1.9: Phase 7 spell system integration:
+*         ADDED: GameEvents.SnakeCharmed(tuneNumber) fired in ApplyTuneEffect for Move and Daze
+*         REMOVED: SnakeState.AttackingEnemy and SnakeState.Frozen (Attack/Freeze removed from system)
+*         REMOVED: _freezeDuration and _frozenColor fields (Freeze tune removed in Phase 7)
+*         REMOVED: StartAttackingEnemy(), FindNearestCreature(), NeutralizeAfterAttack(), ApplyFreeze()
+*         REMOVED: SetState() and UpdateState() cases for AttackingEnemy and Frozen
+*         UPDATED: OnTuneSuccessWithId() — no longer maps tune 3 to Attack or tune 4 to Freeze
+*         NOTE: TuneController no longer fires TuneSuccessWithId for tune 3 (Shield)
 ====================================================================
 */
 
@@ -201,13 +154,11 @@ namespace SnakeEnchanter.Snakes
     /// </summary>
     public enum SnakeState
     {
-        Idle,           // Default — blocking path, not aggressive
-        Aggressive,     // Attacks player on contact (after failed tune)
-        MovedAway,      // Charmed with Move tune — cleared path
-        Dazed,          // Charmed with Daze tune — passive, stunned, no collision
-        AttackingEnemy, // Charmed with Attack tune — attacking other target
-        Frozen,         // Freeze tune effect — temporarily immobile
-        Dead            // Killed (Phase 2+)
+        Idle,       // Default — blocking path, not aggressive
+        Aggressive, // Attacks player on contact (after failed tune)
+        MovedAway,  // Charmed with Move tune — cleared path
+        Dazed,      // Charmed with Daze tune — passive, stunned, no collision
+        Dead        // Killed (Phase 2+)
     }
 
     /// <summary>
@@ -259,9 +210,6 @@ namespace SnakeEnchanter.Snakes
 
         [Tooltip("Time snake stays dazed before returning to idle (seconds)")]
         [SerializeField] private float _dazedDuration = 8f;
-
-        [Tooltip("Time snake stays frozen (seconds)")]
-        [SerializeField] private float _freezeDuration = 4f;
 
         [Header("Move Away")]
         [Tooltip("Position to move to when charmed with Move tune")]
@@ -325,7 +273,6 @@ namespace SnakeEnchanter.Snakes
         [SerializeField] private Color _idleColor = Color.green;
         [SerializeField] private Color _aggressiveColor = Color.red;
         [SerializeField] private Color _dazedColor = new Color(0.5f, 0.5f, 1f, 1f); // Light blue
-        [SerializeField] private Color _frozenColor = Color.cyan;
         [SerializeField] private Color _movedColor = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray transparent
 
         [Header("Attack VFX (Phase 2)")]
@@ -467,7 +414,6 @@ namespace SnakeEnchanter.Snakes
             if (Core.GameManager.Instance != null)
             {
                 _isAdvancedMode = Core.GameManager.Instance.CurrentMode == Core.GameMode.Advanced;
-                // Debug.Log($"SnakeAI ({_snakeName}): Game Mode = {(_isAdvancedMode ? "Advanced" : "Simple")}");
             }
 
             SetState(SnakeState.Idle);
@@ -567,7 +513,6 @@ namespace SnakeEnchanter.Snakes
             if (healthSystem != null)
             {
                 healthSystem.TakeDamage(_contactDamage);
-                // Debug.Log($"SnakeAI ({_snakeName}): Contact damage! {_contactDamage} HP");
             }
         }
         #endregion
@@ -603,10 +548,6 @@ namespace SnakeEnchanter.Snakes
             if (Physics.Raycast(rayOrigin, directionToPlayer, out RaycastHit hit, _detectionRange))
             {
                 bool canSee = hit.collider.CompareTag("Player");
-                if (canSee != _canSeePlayer) // State changed
-                {
-                    // Debug.Log($"SnakeAI ({_snakeName}): Player visibility changed: {canSee} (hit: {hit.collider.name}, distance: {_playerDistance:F2})");
-                }
                 _canSeePlayer = canSee;
             }
             else
@@ -626,17 +567,12 @@ namespace SnakeEnchanter.Snakes
             // Patrol only in Idle state
             if (_currentState != SnakeState.Idle)
             {
-                // Silent - Patrol blocked by non-Idle state (normal behavior)
                 return;
             }
 
             // Stop patrol if player is visible
             if (_canSeePlayer)
             {
-                if (_isPatrolling)
-                {
-                    // Debug.Log($"SnakeAI ({_snakeName}): Patrol stopped - Player visible");
-                }
                 _isPatrolling = false;
                 _isWaitingAtWaypoint = false;
                 if (_agent != null && _agent.isOnNavMesh && _agent.hasPath)
@@ -661,7 +597,6 @@ namespace SnakeEnchanter.Snakes
             // Start patrolling if not yet started
             if (!_isPatrolling)
             {
-                // Debug.Log($"SnakeAI ({_snakeName}): Starting patrol from {_originalPosition}");
                 GenerateNewPatrolWaypoint();
                 _isPatrolling = true;
             }
@@ -725,7 +660,6 @@ namespace SnakeEnchanter.Snakes
                 if (NavMesh.SamplePosition(candidatePoint, out hit, sampleRadius, NavMesh.AllAreas))
                 {
                     _currentPatrolTarget = hit.position;
-                    // Debug.Log($"SnakeAI ({_snakeName}): Patrol waypoint: {_currentPatrolTarget} (attempt {i+1})");
                     return;
                 }
             }
@@ -810,19 +744,6 @@ namespace SnakeEnchanter.Snakes
                     {
                         SetState(SnakeState.Idle);
                     }
-                    break;
-
-                case SnakeState.Frozen:
-                    _stateTimer -= Time.deltaTime;
-                    if (_stateTimer <= 0f)
-                    {
-                        SetState(SnakeState.Idle);
-                    }
-                    break;
-
-                case SnakeState.AttackingEnemy:
-                    // AttackingEnemy behavior handled by StartAttackingEnemy() (invoked from SetState)
-                    // Snake stays in this state until neutralized
                     break;
 
                 case SnakeState.Dead:
@@ -963,99 +884,6 @@ namespace SnakeEnchanter.Snakes
         }
 
         /// <summary>
-        /// Starts attacking the nearest enemy creature (Tune 3 behavior).
-        /// Finds closest creature with tag "Creature" and triggers attack, then neutralizes both.
-        /// </summary>
-        private void StartAttackingEnemy()
-        {
-            if (_currentState != SnakeState.AttackingEnemy) return;
-
-            // Find nearest creature (tag-based, not just snakes)
-            GameObject targetCreature = FindNearestCreature();
-
-            if (targetCreature != null)
-            {
-                // Look at target creature
-                Vector3 directionToTarget = (targetCreature.transform.position - transform.position).normalized;
-                if (directionToTarget != Vector3.zero)
-                {
-                    transform.rotation = Quaternion.LookRotation(directionToTarget);
-                }
-
-                // Trigger bite attack animation (snake attacks creature)
-                if (_animator != null)
-                {
-                    _animator.SetTrigger("Bite Attack");
-                }
-
-                // Neutralize both creatures after attack (simplified Phase 1 implementation)
-                // Both attacker and target become "Dead" or disabled
-                Invoke(nameof(NeutralizeAfterAttack), 1.5f); // Wait for attack animation
-
-                // Try to neutralize target (if it has SnakeAI component)
-                SnakeAI targetSnakeAI = targetCreature.GetComponent<SnakeAI>();
-                if (targetSnakeAI != null)
-                {
-                    targetSnakeAI.Invoke(nameof(NeutralizeAfterAttack), 1.5f);
-                }
-                else
-                {
-                    // Target is not a snake - just disable it (Phase 1 simplified)
-                    Destroy(targetCreature, 1.5f);
-                }
-            }
-            else
-            {
-                // No target found - return to Idle
-                Debug.LogWarning($"SnakeAI ({_snakeName}): [ATTACK CREATURE] No targetable creature found (tag:Creature, NOT SnakeAI), returning to Idle");
-                SetState(SnakeState.Idle);
-            }
-        }
-
-        /// <summary>
-        /// Finds the nearest creature with tag "Creature" (excluding self and ALL snakes).
-        /// Snakes only attack non-snake creatures (e.g., future enemies, monsters).
-        /// Used by Tune 3 (Attack Enemy) to select target.
-        /// </summary>
-        private GameObject FindNearestCreature()
-        {
-            GameObject[] allCreatures = GameObject.FindGameObjectsWithTag("Creature");
-            GameObject nearestCreature = null;
-            float nearestDistance = Mathf.Infinity;
-
-            foreach (var creature in allCreatures)
-            {
-                if (creature == this.gameObject) continue; // Skip self
-
-                // Skip ALL snakes (snakes don't attack other snakes, only other creatures)
-                SnakeAI snakeAI = creature.GetComponent<SnakeAI>();
-                if (snakeAI != null)
-                {
-                    continue; // Skip all snakes (regardless of state)
-                }
-
-                float distance = Vector3.Distance(transform.position, creature.transform.position);
-                if (distance < nearestDistance)
-                {
-                    nearestDistance = distance;
-                    nearestCreature = creature;
-                }
-            }
-
-            return nearestCreature;
-        }
-
-        /// <summary>
-        /// Neutralizes this snake after attack (Phase 1: both attacker and target disabled).
-        /// </summary>
-        private void NeutralizeAfterAttack()
-        {
-            // Simplified Phase 1: Set to Dead state (effectively removed from game)
-            SetState(SnakeState.Dead);
-            EnableCollider(false); // Disable collision
-        }
-
-        /// <summary>
         /// Transitions from MovedAway state back to appropriate root state.
         /// Evaluates player position/visibility to decide next state:
         /// - If player visible and in range → Idle (will trigger attack/follow in next Update)
@@ -1084,14 +912,8 @@ namespace SnakeEnchanter.Snakes
             {
                 switch (newState)
                 {
-                    case SnakeState.Frozen:
-                        // Frozen: halt but keep path so we can resume when unfrozen
-                        _agent.isStopped = true;
-                        break;
-
                     case SnakeState.Dazed:
                     case SnakeState.Dead:
-                    case SnakeState.AttackingEnemy:
                         // These states never resume agent movement — clear path
                         _agent.isStopped = true;
                         _agent.ResetPath();
@@ -1149,19 +971,6 @@ namespace SnakeEnchanter.Snakes
                     }
                     break;
 
-                case SnakeState.AttackingEnemy:
-                    SetVisualColor(Color.yellow);
-                    EnableCollider(false);
-                    // Start attacking nearest enemy snake after animation delay
-                    Invoke(nameof(StartAttackingEnemy), _spellAnimationDelay);
-                    break;
-
-                case SnakeState.Frozen:
-                    _stateTimer = _freezeDuration;
-                    SetVisualColor(_frozenColor);
-                    EnableCollider(true); // Still blocks path when frozen
-                    break;
-
                 case SnakeState.Dead:
                     SetVisualColor(Color.gray); // Grayed out visual
                     EnableCollider(false); // No collision
@@ -1180,29 +989,22 @@ namespace SnakeEnchanter.Snakes
         /// <summary>
         /// Called when a tune succeeds globally (with tune number).
         /// Only reacts if this snake is the closest targetable snake in range.
+        /// TuneController no longer fires TuneSuccessWithId for tune 3 (Shield) — only 1 and 2.
         /// </summary>
         private void OnTuneSuccessWithId(int tuneNumber)
         {
-            // Tune 4 (Freeze) affects ALL snakes — no range/closest check
-            if (tuneNumber == 4)
-            {
-                ApplyFreeze();
-                return;
-            }
-
-            // Other tunes: Only react if player is in range and snake is targetable
+            // Only react if player is in range and snake is targetable
             if (!IsPlayerInRange || !IsTargetable) return;
 
             // Check if this is the closest targetable snake
             if (!IsClosestTargetableSnake()) return;
 
-            // Map tune number to effect
+            // Map tune number to effect — only Move and Daze are snake-targeting tunes
             SnakeEffect effect = tuneNumber switch
             {
                 1 => SnakeEffect.Move,
                 2 => SnakeEffect.Daze,
-                3 => SnakeEffect.Attack,
-                _ => SnakeEffect.Move
+                _ => SnakeEffect.Move // Fallback (should not occur — Shield no longer fires this event)
             };
 
             ApplyTuneEffect(effect);
@@ -1223,6 +1025,7 @@ namespace SnakeEnchanter.Snakes
 
         /// <summary>
         /// Applies the effect of a successful tune on this snake.
+        /// Fires GameEvents.SnakeCharmed() so HealthSystem can heal the player.
         /// </summary>
         public void ApplyTuneEffect(SnakeEffect effect)
         {
@@ -1230,22 +1033,17 @@ namespace SnakeEnchanter.Snakes
             {
                 case SnakeEffect.Move:
                     SetState(SnakeState.MovedAway);
+                    GameEvents.SnakeCharmed(1); // Heal triggers here — snake is actually charmed
                     break;
 
                 case SnakeEffect.Daze:
                     SetState(SnakeState.Dazed);
+                    GameEvents.SnakeCharmed(2); // Heal triggers here — snake is actually charmed
                     break;
 
-                case SnakeEffect.Attack:
-                    SetState(SnakeState.AttackingEnemy);
-                    break;
-
-                case SnakeEffect.Freeze:
-                    SetState(SnakeState.Frozen);
-                    break;
+                // Shield has no snake effect — SnakeAI never processes it
+                // (TuneController no longer fires TuneSuccessWithId for tune 3)
             }
-
-            // Debug.Log($"SnakeAI ({_snakeName}): Tune effect applied — {effect}");
         }
 
         /// <summary>
@@ -1480,7 +1278,6 @@ namespace SnakeEnchanter.Snakes
                     if (healthSystem != null)
                     {
                         healthSystem.TakeDamage(_scheduledDamage);
-                        // Debug.Log($"SnakeAI ({_snakeName}): Hit player for {_scheduledDamage} damage!");
                     }
                 }
             }
@@ -1507,8 +1304,6 @@ namespace SnakeEnchanter.Snakes
                     // Fallback for other shaders
                     _renderer.material.color = color;
                 }
-
-                // Debug.Log($"SnakeAI ({_snakeName}): Color changed to {color} (State visual feedback)");
             }
             else
             {
@@ -1543,15 +1338,6 @@ namespace SnakeEnchanter.Snakes
         public void BecomeAggressive()
         {
             SetState(SnakeState.Aggressive);
-        }
-
-        /// <summary>
-        /// Applies Freeze effect from Tune 4 (called on all snakes).
-        /// </summary>
-        public void ApplyFreeze()
-        {
-            if (_currentState == SnakeState.Dazed || _currentState == SnakeState.Dead) return;
-            SetState(SnakeState.Frozen);
         }
         #endregion
 
