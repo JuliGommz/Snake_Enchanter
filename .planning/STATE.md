@@ -1,52 +1,58 @@
 # Snake Enchanter - Project State
 
-## Current Position
-
-**Milestone:** v1.0 Submission Ready
-**Phase:** Not started (defining requirements)
-**Plan:** —
-**Status:** Defining requirements
-**Last activity:** 2026-02-18 — Milestone v1.0 started
-
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-02-18)
 
 **Core value:** Precise timing gameplay that feels rewarding when mastered and punishing when failed
-**Current focus:** v1.0 Submission Ready (~Mar 3 deadline)
+**Current focus:** Phase 7 — Spell System (v1.0 start)
 
-## Recent Progress
+## Current Position
 
-**2026-02-18:**
-- ✅ v0.3 milestone archived (tag pushed to remote)
-- ✅ v1.0 milestone scope defined through questioning
-- ✅ PROJECT.md updated with v1.0 target features
+Phase: 7 of 13 (Spell System)
+Plan: 0 of 3 in current phase
+Status: Ready to plan
+Last activity: 2026-02-18 — v1.0 roadmap created, phases 7-13 defined
 
-## Active Issues
+Progress: [░░░░░░░░░░] 0% (v1.0 phases)
 
-**None blocking.**
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0 (v1.0)
+- Average duration: —
+- Total execution time: —
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| — | — | — | — |
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
-**Core Systems (current versions):**
-- PlayerController v1.8 (WASD, mouse look, crouch, Cinemachine)
-- HealthSystem v1.3 (drain, restoration, death animations)
-- TuneController v2.5 (4 Tunes, Genshin-style slider)
-- SnakeAI v1.8.5 (7-state machine, NavMesh, submission-clean)
-- GameManager v1.1.1 (Win/Lose, Mode selection)
-- ExitTrigger v1.0
+### Decisions
 
-**Key Files:**
-- `Assets/_Project/Scripts/Player/PlayerController.cs`
-- `Assets/_Project/Scripts/Snakes/SnakeAI.cs`
-- `Assets/_Project/Scripts/TuneSystem/TuneController.cs`
-- `Assets/_Project/Scenes/GameLevel.unity`
-- `Assets/_Project/Scenes/MainMenu.unity`
+Recent decisions affecting current work:
 
-**Timeline:**
-- ~2 weeks remaining (Feb 18 - Mar 3, 2026)
-- Fortschritts-Prasentation 2: ~Feb 24
-- Finale Abgabe: ~Mar 3
+- Scroll permanent unlock (Zelda-style) — simpler than consumables, chosen for v1.0
+- Tune 4 debug deferred from v0.3, now fixed in Phase 7 alongside Spell System
+- Phase 12 (EXT) skippable — all COULD features, execute only if time allows after Phase 11
+- Submission prep (SUB) is Phase 13, always last
 
----
-*Last updated: 2026-02-18 after v1.0 milestone started*
+### Pending Todos
+
+None.
+
+### Blockers/Concerns
+
+- Tune 4 (Freeze) non-functional — root cause unknown, Phase 7 must diagnose
+- FindObjectsByType O(n) scan per tune event — acceptable for now, flag if performance issues appear
+
+## Session Continuity
+
+Last session: 2026-02-18
+Stopped at: Roadmap created for v1.0 — Phase 7 ready to plan
+Resume file: None

@@ -71,42 +71,42 @@ Requirements for submission release. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SPELL-01 | Pending | Pending |
-| SPELL-02 | Pending | Pending |
-| SPELL-03 | Pending | Pending |
-| SPELL-04 | Pending | Pending |
-| MENU-01 | Pending | Pending |
-| MENU-02 | Pending | Pending |
-| MENU-03 | Pending | Pending |
-| MENU-04 | Pending | Pending |
-| API-01 | Pending | Pending |
-| API-02 | Pending | Pending |
-| API-03 | Pending | Pending |
-| AUDIO-01 | Pending | Pending |
-| AUDIO-02 | Pending | Pending |
-| AUDIO-03 | Pending | Pending |
-| AUDIO-04 | Pending | Pending |
-| SUB-01 | Pending | Pending |
-| SUB-02 | Pending | Pending |
-| SUB-03 | Pending | Pending |
-| GAME-01 | Pending | Pending |
-| GAME-02 | Pending | Pending |
-| GAME-03 | Pending | Pending |
-| GAME-04 | Pending | Pending |
-| GAME-05 | Pending | Pending |
-| EXT-01 | Pending | Pending |
-| EXT-02 | Pending | Pending |
-| EXT-03 | Pending | Pending |
-| EXT-04 | Pending | Pending |
-| EXT-05 | Pending | Pending |
-| EXT-06 | Pending | Pending |
-| EXT-07 | Pending | Pending |
+| SPELL-01 | Phase 7 | Pending |
+| SPELL-02 | Phase 7 | Pending |
+| SPELL-03 | Phase 7 | Pending |
+| SPELL-04 | Phase 7 | Pending |
+| MENU-01 | Phase 8 | Pending |
+| MENU-02 | Phase 8 | Pending |
+| MENU-03 | Phase 8 | Pending |
+| MENU-04 | Phase 8 | Pending |
+| API-01 | Phase 9 | Pending |
+| API-02 | Phase 9 | Pending |
+| API-03 | Phase 9 | Pending |
+| AUDIO-01 | Phase 10 | Pending |
+| AUDIO-02 | Phase 10 | Pending |
+| AUDIO-03 | Phase 10 | Pending |
+| AUDIO-04 | Phase 10 | Pending |
+| GAME-01 | Phase 11 | Pending |
+| GAME-02 | Phase 11 | Pending |
+| GAME-03 | Phase 11 | Pending |
+| GAME-04 | Phase 11 | Pending |
+| GAME-05 | Phase 11 | Pending |
+| EXT-01 | Phase 12 | Pending |
+| EXT-02 | Phase 12 | Pending |
+| EXT-03 | Phase 12 | Pending |
+| EXT-04 | Phase 12 | Pending |
+| EXT-05 | Phase 12 | Pending |
+| EXT-06 | Phase 12 | Pending |
+| EXT-07 | Phase 12 | Pending |
+| SUB-01 | Phase 13 | Pending |
+| SUB-02 | Phase 13 | Pending |
+| SUB-03 | Phase 13 | Pending |
 
 **Coverage:**
 - v1.0 requirements: 30 total (18 MUST, 5 SHOULD, 7 COULD)
-- Mapped to phases: 0
-- Unmapped: 30
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 after initial definition*
+*Last updated: 2026-02-18 — traceability mapped to phases 7-13*
