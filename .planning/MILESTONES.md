@@ -73,4 +73,46 @@
 
 ---
 
-*This file tracks completed milestones. Current milestone: v0.3*
+*This file tracks completed milestones.*
+
+---
+
+## v0.3 - Bug Fixes & Stability (Completed)
+
+**Completed:** 2026-02-18 (Sessions 18-19)
+**Duration:** Feb 16-18, 2026 (3 days)
+**Branches:** `feature/enemy-setup` + `feature/cleanup-polish` (merged to main)
+**SnakeAI:** v1.7.2 → v1.8.5
+
+### What Shipped
+
+**NavMesh Migration (Phases 3-6):**
+- NavMesh baked in GameLevel scene — snakes navigate around obstacles
+- NavMeshAgent on all 6 snake prefabs with dual-system transition
+- Full movement migration — SetDestination replaces MoveTowardsSafe()
+- Patrol animation bug fixed — velocity-based triggers instead of booleans
+- SnakeAI v1.8.5 submission-clean — zero Debug.Log spam
+
+**Bug Fixes:**
+1. Snake patrol animation jump/restart — NavMesh pathfinding eliminates collision-based movement
+2. Player floating on spawn — ground detection fix in Start()
+3. Animator W Root → In Place clips for all Slither states
+
+**Key Technical Decisions:**
+- updatePosition=false + LateUpdate sync for animated NavMesh characters
+- 4-condition HasAgentArrived() (Unity remainingDistance=Infinity bug workaround)
+- Velocity-based animation triggers replace boolean-based system
+- LookAtPlayer() retained — NavMeshAgent drives position only, not rotation
+
+**Last Phase Number:** 6 (Phase 7 testing done manually, not GSD-tracked)
+
+### Deferred to Next Milestone
+
+- Tune 4 (Freeze) — code exists but non-functional
+- Backend API integration
+- Menu Scene UI
+- Audio/Visual polish
+- Spell gathering system (new feature)
+
+---
+
