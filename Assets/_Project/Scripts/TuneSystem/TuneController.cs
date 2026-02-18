@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 2.4 - SPELL ANIMATION INTEGRATION
+* Version: 3.0 - 3-Tune Array + Unlock Gate (Phase 7)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -43,6 +43,9 @@
 * - v2.2: TuneSuccessWithId event for snake targeting
 * - v2.3: Fix lambda-leak (B-001), proper unsubscribe in DisableInput
 * - v2.4: Spell animation integration (triggers SpellMove/Daze/Attack/Fear)
+* - v3.0: Refactor to 3-tune array + unlock gate; tunes locked by default,
+*          unlocked via scroll collection via OnTuneUnlocked event;
+*          Tune4/Freeze removed; Tune3 = Shield (SpellShield trigger)
 ====================================================================
 */
 
@@ -64,21 +67,16 @@ namespace SnakeEnchanter.Tunes
 
     /// <summary>
     /// Manages Genshin-style Hold & Release timing mechanic.
-    /// Player holds keys 1-4, slider moves, release in triggerzone = success.
+    /// Player holds keys 1-3, slider moves, release in triggerzone = success.
+    /// Tunes are locked by default — unlocked via scroll collection (OnTuneUnlocked event).
     /// Uses New Input System exclusively.
     /// </summary>
     public class TuneController : MonoBehaviour
     {
         #region Tune Configuration
         [Header("Tune Configurations (ScriptableObjects)")]
-        [Tooltip("Tune 1 - Move Command")]
-        [SerializeField] private TuneConfig _tune1Config;
-        [Tooltip("Tune 2 - Daze Command")]
-        [SerializeField] private TuneConfig _tune2Config;
-        [Tooltip("Tune 3 - Attack Command")]
-        [SerializeField] private TuneConfig _tune3Config;
-        [Tooltip("Tune 4 - Freeze Command (Advanced Mode)")]
-        [SerializeField] private TuneConfig _tune4Config;
+        [Tooltip("Index 0=Move, 1=Daze, 2=Shield")]
+        [SerializeField] private TuneConfig[] _tuneConfigs = new TuneConfig[3];
 
         [Header("Fallback Values (if no ScriptableObject)")]
         [Tooltip("Total slider duration in seconds")]
@@ -87,10 +85,6 @@ namespace SnakeEnchanter.Tunes
         [SerializeField] private float _defaultZoneStart = 0.4f;
         [Tooltip("Triggerzone end position (0-1)")]
         [SerializeField] private float _defaultZoneEnd = 0.65f;
-
-        [Header("Tune 4 Availability")]
-        [Tooltip("Set to true for testing - normally unlocked via progression")]
-        [SerializeField] private bool _tune4Unlocked = true; // TESTING: Default true for Phase 2
 
         [Header("Mode Settings")]
         [Tooltip("Simple Mode adds this to zone size")]
@@ -102,6 +96,10 @@ namespace SnakeEnchanter.Tunes
         #endregion
 
         #region Private Fields
+        // Unlock state — all locked by default, set to true via OnTuneUnlocked event
+        // NOT serialized: runtime state managed by scroll pickup system
+        private bool[] _tuneUnlocked = new bool[3];
+
         // Current tune state
         private bool _isHolding = false;
         private int _currentTuneNumber = 0;
@@ -118,21 +116,14 @@ namespace SnakeEnchanter.Tunes
         // Reference to animator for spell animations
         private Animator _animator;
 
-        // Input System actions
-        private InputAction _tune1Action;
-        private InputAction _tune2Action;
-        private InputAction _tune3Action;
-        private InputAction _tune4Action;
+        // Input System actions — array[0]=Tune1, [1]=Tune2, [2]=Tune3
+        private InputAction[] _tuneActions = new InputAction[3];
 
         // Cached delegates (fix B-001: lambdas can't be unsubscribed)
-        private System.Action<InputAction.CallbackContext> _onTune1Started;
-        private System.Action<InputAction.CallbackContext> _onTune1Canceled;
-        private System.Action<InputAction.CallbackContext> _onTune2Started;
-        private System.Action<InputAction.CallbackContext> _onTune2Canceled;
-        private System.Action<InputAction.CallbackContext> _onTune3Started;
-        private System.Action<InputAction.CallbackContext> _onTune3Canceled;
-        private System.Action<InputAction.CallbackContext> _onTune4Started;
-        private System.Action<InputAction.CallbackContext> _onTune4Canceled;
+        private System.Action<InputAction.CallbackContext>[] _onTuneStarted =
+            new System.Action<InputAction.CallbackContext>[3];
+        private System.Action<InputAction.CallbackContext>[] _onTuneCanceled =
+            new System.Action<InputAction.CallbackContext>[3];
         #endregion
 
         #region Properties
@@ -142,7 +133,7 @@ namespace SnakeEnchanter.Tunes
         public bool IsHolding => _isHolding;
 
         /// <summary>
-        /// Current tune number being cast (1-4), 0 if none.
+        /// Current tune number being cast (1-3), 0 if none.
         /// </summary>
         public int CurrentTuneNumber => _currentTuneNumber;
 
@@ -162,9 +153,10 @@ namespace SnakeEnchanter.Tunes
         public float ZoneEnd => _activeZoneEnd;
 
         /// <summary>
-        /// Is Tune 4 available?
+        /// Is the given tune number unlocked? tuneNumber is 1-based (1, 2, or 3).
         /// </summary>
-        public bool IsTune4Unlocked => _tune4Unlocked;
+        public bool IsTuneUnlocked(int tuneNumber) =>
+            tuneNumber >= 1 && tuneNumber <= 3 && _tuneUnlocked[tuneNumber - 1];
 
         /// <summary>
         /// Current timing state for UI feedback.
@@ -198,14 +190,13 @@ namespace SnakeEnchanter.Tunes
             }
 
             // Cache delegates to enable proper unsubscription (B-001 fix)
-            _onTune1Started = ctx => OnTuneKeyPressed(1);
-            _onTune1Canceled = ctx => OnTuneKeyReleased(1);
-            _onTune2Started = ctx => OnTuneKeyPressed(2);
-            _onTune2Canceled = ctx => OnTuneKeyReleased(2);
-            _onTune3Started = ctx => OnTuneKeyPressed(3);
-            _onTune3Canceled = ctx => OnTuneKeyReleased(3);
-            _onTune4Started = ctx => OnTuneKeyPressed(4);
-            _onTune4Canceled = ctx => OnTuneKeyReleased(4);
+            // IMPORTANT: capture tuneNum in local variable — do NOT use loop variable i in lambda (closure gotcha)
+            for (int i = 0; i < 3; i++)
+            {
+                int tuneNum = i + 1;
+                _onTuneStarted[i] = ctx => OnTuneKeyPressed(tuneNum);
+                _onTuneCanceled[i] = ctx => OnTuneKeyReleased(tuneNum);
+            }
 
             SetupInputActions();
         }
@@ -213,11 +204,13 @@ namespace SnakeEnchanter.Tunes
         private void OnEnable()
         {
             EnableInput();
+            GameEvents.OnTuneUnlocked += OnTuneUnlockedEvent;
         }
 
         private void OnDisable()
         {
             DisableInput();
+            GameEvents.OnTuneUnlocked -= OnTuneUnlockedEvent;
         }
 
         private void Update()
@@ -247,10 +240,9 @@ namespace SnakeEnchanter.Tunes
                 var playerMap = _inputActions.FindActionMap("Player");
                 if (playerMap != null)
                 {
-                    _tune1Action = playerMap.FindAction("Tune1");
-                    _tune2Action = playerMap.FindAction("Tune2");
-                    _tune3Action = playerMap.FindAction("Tune3");
-                    _tune4Action = playerMap.FindAction("Tune4");
+                    _tuneActions[0] = playerMap.FindAction("Tune1");
+                    _tuneActions[1] = playerMap.FindAction("Tune2");
+                    _tuneActions[2] = playerMap.FindAction("Tune3");
                 }
                 else
                 {
@@ -265,63 +257,27 @@ namespace SnakeEnchanter.Tunes
 
         private void EnableInput()
         {
-            if (_tune1Action != null)
+            for (int i = 0; i < 3; i++)
             {
-                _tune1Action.Enable();
-                _tune1Action.started += _onTune1Started;
-                _tune1Action.canceled += _onTune1Canceled;
-            }
-
-            if (_tune2Action != null)
-            {
-                _tune2Action.Enable();
-                _tune2Action.started += _onTune2Started;
-                _tune2Action.canceled += _onTune2Canceled;
-            }
-
-            if (_tune3Action != null)
-            {
-                _tune3Action.Enable();
-                _tune3Action.started += _onTune3Started;
-                _tune3Action.canceled += _onTune3Canceled;
-            }
-
-            if (_tune4Action != null)
-            {
-                _tune4Action.Enable();
-                _tune4Action.started += _onTune4Started;
-                _tune4Action.canceled += _onTune4Canceled;
+                if (_tuneActions[i] != null)
+                {
+                    _tuneActions[i].Enable();
+                    _tuneActions[i].started += _onTuneStarted[i];
+                    _tuneActions[i].canceled += _onTuneCanceled[i];
+                }
             }
         }
 
         private void DisableInput()
         {
-            if (_tune1Action != null)
+            for (int i = 0; i < 3; i++)
             {
-                _tune1Action.started -= _onTune1Started;
-                _tune1Action.canceled -= _onTune1Canceled;
-                _tune1Action.Disable();
-            }
-
-            if (_tune2Action != null)
-            {
-                _tune2Action.started -= _onTune2Started;
-                _tune2Action.canceled -= _onTune2Canceled;
-                _tune2Action.Disable();
-            }
-
-            if (_tune3Action != null)
-            {
-                _tune3Action.started -= _onTune3Started;
-                _tune3Action.canceled -= _onTune3Canceled;
-                _tune3Action.Disable();
-            }
-
-            if (_tune4Action != null)
-            {
-                _tune4Action.started -= _onTune4Started;
-                _tune4Action.canceled -= _onTune4Canceled;
-                _tune4Action.Disable();
+                if (_tuneActions[i] != null)
+                {
+                    _tuneActions[i].started -= _onTuneStarted[i];
+                    _tuneActions[i].canceled -= _onTuneCanceled[i];
+                    _tuneActions[i].Disable();
+                }
             }
         }
 
@@ -330,18 +286,14 @@ namespace SnakeEnchanter.Tunes
             // Don't start new tune if already holding one
             if (_isHolding) return;
 
-            // Check if Tune 4 is unlocked
-            if (tuneNumber == 4 && !_tune4Unlocked) return;
+            // Validate tune number
+            int idx = tuneNumber - 1;
+            if (idx < 0 || idx >= 3) return;
 
-            TuneConfig config = tuneNumber switch
-            {
-                1 => _tune1Config,
-                2 => _tune2Config,
-                3 => _tune3Config,
-                4 => _tune4Config,
-                _ => null
-            };
+            // Silently ignore locked tunes — player must collect scroll first
+            if (!_tuneUnlocked[idx]) return;
 
+            TuneConfig config = _tuneConfigs[idx];
             StartTune(tuneNumber, config);
         }
 
@@ -351,6 +303,22 @@ namespace SnakeEnchanter.Tunes
             if (_isHolding && _currentTuneNumber == tuneNumber)
             {
                 ReleaseTune();
+            }
+        }
+        #endregion
+
+        #region Unlock System
+        /// <summary>
+        /// Called when a tune is unlocked via scroll collection.
+        /// Sets the corresponding unlock flag so the tune key becomes functional.
+        /// </summary>
+        private void OnTuneUnlockedEvent(int tuneNumber)
+        {
+            int idx = tuneNumber - 1;
+            if (idx >= 0 && idx < _tuneUnlocked.Length)
+            {
+                _tuneUnlocked[idx] = true;
+                Debug.Log($"TuneController: Tune {tuneNumber} unlocked!");
             }
         }
         #endregion
@@ -484,8 +452,7 @@ namespace SnakeEnchanter.Tunes
                         {
                             1 => "SpellMove",
                             2 => "SpellDaze",
-                            3 => "SpellAttack",
-                            4 => "SpellFear",
+                            3 => "SpellShield",
                             _ => null
                         };
 
@@ -513,16 +480,6 @@ namespace SnakeEnchanter.Tunes
         #endregion
 
         #region Public Methods
-        /// <summary>
-        /// Unlocks Tune 4 (Advanced Mode scroll pickup).
-        /// </summary>
-        public void UnlockTune4()
-        {
-            if (_tune4Unlocked) return;
-            _tune4Unlocked = true;
-            Debug.Log("TuneController: Tune 4 (Freeze) unlocked!");
-        }
-
         /// <summary>
         /// Sets game mode (Simple vs Advanced).
         /// </summary>
@@ -559,7 +516,7 @@ namespace SnakeEnchanter.Tunes
             if (!_showDebugInfo) return;
 
             GUI.color = Color.white;
-            GUILayout.BeginArea(new Rect(10, 170, 400, 250));
+            GUILayout.BeginArea(new Rect(10, 170, 400, 270));
 
             GUIStyle headerStyle = new GUIStyle(GUI.skin.label) { richText = true, fontSize = 14 };
             GUILayout.Label("<b>TuneController Debug (ADR-008 Slider)</b>", headerStyle);
@@ -568,7 +525,9 @@ namespace SnakeEnchanter.Tunes
             GUILayout.Label($"Slider Position: {_sliderPosition:F3}");
             GUILayout.Label($"State: {CurrentTimingState}");
             GUILayout.Label($"Mode: {(_isSimpleMode ? "Simple" : "Advanced")}");
-            GUILayout.Label($"Tune 4 Unlocked: {_tune4Unlocked}");
+            GUILayout.Label($"Tune 1 (Move) Unlocked: {_tuneUnlocked[0]}");
+            GUILayout.Label($"Tune 2 (Daze) Unlocked: {_tuneUnlocked[1]}");
+            GUILayout.Label($"Tune 3 (Shield) Unlocked: {_tuneUnlocked[2]}");
 
             GUILayout.Space(10);
             GUILayout.Label($"<b>Active Zone:</b> {_activeZoneStart:F2} - {_activeZoneEnd:F2}", headerStyle);
@@ -579,10 +538,6 @@ namespace SnakeEnchanter.Tunes
             DrawSliderVisualization();
 
             GUILayout.Space(10);
-            if (GUILayout.Button("Unlock Tune 4"))
-            {
-                UnlockTune4();
-            }
             if (GUILayout.Button("Toggle Mode"))
             {
                 SetSimpleMode(!_isSimpleMode);
