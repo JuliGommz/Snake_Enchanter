@@ -56,13 +56,13 @@ See: `.planning/milestones/v0.3-ROADMAP.md` for full details
   5. HP heals only when Move/Daze actually charms a snake (not on Shield, not on empty casts)
   6. Move/Daze require snake in range to cast; Shield castable anywhere; HUD shows range indicator
   7. All spells have cooldown (both modes). Advanced mode: limited charges per spell (SerializeField configurable)
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 07-01: Scroll pickup prefabs + SpellUnlockSystem (collect, persist unlock state, pause panel, fire events)
-- [ ] 07-02: TuneController 3-tune refactor + dynamic HUD (empty→grow) + lock integration
-- [ ] 07-03: Tune 3 Shield implementation (duration, block, visual feedback, no-recast-while-active)
-- [ ] 07-04: Spell casting rules — range check, cooldown, charges (Advanced), heal-on-charm-only, HUD indicators
+- [ ] 07-01-PLAN.md — Events foundation + SnakeEffect enum + scroll pickup + SpellUnlockSystem (Wave 1)
+- [ ] 07-02-PLAN.md — TuneController 3-tune array refactor + dynamic SpellHUDController (Wave 2)
+- [ ] 07-03-PLAN.md — ShieldComponent + HealthSystem shield intercept + screen edge glow (Wave 2)
+- [ ] 07-04-PLAN.md — Spell casting rules: range, cooldown, charges, heal-on-charm, HUD indicators (Wave 3)
 
 ### Phase 8: Menu & Win Screen
 **Goal**: Players start a game from a proper menu with mode selection and see stats when they win
@@ -168,7 +168,7 @@ Plans:
 | 4. Component Integration | v0.3 | 2/2 | Complete | 2026-02-17 |
 | 5. Movement Migration | v0.3 | 4/3 | Complete | 2026-02-17 |
 | 6. Cleanup & Polish | v0.3 | 1/1 | Complete | 2026-02-17 |
-| 7. Spell System | v1.0 | 0/4 | Not started | - |
+| 7. Spell System | v1.0 | 0/4 | Planned | - |
 | 8. Menu & Win Screen | v1.0 | 0/2 | Not started | - |
 | 9. Backend API | v1.0 | 0/2 | Not started | - |
 | 10. Audio | v1.0 | 0/2 | Not started | - |
