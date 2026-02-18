@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 3.1 - Spell casting rules: range, cooldown, charges, Shield wiring
+* Version: 3.2 - Audio section playback with fade in/out
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -53,6 +53,7 @@
 ====================================================================
 */
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using SnakeEnchanter.Core;
@@ -78,6 +79,7 @@ namespace SnakeEnchanter.Tunes
     /// Shield activation + no-recast-while-active, TuneSuccessWithId only for snake-targeting tunes.
     /// Uses New Input System exclusively.
     /// </summary>
+    [RequireComponent(typeof(AudioSource))]
     public class TuneController : MonoBehaviour
     {
         #region Tune Configuration
@@ -110,6 +112,11 @@ namespace SnakeEnchanter.Tunes
 
         [Tooltip("Layer mask for snake range check (leave default for all layers)")]
         [SerializeField] private LayerMask _snakeLayerMask;
+
+        [Header("Audio")]
+        [Tooltip("Maximum volume for melody playback")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _melodyVolume = 0.8f;
 
         [Header("Input")]
         [SerializeField] private InputActionAsset _inputActions;
@@ -147,6 +154,10 @@ namespace SnakeEnchanter.Tunes
 
         // Last known range state for debounce
         private bool _lastSnakeInRange = false;
+
+        // Audio playback
+        private AudioSource _melodySource;
+        private Coroutine _fadeCoroutine;
 
         // Input System actions — array[0]=Tune1, [1]=Tune2, [2]=Tune3
         private InputAction[] _tuneActions = new InputAction[3];
@@ -243,6 +254,12 @@ namespace SnakeEnchanter.Tunes
                 _onTuneCanceled[i] = ctx => OnTuneKeyReleased(tuneNum);
             }
 
+            // Audio setup
+            _melodySource = GetComponent<AudioSource>();
+            _melodySource.playOnAwake = false;
+            _melodySource.loop = false;
+            _melodySource.spatialBlend = 0f; // 2D sound (UI feedback, not positional)
+
             SetupInputActions();
         }
 
@@ -265,6 +282,7 @@ namespace SnakeEnchanter.Tunes
             if (_isHolding)
             {
                 UpdateSlider();
+                MonitorMelodySectionEnd();
             }
 
             // Tick cooldown timers
@@ -451,6 +469,10 @@ namespace SnakeEnchanter.Tunes
 
             // Notify systems
             GameEvents.TuneStarted(tuneNumber);
+
+            // Start melody playback with fade-in
+            StartMelodyPlayback(config);
+
             Debug.Log($"TuneController: Started Tune {tuneNumber} | Duration: {_activeDuration}s | Zone: {_activeZoneStart:F2}-{_activeZoneEnd:F2}");
         }
 
@@ -509,6 +531,9 @@ namespace SnakeEnchanter.Tunes
         {
             int tuneNumber = _currentTuneNumber;
             float finalPosition = _sliderPosition;
+
+            // Stop melody with fade-out (before state reset — _currentTuneNumber still valid)
+            StopMelodyPlayback();
 
             // Reset state
             _isHolding = false;
@@ -589,6 +614,131 @@ namespace SnakeEnchanter.Tunes
                     Debug.Log($"TuneController: Tune {tuneNumber} FAIL (Too Late) - SNAKE ATTACKS! | Position: {finalPosition:F2} > Zone {_activeZoneEnd:F2}");
                     break;
             }
+        }
+        #endregion
+
+        #region Audio Playback
+        /// <summary>
+        /// Starts melody playback from the configured section start point with fade-in.
+        /// </summary>
+        private void StartMelodyPlayback(TuneConfig config)
+        {
+            if (config == null || config.melody == null || _melodySource == null) return;
+
+            // Cancel any active fade
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+                _fadeCoroutine = null;
+            }
+
+            _melodySource.clip = config.melody;
+            _melodySource.time = config.melodyStartPoint;
+            _melodySource.volume = 0f;
+            _melodySource.Play();
+
+            float fadeInDuration = config.FadeInDuration;
+            if (fadeInDuration > 0.01f)
+            {
+                _fadeCoroutine = StartCoroutine(FadeCoroutine(0f, _melodyVolume, fadeInDuration));
+            }
+            else
+            {
+                _melodySource.volume = _melodyVolume;
+            }
+        }
+
+        /// <summary>
+        /// Stops melody playback with fade-out. Uses the active tune's config for fade duration.
+        /// </summary>
+        private void StopMelodyPlayback()
+        {
+            if (_melodySource == null || !_melodySource.isPlaying) return;
+
+            // Cancel any active fade
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+                _fadeCoroutine = null;
+            }
+
+            // Get fade-out duration from current tune config
+            int idx = _currentTuneNumber - 1;
+            float fadeOutDuration = 0f;
+            if (idx >= 0 && idx < _tuneConfigs.Length && _tuneConfigs[idx] != null)
+            {
+                fadeOutDuration = _tuneConfigs[idx].FadeOutDuration;
+            }
+
+            if (fadeOutDuration > 0.01f)
+            {
+                _fadeCoroutine = StartCoroutine(FadeCoroutine(_melodySource.volume, 0f, fadeOutDuration, stopAfterFade: true));
+            }
+            else
+            {
+                _melodySource.Stop();
+                _melodySource.volume = 0f;
+            }
+        }
+
+        /// <summary>
+        /// Monitors melody playback position and triggers natural fade-out when approaching section end.
+        /// Called from Update() while holding a tune key.
+        /// </summary>
+        private void MonitorMelodySectionEnd()
+        {
+            if (_melodySource == null || !_melodySource.isPlaying) return;
+
+            int idx = _currentTuneNumber - 1;
+            if (idx < 0 || idx >= _tuneConfigs.Length || _tuneConfigs[idx] == null) return;
+
+            TuneConfig cfg = _tuneConfigs[idx];
+            float endPoint = cfg.EffectiveMelodyEndPoint;
+            if (endPoint <= 0f) return;
+
+            float fadeOutDuration = cfg.FadeOutDuration;
+            float fadeOutStart = endPoint - fadeOutDuration;
+
+            // Begin natural fade-out when approaching section end
+            if (_melodySource.time >= fadeOutStart && _fadeCoroutine == null && _melodySource.volume > 0.01f)
+            {
+                float remaining = endPoint - _melodySource.time;
+                if (remaining > 0.01f)
+                {
+                    _fadeCoroutine = StartCoroutine(FadeCoroutine(_melodySource.volume, 0f, remaining, stopAfterFade: true));
+                }
+                else
+                {
+                    _melodySource.Stop();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Smoothly transitions AudioSource volume between two values over the given duration.
+        /// Optionally stops the AudioSource after reaching the target.
+        /// </summary>
+        private IEnumerator FadeCoroutine(float fromVolume, float toVolume, float duration, bool stopAfterFade = false)
+        {
+            float elapsed = 0f;
+            _melodySource.volume = fromVolume;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                _melodySource.volume = Mathf.Lerp(fromVolume, toVolume, t);
+                yield return null;
+            }
+
+            _melodySource.volume = toVolume;
+
+            if (stopAfterFade)
+            {
+                _melodySource.Stop();
+            }
+
+            _fadeCoroutine = null;
         }
         #endregion
 

@@ -81,6 +81,23 @@ namespace SnakeEnchanter.Tunes
 
         [Tooltip("Fail sound effect")]
         public AudioClip failSound;
+
+        [Header("Audio Section (Melody Playback Range)")]
+        [Tooltip("Start point in seconds — where in the clip to begin playback")]
+        [Min(0f)]
+        public float melodyStartPoint = 0f;
+
+        [Tooltip("End point in seconds — where to stop playback (0 = end of clip)")]
+        [Min(0f)]
+        public float melodyEndPoint = 0f;
+
+        [Tooltip("Fade in duration as percentage (0-100%) of the selected section length")]
+        [Range(0f, 100f)]
+        public float fadeInPercent = 10f;
+
+        [Tooltip("Fade out duration as percentage (0-100%) of the selected section length")]
+        [Range(0f, 100f)]
+        public float fadeOutPercent = 15f;
         #endregion
 
         #region Visual
@@ -107,6 +124,31 @@ namespace SnakeEnchanter.Tunes
         /// Validates zone configuration.
         /// </summary>
         public bool IsValid => triggerZoneEnd > triggerZoneStart && duration > 0f;
+
+        /// <summary>
+        /// Effective end point in seconds. If melodyEndPoint is 0, uses full clip length.
+        /// Returns 0 if no melody clip is assigned.
+        /// </summary>
+        public float EffectiveMelodyEndPoint =>
+            melody == null ? 0f :
+            melodyEndPoint <= 0f ? melody.length :
+            Mathf.Min(melodyEndPoint, melody.length);
+
+        /// <summary>
+        /// Duration of the selected audio section in seconds.
+        /// </summary>
+        public float MelodySectionDuration =>
+            Mathf.Max(0f, EffectiveMelodyEndPoint - melodyStartPoint);
+
+        /// <summary>
+        /// Fade in duration in seconds (calculated from percentage of section length).
+        /// </summary>
+        public float FadeInDuration => MelodySectionDuration * (fadeInPercent / 100f);
+
+        /// <summary>
+        /// Fade out duration in seconds (calculated from percentage of section length).
+        /// </summary>
+        public float FadeOutDuration => MelodySectionDuration * (fadeOutPercent / 100f);
         #endregion
 
         #region Editor Validation
@@ -121,6 +163,24 @@ namespace SnakeEnchanter.Tunes
             // Clamp to valid range
             triggerZoneStart = Mathf.Clamp(triggerZoneStart, 0f, 0.9f);
             triggerZoneEnd = Mathf.Clamp(triggerZoneEnd, triggerZoneStart + 0.05f, 1f);
+
+            // Audio section validation
+            if (melody != null)
+            {
+                melodyStartPoint = Mathf.Clamp(melodyStartPoint, 0f, melody.length);
+                if (melodyEndPoint > 0f)
+                {
+                    melodyEndPoint = Mathf.Clamp(melodyEndPoint, melodyStartPoint + 0.1f, melody.length);
+                }
+            }
+
+            // Prevent combined fade percentages from exceeding 100%
+            if (fadeInPercent + fadeOutPercent > 100f)
+            {
+                float ratio = 100f / (fadeInPercent + fadeOutPercent);
+                fadeInPercent *= ratio;
+                fadeOutPercent *= ratio;
+            }
         }
         #endregion
     }
