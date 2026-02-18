@@ -1,332 +1,99 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-15 (Session 17 - SnakeAI v1.7.2 Bug Fixes COMPLETE)
+**Letzte Aktualisierung:** 2026-02-18
 
 ---
 
-## ⚡ QUICK START FÜR NÄCHSTE SESSION
+## QUICK START
 
-**Aktueller Branch:** `feature/enemy-setup`
-**Letzter Commit:** `9cc945d` - "fix: SnakeAI v1.7.2 - Die Animation Loop Fixed"
+**Branch:** `main`
+**Letzter Commit:** `d6eaec0` - "refactor: restructure _Project folder"
 
-**Status:** SnakeAI v1.7.2 COMPLETE ✅ | 4 Critical Bugs FIXED ✅
-**Nächster Schritt:** Phase 2 Final Testing (Slither L/R, Tune 4) → Branch Merge
+**Milestone:** v1.0 Submission Ready (Phases 7-13)
+**Aktuelle Phase:** 7 - Spell System (Plans 07-01 bis 07-03 done, 07-04 auto tasks done - checkpoint pending)
+**Fortschritt:** ~30% von v1.0
 
----
-
-## 🎯 SESSION 17 ZUSAMMENFASSUNG (2026-02-15)
-
-### 🔧 Bug Fixes - SnakeAI v1.7.0 → v1.7.2
-
-**3 Commits, 4 Critical Bugs Fixed:**
-
-#### ✅ Commit `14b7df5` - SnakeAI v1.7.1
-1. **IsDazed Parameter ERROR** - Controller Mismatch
-   - Problem: Prefabs nutzten External_Assets controller (OHNE IsDazed)
-   - Fix: Alle 6 Snake Prefabs auf _Project controller umgestellt
-   - Result: "Parameter 'IsDazed' does not exist" ERROR behoben
-
-2. **Attack Cooldown nach Daze**
-   - Problem: Snake konnte 4s nicht angreifen nach Dazed → Idle
-   - Fix: `_lastAttackTime = 0f` beim Verlassen von Dazed state
-   - Result: Snake greift sofort an nach Daze-Ende
-
-3. **Spell 1 stoppt Patrol** (KEIN BUG - Working as Intended)
-   - Analyse: Spell out-of-range → Snake ignoriert ✅
-   - Player visible → Snake beobachtet statt Patrol ✅
-
-#### ✅ Commit `9cc945d` - SnakeAI v1.7.2
-4. **Die Animation Loop**
-   - Problem: Snake fiel 2x runter + stand sofort auf
-   - Root Cause: Dead state setzte IsDazed NICHT → Die → Idle Transition
-   - Fix: `IsDazed=true` in Dead state setzen
-   - Result: Snake bleibt in Die Animation (collapsed)
-
-### 📊 Testing Results (User)
-
-**✅ Tune 2 (Daze):**
-- Works perfectly, no debug errors
-- IsDazed parameter error RESOLVED
-
-**✅ Tune 3 (Attack):**
-- Snake greift RobotKyle an (Tag "Creature")
-- Both Snake + Creature die (Phase 1 simplified design)
-- **BACKLOG (Phase 3):** Kampf-System mit HP (Snake kann überleben/sterben basierend auf Creature Interaction)
-
-**⏳ Still TODO:**
-- Slither Left/Right testen (nur Forward getestet)
-- Tune 4 (Freeze) testen
-
-### 📚 Documentation Created
-
-**GSD Debug Session:**
-- `.planning/debug/resolved/snake-ai-detection-targeting-bugs.md` - Full investigation
-- `.planning/debug/ANIMATOR_FIX_INSTRUCTIONS.md` - Unity Editor fix guide
-- `.planning/debug/FIX_SUMMARY.md` - Comprehensive fix summary
+**GSD Tracking:** `.planning/STATE.md` (detaillierter Stand)
 
 ---
 
-## 🎯 SESSION 16 ZUSAMMENFASSUNG (2026-02-14)
+## WAS GERADE PASSIERT
 
-### Was funktioniert (SnakeAI v1.6.0):
+Phase 7 (Spell System) ist fast fertig. Plans 07-01 bis 07-03 sind komplett implementiert. Plan 07-04 (Spell Casting Rules) auto tasks sind done, wartet auf Human Verification im Unity Editor.
 
-#### ✅ 1. Tune 2 (Daze) - Complete Rename & Behavior
-- **Rename:** Sleep → Daze (SnakeState, SnakeEffect, UI, Editor, Documentation)
-- **Behavior:** 8s timer, Blue glow, collision OFF
-- **Animation:** Die (snake collapses)
-- **Transition:** After timer → Idle (IsDazed=false)
-- **Code:** SnakeAI.cs SetState(), ApplyTuneEffect()
-
-#### ✅ 2. Tune 3 (Attack Creature) - Non-Snake Targeting
-- **Design:** Snakes do NOT attack other snakes
-- **Targeting:** FindNearestCreature() skips ALL GameObjects with SnakeAI component
-- **Future-Proof:** Allows adding non-snake enemies (monsters, etc.)
-- **Phase 1 Test:** Attacks RobotKyle (no real enemies exist yet)
-- **Code:** SnakeAI.cs FindNearestCreature(), StartAttackingEnemy()
-
-#### ✅ 3. Directional Slither Animations
-- **3 Directions:** Forward, Left, Right (Bool parameters)
-- **Logic:** InverseTransformDirection() converts world movement to local
-- **Selection:** Compare forward (z) vs right (x) magnitude
-- **Tracking:** _lastMoveDirection updated in MoveTowardsSafe()
-- **Code:** SnakeAI.cs UpdateMovementAnimation()
-
-#### ✅ 4. Debug Logging System
-- **Spell States:** All 4 Tunes log entry/exit with parameters
-- **Attacks:** Bite/Breath/Projectile log damage, distance, delay
-- **Daze:** IsDazed transitions logged (true/false)
-- **Attack Creature:** Target name, distance, neutralization
-- **Result:** Full visibility for testing
-
-### Dateien geändert (Session 16):
-
-**✅ Committed:**
-- SnakeAI.cs v1.6.0 (Directional Slither, Debug Logging)
-- TuneConfig.cs (SnakeEffect.Daze)
-- TuneController.cs (Tooltip update)
-- TuneConfigCreator.cs (Tune2_Daze)
-- TuneSliderUI.cs (Label "Daze")
-- DESIGN_CHANGES.md (NEW - Session 16 documentation + BACKLOG)
-- Arbeitsprotokoll (Session 16 entry)
-
-**⏳ Uncommitted:**
-- GameLevel.unity (Scene changes)
-- Snake Prefabs (Animator parameters, Material Emission)
-- Toon Cobra Controller (IsDazed, Slither parameters)
-- TagManager.asset (neue Tags)
-- SpaceRobotKyle asset (Test enemy for Tune 3)
+Parallel dazu: Folder Restructuring wurde durchgefuhrt und committed.
 
 ---
 
-## 📚 BACKLOG - Phase 3 Features (Session 16)
+## ABGESCHLOSSENE MILESTONES
 
-### 🔴 Spell System Enhancements:
+| Milestone | Status | Shipped |
+|-----------|--------|---------|
+| v0.1 SPIELBAR | DONE | 2026-02-09 |
+| v0.2 KOMPLETT | DONE | 2026-02-15 |
+| v0.3 Bug Fixes & Stability | DONE | 2026-02-18 |
 
-1. **Two-Level Success System:**
-   - Level 1: Spell Cast Success (Player timing)
-   - Level 2: Enemy Enchanted Success (Random chance)
+## v1.0 PHASEN-UBERSICHT
 
-2. **Player Spell Cooldown:**
-   - Prevents spam-casting
-   - Inspector-configurable per spell
-
-3. **Player Success Rate System:**
-   - 50-90% chance based on PlayerHealth
-   - Random roll per enemy in range
-
-4. **Spell Range System:**
-   - Inspector-definable range per spell
-   - Only enemies in range affected
-
-5. **Dynamic Slider Balancing:**
-   - Speed variation per spell
-   - Success zone variation
-   - Health-based difficulty scaling
-
-6. **Particle Glow System:**
-   - Replace Material Color Change
-   - Maintain original snake color
-   - State-based particle colors
-
-7. **Enemy Attack System Completion:**
-   - Current implementation incomplete
-
-**Priority:** Medium (Phase 3 - Polish)
+| Phase | Beschreibung | Status |
+|-------|-------------|--------|
+| 7 | Spell System (3 Tunes: Move, Daze, Shield) | ~90% (checkpoint pending) |
+| 8 | Menu & UI | pending |
+| 9 | Backend & Stats | pending |
+| 10 | Audio & Music | pending |
+| 11 | Polish & Juice | pending |
+| 12 | Testing & QA | pending |
+| 13 | Build & Submission | pending |
 
 ---
 
-## ✅ SNAKE AI v1.6.0 - COMPLETE FEATURE LIST
+## WAS FUNKTIONIERT
 
-### Core Behaviors (alle funktionieren):
-
-**1. Patrol System:**
-- Random waypoints in 2-3 unit radius
-- Movement via MoveTowardsSafe()
-- Collider-aware (stoppt bei Hindernissen)
-
-**2. Proximity Detection:**
-- Line-of-Sight Raycast zu Player
-- Range-based Behavior Selection
-- State Machine (Idle/Aggressive/MovedAway/Dazed/AttackingEnemy/Frozen/Dead)
-
-**3. Attack System:**
-- **Bite Attack:** < 0.5 units
-- **Breath Attack:** 4-7 units (Animation + Damage)
-- **Projectile Attack:** 8+ units
-- 4s Cooldown zwischen Attacken
-
-**4. Spell Responses:**
-- **Tune 1 (Move):** Snake bewegt sich zu MoveAwayTarget
-- **Tune 2 (Daze):** Snake wird dazed (8s timer, Blue glow)
-- **Tune 3 (Attack):** Snake greift non-snake creature an
-- **Tune 4 (Freeze):** Alle Snakes eingefroren
-
-**5. Movement Animations:**
-- **Directional Slither:** Forward/Left/Right
-- **Auto-enable:** Aggressive, Patrol, MovedAway states
-- **Auto-disable:** Idle, Dazed, Frozen, Dead states
-
-**6. Visual Feedback:**
-- **Material Emission:** Augen leuchten in State-Farbe
-- **Glow Intensity:** Adjustable via Inspector
-- **State Colors:** Idle=None, MovedAway=White, Dazed=Blue, Aggressive=Red, Frozen=Cyan
-
-**7. Collision Detection:**
-- Environment (Walls + Props)
-- Other Snakes (SphereCast)
-- Player
-- Raycast-basiert (1.0 unit minimum distance)
-
-**8. Debug Logging:**
-- Spell state transitions
-- Attack triggers
-- Daze timer events
-- Attack creature targeting
+- Player Controller v1.8 (New Input System, Crouch, Cinemachine v3.x)
+- Health System v1.5 (Drain, Events, Death Animations, heal-on-charm, shield intercept)
+- Tune System (TuneController v3.1, 3-Tune Array, Unlock Gate, Cooldown, Charges)
+- Snake AI v1.9 (NavMesh, SnakeCharmed event, 7-state machine)
+- SpellScrollPickup + SpellUnlockSystem (scroll-based unlock)
+- SpellHUDController v1.1 (dynamic HUD, cooldown overlay, range indicator)
+- ShieldComponent (8s shield, blocks next attack)
+- Cave Map (Caves Parts Set + Dwarven Pack + ProBuilder/Polybrush)
+- Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
+- Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
+- Win Condition (ExitTrigger)
+- Game Loop (GameManager)
+- Pirate Character komplett setup
 
 ---
 
-## 📦 AKTUELLER STAND
+## FOLDER STRUCTURE (nach Restructuring 2026-02-18)
 
-### Phase: 2 - KOMPLETT (von 4)
-### Branch: `feature/enemy-setup`
-
-### Was funktioniert:
-- ✅ Player Controller v1.7 (New Input System, Crouch, Cinemachine)
-- ✅ Health System v1.3 (Drain, Events, Death Animations)
-- ✅ Tune System (TuneController v2.4, Spell Animations, 4 TuneConfig SOs)
-- ✅ **Snake AI v1.6.0** - COMPLETE
-  - ✅ Patrol System (random waypoints)
-  - ✅ Proximity Detection (line-of-sight)
-  - ✅ Range-based Attacks (Bite/Breath/Projectile)
-  - ✅ Spell Responses (Move/Daze/Attack/Freeze)
-  - ✅ Collision Detection (Environment + Props + Snakes)
-  - ✅ Directional Slither (Forward/Left/Right)
-  - ✅ Visual Feedback (Material Emission)
-  - ✅ Debug Logging (All behaviors)
-- ✅ Cave Map (Caves Parts Set + Dwarven Pack)
-- ✅ Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
-- ✅ Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
-- ✅ Win Condition (ExitTrigger)
-- ✅ Game Loop (GameManager v1.1.1)
-- ✅ **Pirate Character komplett setup**
-- ✅ **MC Animations komplett: Movement (4), Spells (4), Death (2)**
-
-### Was noch nicht fertig ist:
-- ⬜ BACKLOG Items (Phase 3 - Polish)
-
----
-
-## 🧪 TESTING STATUS (Session 16)
-
-### ✅ Getestet & Funktioniert:
-- Tune 1 (Move) - Snake moves away, White glow
-- Tune 2 (Daze) - Code korrekt (IsDazed Bool, 8s timer, Blue glow)
-- Tune 3 (Attack) - Finds RobotKyle, attacks, neutralizes
-- Directional Slither - Forward animation plays during chase
-- Debug Logging - All spell states log correctly
-- Attack System (Bite/Breath/Projectile)
-
-### ⏳ Noch nicht getestet:
-- Slither Left/Right (nur Forward getestet)
-- Death_by_Snakes Animation
-- Tune 4 (Freeze) - No testing this session
-
----
-
-## 📝 LESSONS LEARNED (Session 16)
-
-### Lesson 1: Code Works, Animations Don't Always Follow
-**Problem:** IsDazed Bool set correctly, 8s timer works, but animation behavior unclear
-**Lesson:** Code logic can be correct while visual result differs - not always a code bug
-**Rule:** Test code logic separately from animation system
-
-### Lesson 2: Backlog Management
-**Context:** User identified 7 features that don't belong in current scope
-**Action:** Created BACKLOG section in DESIGN_CHANGES.md
-**Rule:** When features expand scope, document in BACKLOG instead of abandoning
-
-### Lesson 3: Directional Movement Requires Local Space
-**Implementation:** InverseTransformDirection() converts world to local
-**Reason:** Snake's forward direction != world forward
-**Rule:** Character-relative directions always use local space calculations
-
----
-
-## 🎯 NÄCHSTE SCHRITTE (Priorität)
-
-### ✅ Phase 2 Fast Fertig - Noch 2 Tests:
-
-1. **Slither Left/Right testen**
-   - Forward funktioniert ✅
-   - Left/Right Logik implementiert, aber ungetestet
-
-2. **Tune 4 (Freeze) testen**
-   - Code vorhanden, nicht getestet
-
-3. **DANN Branch Merge:** feature/enemy-setup → main
-
-### BACKLOG Features (Phase 3)
-
-**Spell System Enhancements:**
-- Two-Level Success System (Player Timing + Enemy Enchantment)
-- Player Spell Cooldown (Inspector-konfigurierbar)
-- Player Success Rate (50-90% basierend auf Health)
-- Spell Range System (Inspector-definierbar)
-- Dynamic Slider Balancing (Speed/Zone Variation)
-- Particle Glow System (ersetzt Material Color Change)
-
-**Creature Combat System (NEW):**
-- Kampf-System: Snake vs Creature mit HP
-- Creature kann Snake angreifen
-- Snake überlebt/stirbt basierend auf HP-Interaktion
-- Aktuell: Beide sterben (Phase 1 simplified)
-
-### Empfehlung: Phase 2 ABSCHLIESSEN
-- 4 Critical Bugs FIXED ✅
-- Slither/Freeze testen → Branch Merge → Phase 3
+```
+Assets/_Project/
+  Art-Visuals/
+    Animations/          # MC_Controller, Pirate Anims + FBX
+    Images/              # UI Textures
+    Prefabs-FBX-Materials/
+      Cave/              # Cave FBX, Materials, Prefabs, Textures
+      Pirate/            # Pirate Prefab + Original Assets
+      Props/             # Dungeon Props
+      Snakes/            # Snake Prefabs, FBX, Controllers, Materials
+  Scripts/               # Core, Player, Snakes, TuneSystem, UI, Data, Level, Editor
+  ScriptableObjects/
+  Scenes/                # MainMenu, GameLevel
+  Data/                  # Input Actions
+  Design/
+  Media/
+```
 
 ---
 
 ## GIT STATUS
 
 ```
-Branch: feature/enemy-setup (aktiv)
-Letzter Commit: 9cc945d "fix: SnakeAI v1.7.2 - Die Animation Loop Fixed"
+Branch: main
+Letzter Commit: d6eaec0 "refactor: restructure _Project folder"
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
-
-Working tree: MODIFIED (STATE.md uncommitted)
 ```
-
-**Commits Session 17:**
-1. `c146b1f` - Scene + Prefabs setup (Snake Prefabs, TagManager, RobotKyle)
-2. `8f00a58` - Unity package dependencies update (URP, ShaderGraph)
-3. `43feec9` - SnakeAI v1.7.0 - Spell line-of-sight + Dead code cleanup (GSD Debug)
-4. `ed2a970` - Debug session documentation (GSD)
-5. `1b2aef3` - Debug session resolved (GSD)
-6. `14b7df5` - SnakeAI v1.7.1 - Controller Fix + Attack Cooldown Reset
-7. `9cc945d` - SnakeAI v1.7.2 - Die Animation Loop Fixed
-
-**Total:** 7 commits, 4 critical bugs fixed
 
 ---
 
@@ -336,20 +103,20 @@ Working tree: MODIFIED (STATE.md uncommitted)
 AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
 
 ### Kamera-System (Cinemachine v3.x)
-- Cinemachine besitzt Kamera-Position. NIEMALS per Script überschreiben.
+- Cinemachine besitzt Kamera-Position. NIEMALS per Script uberschreiben.
 - PlayerController steuert NUR Pitch (Mouse Y) + Body Yaw (Mouse X)
 
 ### Animation
-- KEINE Flöte (zu komplex) → Spell Animation stattdessen
+- Spell Animation (keine Flote)
 - Root Motion OFF (CharacterController steuert Movement)
 
 ### Git Workflow
 - Feature Branches: `feature/<name>` from main
 - Ein Feature = Ein Branch
-- Nach Merge: Branch löschen
-- NIEMALS uncommitted changes committen ohne User-Bestätigung
+- Nach Merge: Branch loschen
 
----
-
-**Status:** ✅ SNAKE AI v1.6.0 COMPLETE + BACKLOG DEFINED
-**Next:** Phase 2 abschließen ODER BACKLOG Features (Phase 3)
+### Spell System (Phase 7)
+- 3 Tunes: Move, Daze, Shield (Attack + Freeze removed)
+- Scroll-based unlock (Zelda-style)
+- HP heals only on successful charm (Move/Daze), not Shield
+- Cooldown + Charges (Advanced mode)

@@ -58,13 +58,24 @@ Timing-basierte Schlangen-Kontrolle durch Melodien mit Hold & Release System:
 ## Ordnerstruktur
 ```
 Assets/
-├── _Project/           # Eigene Assets
-│   ├── Scripts/        # Core, Player, Snakes, TuneSystem, UI, Data
-│   ├── Prefabs/        # Player, Snakes, Environment, UI
+├── _Project/
+│   ├── Art-Visuals/
+│   │   ├── Animations/          # MC_Controller, Pirate Anims + FBX
+│   │   ├── Images/              # UI Textures (teastain etc.)
+│   │   └── Prefabs-FBX-Materials/
+│   │       ├── Cave/            # Cave FBX, Materials, Prefabs, Textures
+│   │       ├── Pirate/          # Pirate Prefab + Original Assets
+│   │       ├── Props/           # Dungeon Props (Pillars, Walls, etc.)
+│   │       └── Snakes/          # Snake Prefabs, FBX, Controllers, Materials
+│   ├── Scripts/                 # Core, Player, Snakes, TuneSystem, UI, Data, Level, Editor
 │   ├── ScriptableObjects/
-│   └── Scenes/         # MainMenu, GameLevel
-├── Documentation/      # GDD, Projektplan, Arbeitsprotokoll, Media
-└── Plugins/            # Toon Snakes Pack
+│   ├── Scenes/                  # MainMenu, GameLevel
+│   ├── Data/                    # Input Actions, Config
+│   ├── Design/
+│   └── Media/
+├── External_Assets/             # Third-party packages (Caves, Dwarven, Gentleland, Toon Snakes, etc.)
+├── Documentation/               # GDD, Projektplan, Arbeitsprotokoll
+└── Plugins/                     # Toon Snakes Pack (original)
 ```
 
 ## Namespaces
