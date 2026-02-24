@@ -1,13 +1,13 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-18
+**Letzte Aktualisierung:** 2026-02-24
 
 ---
 
 ## QUICK START
 
-**Branch:** `main`
-**Letzter Commit:** `d6eaec0` - "refactor: restructure _Project folder"
+**Branch:** `feature/cave-rebuild`
+**Letzter Commit:** `c69ed43` - "fix(pirate): convert animation system to Humanoid + Bake Into Pose"
 
 **Milestone:** v1.0 Submission Ready (Phases 7-13)
 **Aktuelle Phase:** 7 - Spell System (Plans 07-01 bis 07-03 done, 07-04 auto tasks done - checkpoint pending)
@@ -19,9 +19,14 @@
 
 ## WAS GERADE PASSIERT
 
-Phase 7 (Spell System) ist fast fertig. Plans 07-01 bis 07-03 sind komplett implementiert. Plan 07-04 (Spell Casting Rules) auto tasks sind done, wartet auf Human Verification im Unity Editor.
+Cave-Rebuild Branch: Asset-Konsolidierung + Pirate Animation Fix abgeschlossen.
+- Alle Art-Assets in einheitliche Struktur unter Art-Visuals/ konsolidiert
+- Pirate Animation System auf Humanoid umgestellt (war Generic ohne Avatar)
+- Bake Into Pose konfiguriert (Rotation/Y/XZ) — Player sinkt nicht mehr ein
+- 3 unbenutzte Animations + orphaned Cave Prefabs geloscht
+- Cave Materials auf URP Lit konvertiert, NavMesh gebacken
 
-Parallel dazu: Folder Restructuring wurde durchgefuhrt und committed.
+**Nachster Schritt:** feature/cave-rebuild in main mergen, dann weiter mit Phase 7 Checkpoint oder Phase 8.
 
 ---
 
@@ -61,28 +66,27 @@ Parallel dazu: Folder Restructuring wurde durchgefuhrt und committed.
 - Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
 - Win Condition (ExitTrigger)
 - Game Loop (GameManager)
-- Pirate Character komplett setup
+- Pirate Character: Humanoid Avatar, 10 Animations, Bake Into Pose
 
 ---
 
-## FOLDER STRUCTURE (nach Restructuring 2026-02-18)
+## FOLDER STRUCTURE (nach Konsolidierung 2026-02-24)
 
 ```
 Assets/_Project/
   Art-Visuals/
-    Animations/          # MC_Controller, Pirate Anims + FBX
-    Images/              # UI Textures
-    Prefabs-FBX-Materials/
-      Cave/              # Cave FBX, Materials, Prefabs, Textures
-      Pirate/            # Pirate Prefab + Original Assets
-      Props/             # Dungeon Props
-      Snakes/            # Snake Prefabs, FBX, Controllers, Materials
+    Images/              # UI Textures (teastain)
+    Prefabs-FBX-Materials-Animations/
+      Cave/              # FBX/, Materials/, Prefabs/ (Sample.prefab), Textures/
+      Pirate/            # Mesh/, Animations/, Materials/, Prefabs/, Textures/, MC_Controller
+      Props/             # Dungeon Props (Dwarven Pack)
+      Snakes/            # Controllers/, FBX/, Materials/, Prefabs/, Textures/
   Scripts/               # Core, Player, Snakes, TuneSystem, UI, Data, Level, Editor
   ScriptableObjects/
   Scenes/                # MainMenu, GameLevel
   Data/                  # Input Actions
   Design/
-  Media/
+  Media/                 # Audio/Music, Audio/SFX, Audio/Tunes
 ```
 
 ---
@@ -90,8 +94,8 @@ Assets/_Project/
 ## GIT STATUS
 
 ```
-Branch: main
-Letzter Commit: d6eaec0 "refactor: restructure _Project folder"
+Branch: feature/cave-rebuild
+Letzter Commit: c69ed43 "fix(pirate): convert animation system to Humanoid + Bake Into Pose"
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 ```
 
@@ -107,6 +111,8 @@ AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
 - PlayerController steuert NUR Pitch (Mouse Y) + Body Yaw (Mouse X)
 
 ### Animation
+- Humanoid Rig (Pirate.FBX + alle Animations)
+- Bake Into Pose: Rotation (Body Orientation), Y (Feet), XZ (Center of Mass)
 - Spell Animation (keine Flote)
 - Root Motion OFF (CharacterController steuert Movement)
 
