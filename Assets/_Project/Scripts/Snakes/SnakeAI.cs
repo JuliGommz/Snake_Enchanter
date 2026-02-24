@@ -157,6 +157,7 @@ namespace SnakeEnchanter.Snakes
         Idle,       // Default — blocking path, not aggressive
         Aggressive, // Attacks player on contact (after failed tune)
         MovedAway,  // Charmed with Move tune — cleared path
+        Entranced,  // Listening to Daze melody — faces player, no attack, 3s then → Dazed
         Dazed,      // Charmed with Daze tune — passive, stunned, no collision
         Dead        // Killed (Phase 2+)
     }
@@ -207,6 +208,9 @@ namespace SnakeEnchanter.Snakes
 
         [Tooltip("Time snake stays aggressive before returning to idle (seconds)")]
         [SerializeField] private float _aggressiveDuration = 5f;
+
+        [Tooltip("Time snake listens/is entranced before falling asleep (seconds)")]
+        [SerializeField] private float _entrancedDuration = 3f;
 
         [Tooltip("Time snake stays dazed before returning to idle (seconds)")]
         [SerializeField] private float _dazedDuration = 8f;
@@ -272,6 +276,7 @@ namespace SnakeEnchanter.Snakes
         [Header("Visual Feedback (Phase 1 — Color Change)")]
         [SerializeField] private Color _idleColor = Color.green;
         [SerializeField] private Color _aggressiveColor = Color.red;
+        [SerializeField] private Color _entrancedColor = new Color(1f, 0.85f, 0.2f, 1f); // Amber/gold — listening
         [SerializeField] private Color _dazedColor = new Color(0.5f, 0.5f, 1f, 1f); // Light blue
         [SerializeField] private Color _movedColor = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray transparent
 
@@ -738,6 +743,17 @@ namespace SnakeEnchanter.Snakes
                     }
                     break;
 
+                case SnakeState.Entranced:
+                    // Entranced phase — snake faces player, listens to melody
+                    LookAtPlayer();
+                    _stateTimer -= Time.deltaTime;
+                    if (_stateTimer <= 0f)
+                    {
+                        Debug.Log($"SnakeAI ({_snakeName}): Entranced → Dazed transition");
+                        SetState(SnakeState.Dazed); // Melody worked → snake falls asleep
+                    }
+                    break;
+
                 case SnakeState.Dazed:
                     // Dazed with timer - snake lies on ground until timer expires
                     _stateTimer -= Time.deltaTime;
@@ -906,6 +922,11 @@ namespace SnakeEnchanter.Snakes
             SnakeState previousState = _currentState;
             _currentState = newState;
 
+            // Cancel any pending Invoke calls from previous state
+            // Prevents: MovedAway's StartMoveAwayMovement firing in a different state,
+            // Attack VFX resets, or damage timers carrying over
+            CancelInvoke();
+
             // NavMeshAgent state control (Phase 5)
             // isStopped=true preserves the current path (can resume with isStopped=false)
             // ResetPath() clears destination entirely (for states that don't resume movement)
@@ -913,6 +934,7 @@ namespace SnakeEnchanter.Snakes
             {
                 switch (newState)
                 {
+                    case SnakeState.Entranced:
                     case SnakeState.Dazed:
                     case SnakeState.Dead:
                         // These states never resume agent movement — clear path
@@ -961,15 +983,25 @@ namespace SnakeEnchanter.Snakes
                     Invoke(nameof(StartMoveAwayMovement), _spellAnimationDelay);
                     break;
 
+                case SnakeState.Entranced:
+                    SetVisualColor(_entrancedColor);
+                    EnableCollider(true); // Still solid while listening — not yet neutralized
+                    _stateTimer = _entrancedDuration > 0f ? _entrancedDuration : 3f; // Safety: fallback 3s
+                    Debug.Log($"SnakeAI ({_snakeName}): Entering Entranced | Timer: {_stateTimer}s (config: {_entrancedDuration}s)");
+                    // Snake faces player (handled in UpdateState via LookAtPlayer)
+                    break;
+
                 case SnakeState.Dazed:
                     SetVisualColor(_dazedColor);
                     EnableCollider(false); // GDD: collision disabled when dazed
                     _stateTimer = _dazedDuration; // Set timer for how long snake stays dazed
-                    // Set IsDazed bool to true - keeps snake in Die animation
+                    // Trigger Die animation + IsDazed bool keeps it there
                     if (_animator != null)
                     {
+                        _animator.SetTrigger("Die");
                         _animator.SetBool("IsDazed", true);
                     }
+                    Debug.Log($"SnakeAI ({_snakeName}): Entering Dazed | Timer: {_stateTimer}s | Animator: {(_animator != null ? "OK" : "NULL")}");
                     break;
 
                 case SnakeState.Dead:
@@ -1038,8 +1070,8 @@ namespace SnakeEnchanter.Snakes
                     break;
 
                 case SnakeEffect.Daze:
-                    SetState(SnakeState.Dazed);
-                    GameEvents.SnakeCharmed(2); // Heal triggers here — snake is actually charmed
+                    SetState(SnakeState.Entranced); // Phase 1: listen → then Dazed
+                    GameEvents.SnakeCharmed(2); // Heal triggers here — spell was successful
                     break;
 
                 // Shield has no snake effect — SnakeAI never processes it

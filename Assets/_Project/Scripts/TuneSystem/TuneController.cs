@@ -120,6 +120,10 @@ namespace SnakeEnchanter.Tunes
 
         [Header("Input")]
         [SerializeField] private InputActionAsset _inputActions;
+
+        [Header("Debug")]
+        [Tooltip("Unlock all tunes at start (skip scroll collection). Disable for release!")]
+        [SerializeField] private bool _unlockAllOnStart = true;
         #endregion
 
         #region Private Fields
@@ -158,6 +162,7 @@ namespace SnakeEnchanter.Tunes
         // Audio playback
         private AudioSource _melodySource;
         private Coroutine _fadeCoroutine;
+        private TuneConfig _activeMelodyConfig; // Tracks which config is playing post-success
 
         // Input System actions — array[0]=Tune1, [1]=Tune2, [2]=Tune3
         private InputAction[] _tuneActions = new InputAction[3];
@@ -260,6 +265,13 @@ namespace SnakeEnchanter.Tunes
             _melodySource.loop = false;
             _melodySource.spatialBlend = 0f; // 2D sound (UI feedback, not positional)
 
+            // Debug: unlock all tunes at start (bypasses scroll collection)
+            if (_unlockAllOnStart)
+            {
+                _tuneUnlocked = new bool[] { true, true, true };
+                Debug.Log("TuneController: [DEBUG] All tunes unlocked on start.");
+            }
+
             SetupInputActions();
         }
 
@@ -267,12 +279,14 @@ namespace SnakeEnchanter.Tunes
         {
             EnableInput();
             GameEvents.OnTuneUnlocked += OnTuneUnlockedEvent;
+            GameEvents.OnShieldDeactivated += OnShieldDeactivated;
         }
 
         private void OnDisable()
         {
             DisableInput();
             GameEvents.OnTuneUnlocked -= OnTuneUnlockedEvent;
+            GameEvents.OnShieldDeactivated -= OnShieldDeactivated;
         }
 
         private void Update()
@@ -282,8 +296,10 @@ namespace SnakeEnchanter.Tunes
             if (_isHolding)
             {
                 UpdateSlider();
-                MonitorMelodySectionEnd();
             }
+
+            // Monitor melody section end — runs independently (melody plays post-success)
+            MonitorMelodySectionEnd();
 
             // Tick cooldown timers
             for (int i = 0; i < 3; i++)
@@ -426,6 +442,15 @@ namespace SnakeEnchanter.Tunes
                 Debug.Log($"TuneController: Tune {tuneNumber} unlocked!");
             }
         }
+
+        /// <summary>
+        /// Called when Shield deactivates (absorbed or expired).
+        /// Stops the shield melody with fade-out so audio and shield are perfectly synced.
+        /// </summary>
+        private void OnShieldDeactivated(bool absorbed)
+        {
+            StopMelodyPlayback();
+        }
         #endregion
 
         #region Slider System (ADR-008)
@@ -469,9 +494,6 @@ namespace SnakeEnchanter.Tunes
 
             // Notify systems
             GameEvents.TuneStarted(tuneNumber);
-
-            // Start melody playback with fade-in
-            StartMelodyPlayback(config);
 
             Debug.Log($"TuneController: Started Tune {tuneNumber} | Duration: {_activeDuration}s | Zone: {_activeZoneStart:F2}-{_activeZoneEnd:F2}");
         }
@@ -532,9 +554,6 @@ namespace SnakeEnchanter.Tunes
             int tuneNumber = _currentTuneNumber;
             float finalPosition = _sliderPosition;
 
-            // Stop melody with fade-out (before state reset — _currentTuneNumber still valid)
-            StopMelodyPlayback();
-
             // Reset state
             _isHolding = false;
             _currentTuneNumber = 0;
@@ -578,9 +597,12 @@ namespace SnakeEnchanter.Tunes
                     }
 
                     // Shield activation — Tune 3 success activates the shield directly
+                    // Duration coupled to melody section length (single source of truth = TuneConfig)
                     if (tuneNumber == 3 && _shieldComponent != null)
                     {
-                        _shieldComponent.ActivateShield();
+                        TuneConfig shieldConfig = _tuneConfigs[idx];
+                        float shieldDuration = shieldConfig != null ? shieldConfig.MelodySectionDuration : 0f;
+                        _shieldComponent.ActivateShield(shieldDuration);
                     }
 
                     // Trigger spell animation based on tune number
@@ -599,6 +621,13 @@ namespace SnakeEnchanter.Tunes
                             _animator.SetTrigger(triggerName);
                             Debug.Log($"TuneController: Triggered animation '{triggerName}'");
                         }
+                    }
+
+                    // Play melody AFTER success (not during hold)
+                    if (idx >= 0 && idx < _tuneConfigs.Length)
+                    {
+                        _activeMelodyConfig = _tuneConfigs[idx];
+                        StartMelodyPlayback(_activeMelodyConfig);
                     }
 
                     Debug.Log($"TuneController: Tune {tuneNumber} SUCCESS! | Position: {finalPosition:F2} in Zone [{_activeZoneStart:F2}-{_activeZoneEnd:F2}]");
@@ -662,12 +691,11 @@ namespace SnakeEnchanter.Tunes
                 _fadeCoroutine = null;
             }
 
-            // Get fade-out duration from current tune config
-            int idx = _currentTuneNumber - 1;
+            // Get fade-out duration from active melody config
             float fadeOutDuration = 0f;
-            if (idx >= 0 && idx < _tuneConfigs.Length && _tuneConfigs[idx] != null)
+            if (_activeMelodyConfig != null)
             {
-                fadeOutDuration = _tuneConfigs[idx].FadeOutDuration;
+                fadeOutDuration = _activeMelodyConfig.FadeOutDuration;
             }
 
             if (fadeOutDuration > 0.01f)
@@ -688,11 +716,9 @@ namespace SnakeEnchanter.Tunes
         private void MonitorMelodySectionEnd()
         {
             if (_melodySource == null || !_melodySource.isPlaying) return;
+            if (_activeMelodyConfig == null) return;
 
-            int idx = _currentTuneNumber - 1;
-            if (idx < 0 || idx >= _tuneConfigs.Length || _tuneConfigs[idx] == null) return;
-
-            TuneConfig cfg = _tuneConfigs[idx];
+            TuneConfig cfg = _activeMelodyConfig;
             float endPoint = cfg.EffectiveMelodyEndPoint;
             if (endPoint <= 0f) return;
 

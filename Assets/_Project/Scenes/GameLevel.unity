@@ -3225,9 +3225,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _tuneConfigs:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: afb8927a521d64e46b42f6811806b649, type: 2}
+  - {fileID: 11400000, guid: 93f1134af90dfb64cad1c833125fc4ae, type: 2}
+  - {fileID: 11400000, guid: bf398a36747c874428f9d6e2525133df, type: 2}
   _defaultDuration: 3
   _defaultZoneStart: 0.45
   _defaultZoneEnd: 0.55
@@ -3244,6 +3244,7 @@ MonoBehaviour:
     m_Bits: 0
   _melodyVolume: 0.8
   _inputActions: {fileID: -944628639613478452, guid: a0cba79caa06ff842b9b265de28c868b, type: 3}
+  _unlockAllOnStart: 1
   _showDebugInfo: 1
 --- !u!114 &935108202
 MonoBehaviour:
@@ -3672,7 +3673,7 @@ Transform:
   m_GameObject: {fileID: 1116400195}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 10.3, y: 0, z: -20.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7363,6 +7364,7 @@ Animator:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 220968587}
   - {fileID: 410087041}
   - {fileID: 330585546}
   - {fileID: 832575519}
@@ -7371,7 +7373,6 @@ SceneRoots:
   - {fileID: 232224793}
   - {fileID: 921762306}
   - {fileID: 450711143}
-  - {fileID: 220968587}
   - {fileID: 935108200}
   - {fileID: 1566076315}
   - {fileID: 1432003243}

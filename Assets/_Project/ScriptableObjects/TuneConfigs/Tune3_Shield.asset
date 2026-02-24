@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 38d118c75d058a749a7800e688376228, type: 3}
-  m_Name: Tune1_Move
+  m_Name: Tune3_Shield
   m_EditorClassIdentifier: 
-  tuneName: Move
-  keyNumber: 1
-  resultEffect: 0
-  description: Charms the snake to move away from your path. Quick and forgiving.
+  tuneName: Shield
+  keyNumber: 3
+  resultEffect: 2
+  description: Conjures a protective shield that absorbs the next snake attack.
   duration: 3
   triggerZoneStart: 0.4
   triggerZoneEnd: 0.65
   simpleModeZoneBonus: 0.1
-  melody: {fileID: 8300000, guid: be817f6b0550f73488210971558cfefa, type: 3}
+  melody: {fileID: 8300000, guid: 95b0338ab9bebea4791fc9af7310711c, type: 3}
   successSound: {fileID: 8300000, guid: 2c8be7d36c3f6ea4aae80ffb5edfa730, type: 3}
   failSound: {fileID: 8300000, guid: 210da81cd3e401b46844175a2758c50f, type: 3}
-  melodyStartPoint: 0
-  melodyEndPoint: 12
+  melodyStartPoint: 10
+  melodyEndPoint: 25
   fadeInPercent: 10
   fadeOutPercent: 20
-  zoneColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
+  zoneColor: {r: 0.9, g: 0.8, b: 0.2, a: 1}
   icon: {fileID: 0}

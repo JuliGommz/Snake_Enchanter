@@ -210,8 +210,7 @@ MonoBehaviour:
   _commandRange: 8
   _contactDamage: 10
   _aggressiveDuration: 5
-  _dazedDuration: 6
-  _freezeDuration: 4
+  _dazedDuration: 8
   _moveAwayTarget: {fileID: 0}
   _moveSpeed: 0.6
   _spellAnimationDelay: 3.65
@@ -235,7 +234,6 @@ MonoBehaviour:
   _idleColor: {r: 0, g: 1, b: 0, a: 1}
   _aggressiveColor: {r: 1, g: 0, b: 0, a: 1}
   _dazedColor: {r: 0.5, g: 0.5, b: 1, a: 1}
-  _frozenColor: {r: 0, g: 1, b: 1, a: 1}
   _movedColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
   _poisonBreathFXPrefab: {fileID: 125172, guid: 552251c2a3c3dee40bd6578daad431c7, type: 3}
   _projectileFXPrefab: {fileID: 190672, guid: 0b57796020b4e1345878526bc8a77cb8, type: 3}
