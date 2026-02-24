@@ -47,7 +47,7 @@
 
 **Linting:**
 - No ESLint/Roslyn analyzer configured
-- Unity 2022 LTS default C# conventions apply
+- Unity 6 (6000.0.62f1) default C# conventions apply
 - Nullable reference types not enforced
 
 ## Import Organization

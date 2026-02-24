@@ -393,7 +393,8 @@ namespace SnakeEnchanter.Snakes
                 _agent.updateRotation = false;  // Manual rotation via LookAtPlayer()
                 _agent.speed = _moveSpeed * 0.75f;
                 _agent.stoppingDistance = 0.2f;
-                _agent.isStopped = false;
+                if (_agent.isOnNavMesh)
+                    _agent.isStopped = false;
             }
         }
 
@@ -1383,6 +1384,7 @@ namespace SnakeEnchanter.Snakes
         private void OnGUI()
         {
             if (!_showDebugLabel) return;
+            if (Camera.main == null) return;
 
             // World-to-screen label
             Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 2f);
