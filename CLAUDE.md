@@ -4,7 +4,7 @@
 
 ## Projekt-Übersicht
 - **Name:** Snake Enchanter
-- **Engine:** Unity 3D (2022 LTS, URP)
+- **Engine:** Unity 6 (6000.0.62f1, URP)
 - **Plattform:** Windows, 1920x1080 + Ultrawide, 60 FPS
 - **Zeitraum:** 03.02.2026 – ~03.03.2026
 - **Typ:** Solo-Projekt, akademische Einreichung (PIP-3 Theme B)

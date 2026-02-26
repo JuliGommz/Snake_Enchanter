@@ -1,120 +1,126 @@
 # Requirements: Snake Enchanter
 
-**Defined:** 2026-02-18
+**Defined:** 2026-02-18 (original), **Restructured:** 2026-02-24
 **Core Value:** Precise timing gameplay that feels rewarding when mastered and punishing when failed
 
-## v1.0 Requirements
+## v1.0 MVP Requirements
 
-Requirements for submission release. Each maps to roadmap phases.
+Requirements for academic submission. Restructured 2026-02-24 for MVP focus (cave rebuild + simplified scope).
 
-### Spell System
+### Cave System
 
-- [ ] **SPELL-01**: Player can collect 3 scroll prefabs placed at key positions in cave (1 per QuestRoom path)
-- [ ] **SPELL-02**: Collecting a scroll permanently unlocks the corresponding tune + shows pause panel with description
-- [ ] **SPELL-03**: HUD starts empty; each scroll adds a tune slot (key icon + name + color). Unassigned keys do nothing.
-- [ ] **SPELL-04**: Tune 3 (Shield) gives player an 8s shield blocking the next snake attack (screen-edge glow, shatter on block, no recast while active)
-- [ ] **SPELL-05**: HP heals only when Move/Daze actually charms a snake (not on Shield, not on empty casts)
-- [ ] **SPELL-06**: Move/Daze require snake in range to cast; Shield castable anywhere; HUD shows range indicator
-- [ ] **SPELL-07**: All spells have cooldown timer (SerializeField). Basic mode: unlimited charges. Advanced mode: limited charges per spell (SerializeField configurable).
+- [ ] **CAVE-01**: New simplified cave layout exists with clear path from start to exit
+- [ ] **CAVE-02**: Cave has 3 distinct areas/rooms where scroll pickups can be placed
+- [ ] **CAVE-03**: NavMesh is baked and functional for snake pathfinding in new cave
 
-*Scope change: Reduced from 4 tunes to 3. Old Tune 3 (Attack) removed — needs creature system. Old Tune 4 (Freeze) removed — overlaps Daze. New Tune 3 = Shield.*
-*Scope change: EXT-03 (cooldown) and EXT-05 (range) promoted to MUST — moved from Phase 12 to Phase 7.*
+### Enemy Setup
+
+- [ ] **ENEMY-01**: Snakes are placed in new cave with patrol waypoints
+- [ ] **ENEMY-02**: Snake AI functions correctly (patrol, detect, attack, respond to spells)
+
+### Spell Wiring
+
+- [ ] **SPELL-01**: 3 scroll objects placed in cave, collectible via walk-over or interact
+- [ ] **SPELL-02**: Collecting scroll unlocks tune + shows pause panel with lore text
+- [ ] **SPELL-03**: SpellHUD starts empty, grows dynamically per scroll collected
+- [ ] **SPELL-04**: Shield blocks next snake attack (8s duration, screen glow)
+- [ ] **SPELL-05**: HP heals only on successful charm (Move/Daze), not Shield
 
 ### Menu & UI
 
-- [ ] **MENU-01**: Main Menu scene with mode selection (Simple/Advanced)
-- [ ] **MENU-02**: Start Game button loads GameLevel scene
-- [ ] **MENU-03**: Win screen shows game stats (time, spells cast, HP remaining)
-- [ ] **MENU-04**: Brief fade transition when reaching exit before Win screen
+- [ ] **MENU-01**: Main Menu scene with Simple/Advanced mode selection
+- [ ] **MENU-02**: Start Game loads GameLevel with selected mode active
+- [ ] **MENU-03**: Win screen shows time played, spells cast, HP remaining
+- [ ] **MENU-04**: Fade transition before Win screen appears
 
 ### Backend
 
-- [ ] **API-01**: Game session data posted to backend API on Win/Lose
+- [ ] **API-01**: Session data posted to backend API on game end (Win/Lose)
 - [ ] **API-02**: Leaderboard retrievable by mode (Simple/Advanced)
 - [ ] **API-03**: Player stats aggregated and displayed
 
-### Audio
+### Audio (Minimal)
 
-- [ ] **AUDIO-01**: Flute melody plays during each tune cast (3 melodies, 5-12s each)
-- [ ] **AUDIO-02**: Snake SFX (hiss ambient, bite, breath attack)
-- [ ] **AUDIO-03**: Cave ambient music loop
-- [ ] **AUDIO-04**: UI feedback sounds (slider, success, fail)
+- [ ] **AUDIO-01**: Flute melody plays during each tune cast (3 existing MP3s)
+- [ ] **AUDIO-02**: Cave ambient music loop plays in GameLevel
 
 ### Submission
 
-- [ ] **SUB-01**: Game balancing pass (HP drain rates, timing windows, trigger zones, charge counts)
+- [ ] **SUB-01**: Game balancing pass (HP drain, timing windows, trigger zones)
 - [ ] **SUB-02**: Windows .exe build + ZIP package
 - [ ] **SUB-03**: Stable 60 FPS on school laptops
 
-### Gameplay Enhancements (SHOULD)
+## v2 Requirements (Deferred)
 
-- [ ] **GAME-01**: Player can jump (mapped to New Input System)
-- [ ] **GAME-02**: Dynamic slider balancing (speed/zone variation per spell, HP-based scaling)
-- [ ] **GAME-03**: Story/narrative intro displayed after menu before game starts
-- [ ] **GAME-04**: Essential visual polish (fix yellow cave lights, damage flash, low HP vignette)
-- [ ] **GAME-05**: SerializeField tooltips translated to English for consistency
+Features cut from MVP. Can be added post-submission if time allows.
 
-### Extended Features (COULD)
+### Gameplay Enhancements
 
-- [ ] **EXT-01**: MiniMap showing player position in cave
-- [ ] **EXT-02**: Second enemy system (RobotKyle with HP-based combat)
-- [ ] **EXT-04**: Player success rate system (50-90% based on HP)
-- [ ] **EXT-06**: Particle glow system (replace Material Emission for snakes)
-- [ ] **EXT-07**: Arm animation clipping fix (spell animation through wall collider)
+- **GAME-01**: Player can jump (New Input System)
+- **GAME-02**: Dynamic slider balancing (speed/zone per spell, HP scaling)
+- **GAME-03**: Story/narrative intro after menu
+- **GAME-04**: Visual polish (damage flash, low HP vignette, yellow light fix)
+- **GAME-05**: SerializeField tooltips translated to English
 
-*EXT-03 (Spell cooldown) → promoted to SPELL-07 (Phase 7)*
-*EXT-05 (Spell range) → promoted to SPELL-06 (Phase 7)*
+### Extended Features
+
+- **EXT-01**: MiniMap showing player position
+- **EXT-02**: Second enemy system (RobotKyle with HP)
+- **EXT-04**: Player success rate system (HP-based)
+- **EXT-06**: Particle glow system (replace Material Emission)
+- **EXT-07**: Arm animation clipping fix
+
+### Audio Extended
+
+- **AUDIO-03**: Snake SFX (hiss, bite, breath)
+- **AUDIO-04**: UI feedback sounds (slider tick, success chime, fail sting)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Two-Level Success System | Too complex for timeline, discarded |
-| Full visual polish (particles, screen shake, animation polish) | Only essential polish in scope |
+| Two-Level Success System | Too complex, discarded |
+| Tune 3 Attack (creature targeting) | Removed — needs creature system not in game |
+| Tune 4 Freeze | Removed — overlaps Daze functionality |
+| Slither Left/Right testing | Not necessary per user |
 | Mobile/other platforms | Windows only for academic submission |
 | Multiplayer | Solo game, not in GDD |
 
 ## Traceability
 
+Which phases cover which requirements. Updated 2026-02-24.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SPELL-01 | Phase 7 | Pending |
-| SPELL-02 | Phase 7 | Pending |
-| SPELL-03 | Phase 7 | Pending |
-| SPELL-04 | Phase 7 | Pending |
-| SPELL-05 | Phase 7 | Pending |
-| SPELL-06 | Phase 7 | Pending |
-| SPELL-07 | Phase 7 | Pending |
-| MENU-01 | Phase 8 | Pending |
-| MENU-02 | Phase 8 | Pending |
-| MENU-03 | Phase 8 | Pending |
-| MENU-04 | Phase 8 | Pending |
-| API-01 | Phase 9 | Pending |
-| API-02 | Phase 9 | Pending |
-| API-03 | Phase 9 | Pending |
-| AUDIO-01 | Phase 10 | Pending |
-| AUDIO-02 | Phase 10 | Pending |
-| AUDIO-03 | Phase 10 | Pending |
-| AUDIO-04 | Phase 10 | Pending |
-| GAME-01 | Phase 11 | Pending |
-| GAME-02 | Phase 11 | Pending |
-| GAME-03 | Phase 11 | Pending |
-| GAME-04 | Phase 11 | Pending |
-| GAME-05 | Phase 11 | Pending |
-| EXT-01 | Phase 12 | Pending |
-| EXT-02 | Phase 12 | Pending |
-| EXT-04 | Phase 12 | Pending |
-| EXT-06 | Phase 12 | Pending |
-| EXT-07 | Phase 12 | Pending |
-| SUB-01 | Phase 13 | Pending |
-| SUB-02 | Phase 13 | Pending |
-| SUB-03 | Phase 13 | Pending |
+| CAVE-01 | Phase 7 | Pending |
+| CAVE-02 | Phase 7 | Pending |
+| CAVE-03 | Phase 7 | Pending |
+| ENEMY-01 | Phase 8 | Pending |
+| ENEMY-02 | Phase 8 | Pending |
+| SPELL-01 | Phase 8 | Pending |
+| SPELL-02 | Phase 8 | Pending |
+| SPELL-03 | Phase 8 | Pending |
+| SPELL-04 | Phase 8 | Pending |
+| SPELL-05 | Phase 8 | Pending |
+| AUDIO-01 | Phase 8 | Pending |
+| AUDIO-02 | Phase 8 | Pending |
+| MENU-01 | Phase 9 | Pending |
+| MENU-02 | Phase 9 | Pending |
+| MENU-03 | Phase 9 | Pending |
+| MENU-04 | Phase 9 | Pending |
+| API-01 | Phase 10 | Pending |
+| API-02 | Phase 10 | Pending |
+| API-03 | Phase 10 | Pending |
+| SUB-01 | Phase 11 | Pending |
+| SUB-02 | Phase 11 | Pending |
+| SUB-03 | Phase 11 | Pending |
 
 **Coverage:**
-- v1.0 requirements: 30 total (21 MUST, 5 SHOULD, 5 COULD — 2 promoted from COULD to MUST)
-- Mapped to phases: 30
+- v1.0 MVP requirements: 21 total (all MUST)
+- Mapped to phases: 21/21
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 — SPELL-05/06/07 added, EXT-03/EXT-05 promoted to Phase 7*
+*Restructured: 2026-02-24 for MVP focus (cave rebuild + simplified scope)*
+*Traceability updated: 2026-02-24 (Phases 7-11)*

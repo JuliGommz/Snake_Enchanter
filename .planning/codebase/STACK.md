@@ -13,7 +13,7 @@
 ## Runtime
 
 **Environment:**
-- Unity Editor 6000.0.62f1 (2022 LTS equivalent)
+- Unity Editor 6000.0.62f1 (Unity 6)
 - .NET Framework (Standard 2.1 via Unity's managed backend)
 
 **Package Manager:**

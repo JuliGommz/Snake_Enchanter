@@ -54,7 +54,7 @@ namespace SnakeEnchanter.Player
     {
         #region Configuration
         [Header("Shield Settings")]
-        [Tooltip("Duration the shield stays active before expiring (GDD: 8 seconds)")]
+        [Tooltip("Fallback duration if no TuneConfig provides one (overridden by melody section length)")]
         [SerializeField] private float _shieldDuration = 8f;
 
         [Header("Screen Edge Glow")]
@@ -94,10 +94,17 @@ namespace SnakeEnchanter.Player
         /// Activates the shield. Guard: does nothing if shield is already active (no recast).
         /// Called by TuneController when Tune 3 (Shield) is cast successfully.
         /// </summary>
-        public void ActivateShield()
+        /// <param name="duration">Shield duration in seconds. If 0 or negative, uses fallback _shieldDuration.</param>
+        public void ActivateShield(float duration = 0f)
         {
             // Guard: cannot recast while shield is already active
             if (_isShieldActive) return;
+
+            // Use provided duration (from TuneConfig melody section) or fallback
+            if (duration > 0f)
+            {
+                _shieldDuration = duration;
+            }
 
             _isShieldActive = true;
 
