@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-18
-* Version: v1.0
+* Version: v1.1
 *
 * AUTHORSHIP CLASSIFICATION:
 * [AI-ASSISTED]
@@ -35,12 +35,14 @@
 *
 * VERSION HISTORY:
 * - v1.0: Initial implementation — full shield lifecycle
+* - v1.1: Added ShieldText (TextMeshProUGUI) support — shown/hidden with shield state
 ====================================================================
 */
 
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using SnakeEnchanter.Core;
 
 namespace SnakeEnchanter.Player
@@ -66,6 +68,10 @@ namespace SnakeEnchanter.Player
 
         [Tooltip("Flash color on shield absorb (briefly shows before hiding)")]
         [SerializeField] private Color _shieldAbsorbFlashColor = Color.white;
+
+        [Header("Shield Text")]
+        [Tooltip("TMP text label shown while shield is active. Assign 'ShieldText' from GameCanvas → Healthbar in Inspector.")]
+        [SerializeField] private TextMeshProUGUI _shieldText;
         #endregion
 
         #region Private Fields
@@ -85,6 +91,12 @@ namespace SnakeEnchanter.Player
             if (_borderGlowImage != null)
             {
                 _borderGlowImage.gameObject.SetActive(false);
+            }
+
+            // Shield text hidden by default — only visible while shield is active
+            if (_shieldText != null)
+            {
+                _shieldText.gameObject.SetActive(false);
             }
         }
         #endregion
@@ -116,6 +128,12 @@ namespace SnakeEnchanter.Player
             {
                 _borderGlowImage.color = _shieldActiveColor;
                 _borderGlowImage.gameObject.SetActive(true);
+            }
+
+            // Show shield text indicator
+            if (_shieldText != null)
+            {
+                _shieldText.gameObject.SetActive(true);
             }
 
             // Start expiry timer
@@ -183,6 +201,12 @@ namespace SnakeEnchanter.Player
             if (!absorbed && _borderGlowImage != null)
             {
                 _borderGlowImage.gameObject.SetActive(false);
+            }
+
+            // Hide shield text immediately (both natural expiry and absorbed)
+            if (_shieldText != null)
+            {
+                _shieldText.gameObject.SetActive(false);
             }
         }
 
