@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ca87f663296e609408cabba79d5b1287
+timeCreated: 1427800090
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 33385
+  packageName: Caves Parts Set
+  packageVersion: 1.0.0
+  assetPath: Assets/Caves Parts Set/prefab/Main Camera.prefab
+  uploadId: 57304
