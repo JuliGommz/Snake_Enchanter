@@ -118,6 +118,10 @@ namespace SnakeEnchanter.Core
         private float _sessionStartTime;
         private float _sessionEndTime;
 
+        // Player spawn position — captured once at Start(), restored on RestartGame()
+        private Vector3    _playerSpawnPosition;
+        private Quaternion _playerSpawnRotation;
+
         // Session tracking (GDD Section 7.2)
         private int _successfulTuneCasts = 0;
         private int _failedTuneCasts = 0;
@@ -165,6 +169,13 @@ namespace SnakeEnchanter.Core
 
         private void Start()
         {
+            // Capture spawn position BEFORE StartGame moves anything
+            if (_playerController != null)
+            {
+                _playerSpawnPosition = _playerController.transform.position;
+                _playerSpawnRotation = _playerController.transform.rotation;
+            }
+
             // Read mode chosen in MainMenu via PlayerPrefs (set by MainMenuController)
             // Key: "SnakeEnchanter_GameMode" — 0 = Simple, 1 = Advanced, default = Simple
             int modeValue = PlayerPrefs.GetInt("SnakeEnchanter_GameMode", 0);
@@ -269,14 +280,41 @@ namespace SnakeEnchanter.Core
             // Reset health
             if (_healthSystem != null) _healthSystem.ResetHealth();
 
-            // Reset all snakes (Unity 2023+ API)
+            // Reset player position to spawn point
+            ResetPlayerPosition();
+
+            // Reset all snakes
             Snakes.SnakeAI[] allSnakes = FindObjectsByType<Snakes.SnakeAI>(FindObjectsSortMode.None);
             foreach (var snake in allSnakes)
             {
                 snake.ResetSnake();
             }
 
+            // Reset all exit triggers so win condition can fire again
+            Level.ExitTrigger[] exitTriggers = FindObjectsByType<Level.ExitTrigger>(FindObjectsSortMode.None);
+            foreach (var trigger in exitTriggers)
+            {
+                trigger.ResetTrigger();
+            }
+
             StartGame(_gameMode);
+        }
+
+        /// <summary>
+        /// Teleports player back to spawn position.
+        /// Disables CharacterController during move to avoid position fighting.
+        /// </summary>
+        private void ResetPlayerPosition()
+        {
+            if (_playerController == null) return;
+
+            // CharacterController fights transform.position changes — disable, move, re-enable
+            CharacterController cc = _playerController.GetComponent<CharacterController>();
+            if (cc != null) cc.enabled = false;
+
+            _playerController.transform.SetPositionAndRotation(_playerSpawnPosition, _playerSpawnRotation);
+
+            if (cc != null) cc.enabled = true;
         }
         #endregion
 
