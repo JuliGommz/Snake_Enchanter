@@ -165,8 +165,10 @@ namespace SnakeEnchanter.Core
 
         private void Start()
         {
-            // Read mode chosen in MainMenu (PlayerPrefs), fallback to Inspector default
-            GameMode selectedMode = UI.GameModePrefs.Load();
+            // Read mode chosen in MainMenu via PlayerPrefs (set by MainMenuController)
+            // Key: "SnakeEnchanter_GameMode" — 0 = Simple, 1 = Advanced, default = Simple
+            int modeValue = PlayerPrefs.GetInt("SnakeEnchanter_GameMode", 0);
+            GameMode selectedMode = (modeValue == 1) ? GameMode.Advanced : GameMode.Simple;
             StartGame(selectedMode);
         }
 
