@@ -45,7 +45,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using TMPro;
+using SnakeEnchanter.Core;
 
 namespace SnakeEnchanter.UI
 {
@@ -118,6 +118,7 @@ namespace SnakeEnchanter.UI
     /// <summary>
     /// Static helper — single source of truth for GameMode PlayerPrefs key.
     /// Used by MainMenuController (write) and GameManager (read).
+    /// Requires using SnakeEnchanter.Core for GameMode enum.
     /// </summary>
     public static class GameModePrefs
     {
@@ -131,10 +132,10 @@ namespace SnakeEnchanter.UI
         }
 
         /// <summary>Loads saved mode. Returns Simple if no pref saved yet.</summary>
-        public static Core.GameMode Load()
+        public static GameMode Load()
         {
             int value = PlayerPrefs.GetInt(KEY, 0); // default = Simple
-            return value == 1 ? Core.GameMode.Advanced : Core.GameMode.Simple;
+            return value == 1 ? GameMode.Advanced : GameMode.Simple;
         }
     }
 }
