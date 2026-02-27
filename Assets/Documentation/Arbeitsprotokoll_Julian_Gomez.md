@@ -496,38 +496,74 @@
 
 ---
 
-### 19.02.2026 (Mittwoch)
+### 19.02.2026 (Mittwoch) - Session 21: Cave-Rebuild & Art-Restructure
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| v1.0 MVP Roadmap umstrukturiert (5 Phasen, 21 Requirements) | x | x | x |
+| Cave Materialien: Standard-Shader → URP/Lit (4 Materials) | x | x | x |
+| Pirate Assets in eigenen Ordner konsolidiert | x | x | x |
+| Art-Visuals Ordnerstruktur vereinheitlicht (Cave, Pirate, Snakes, Props) | x | x | x |
+| Pirate Animation System: Humanoid Rig + Bake Into Pose konfiguriert | x | x | x |
+| Water Material + NavMesh nach Restructure wiederhergestellt | x | x | x |
+| Spell System gefixt: TuneConfigs, Entranced State, Shield-Kopplung | x | x | x |
+| GameManager Bindings + Scene-Referenzen repariert | x | x | x |
 
 **Screenshot:** `Media/Screenshots/2026-02-19_.png`
 
 **Notizen:**
+- **Art-Visuals Restructure:** Alle Assets in einheitliche Struktur unter `_Project/Art-Visuals/Prefabs-FBX-Materials-Animations/` (Cave, Pirate, Snakes, Props)
+- **Cave Materialien:** 4 Materials hatten Standard-Shader (erscheinen pink in URP) → auf URP/Lit Shader umgestellt. `materialSearch: Recursive-Up` damit Unity Materials in Unterordnern findet
+- **Pirate Humanoid:** Animation System auf Humanoid Rig umgestellt + "Bake Into Pose" für alle Clips (Root Motion OFF — CharacterController steuert Bewegung)
+- **Spell System Fix:** TuneConfigs korrekt zugewiesen, Entranced-State für Daze (zweiphasig: Entranced 3s → Dazed 8s), Shield-Kopplung repariert
+- **Lesson Learned:** materialSearch Wert `1` (Local) findet keine Materialien in Unterordnern → `2` (Recursive-Up) nötig
+- **Git:** feature/cave-rebuild Branch — 8 Commits (6b9dd85 → fd68d8d)
 
 
 ---
 
-### 20.02.2026 (Donnerstag)
+### 20.02.2026 (Donnerstag) - Session 22: Dokumentation & Merge
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| STATE.md aktualisiert — Spell System Session Handoff dokumentiert | x | x | x |
+| feature/cave-rebuild in main gemergt (--no-ff) | x | x | x |
+| Feature-Branch lokal + remote gelöscht | x | x | x |
 
 **Screenshot:** `Media/Screenshots/2026-02-20_.png`
 
 **Notizen:**
+- **Merge:** feature/cave-rebuild → main (Commit e0c85cc) — enthält Cave-Rebuild, Spell System, Pirate Humanoid
+- **Git Workflow:** Branch nach Merge lokal + remote gelöscht (Projekt-Regel: Ein Feature = Ein Branch, nach Merge löschen)
+- **Status nach Merge:** main ist clean, alle cave-rebuild Änderungen integriert
 
 
 ---
 
-### 21.02.2026 (Freitag)
+### 21.02.2026 (Freitag) - Session 23: FBX Asset Recovery & Animator Cleanup
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| Root Cause identifiziert: `.gitignore: *.fbx` schließt alle FBX-Binaries aus | | x | x |
+| Cave FBX: 7 Binaries aus External_Assets wiederhergestellt | x | x | x |
+| Snake FBX: 16 Binaries (Toon Cobra + Animationen) wiederhergestellt | x | x | x |
+| Pirate.FBX: GUID-korrekt wiederhergestellt (619359b8...) | x | x | x |
+| Pirate Animations: 10/10 .meta aus git HEAD + FBX-Binaries platziert | x | x | x |
+| Cave Materialien: URP/Lit Shader nach Stash-Operation zurückgesetzt | x | x | x |
+| MC_Controller: Spell_Fear → Spell_Shield (Magic Spell Casting Anim) | x | x | x |
+| MC_Controller: Spell_Attack State + SpellAttack Parameter gelöscht | x | x | x |
+| MC_Controller: IsDead Parameter → IsDazed umbenannt | x | x | x |
+| Alle 9 Animator-States mit Animationsclips verknüpft | x | x | x |
+| Alte Platzhalter-Avatare entfernt (Malbers/Cowboy, SpaceRobotKyle) | x | x | x |
+| feature/spell-editor-setup committed + gepusht + in main gemergt | x | x | x |
 
 **Screenshot:** `Media/Screenshots/2026-02-21_.png`
 
 **Notizen:**
+- **Root Cause FBX fehlen:** `.gitignore: *.fbx` tracked keine FBX-Binaries. Nur `.meta`-Dateien im Repo. FBX-Dateien müssen manuell aus External_Assets-Quellen bereitgestellt werden
+- **GUID-System:** Unity referenziert Assets per GUID (in .meta-Datei). Beim Wiederherstellen von FBX darf die `.meta`-Datei NICHT überschrieben werden — sonst brechen alle Scene/Prefab/Controller-Referenzen
+- **Pirate.FBX GUID:** `619359b845787a443af41cf1ed1cfed0` — muss exakt stimmen, da Pirate-Prefab + MC_Controller diese GUID referenzieren
+- **MC_Controller finales Setup:** 3 Spell States (Move, Daze, Shield) + 2 Death States + 4 Movement States. Parameter: Speed, IsCrouching, SpellMove, SpellDaze, SpellShield, IsDazed
+- **Scripts bereits korrekt:** SnakeAI.cs nutzt `IsDazed`, TuneController.cs nutzt `SpellShield` — keine Code-Änderungen nötig nach Rename
+- **Lesson Learned:** Mixamo FBX-Animationsclips im Animator zuweisen: FBX aufklappen (▶), den `mixamo.com`-Clip in Motion-Feld ziehen — nicht die FBX-Datei selbst
+- **Git:** 2 Feature-Commits (de09e49, eb6c9d3) + Merge (f6777f8) auf main
 
 
 ---
