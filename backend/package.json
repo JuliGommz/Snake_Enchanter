@@ -1,0 +1,17 @@
+{
+  "name": "snake-enchanter-backend",
+  "version": "1.0.0",
+  "description": "REST API Backend for Snake Enchanter - PIP-3 Theme B",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Julian Gomez",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mysql2": "^3.14.0"
+  }
+}

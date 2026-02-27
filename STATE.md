@@ -6,34 +6,51 @@
 
 ## QUICK START
 
-**Branch:** `main`
-**Letzter Commit:** 8fa265b (merge feature/phase8-menu-ui)
-**Working Tree:** Clean
+**Branch:** `feature/phase9-backend`
+**Letzter Commit:** eb1bf69 (feat: START_SERVER.bat + README_DOZENTEN)
+**Working Tree:** Clean (scene files auto-modified by Unity, nicht committed)
 
 **Milestone:** v1.0 Submission Ready (Phases 7-13)
-**Aktuelle Phase:** 9 - Backend & Stats
-**Fortschritt:** ~65% von v1.0
+**Aktuelle Phase:** 9 - Backend & Stats (IN PROGRESS — bereit für Test + Merge)
+**Fortschritt:** ~70% von v1.0
 
 ---
 
 ## WAS GERADE PASSIERT
 
-Phase 8 (Menu & UI) vollständig abgeschlossen.
-Vollständiger Game Loop läuft: MainMenu → GameLevel → Win/Lose → Retry/MainMenu.
+Phase 9 Backend vollständig implementiert. Bereit für End-to-End Test.
 
-### Was Phase 8 gemacht hat:
-1. **MainMenuController v1.0** — Simple/Advanced/Quit Buttons, PlayerPrefs Handoff
-2. **GameModePrefs** — Static Helper (Key: `SnakeEnchanter_GameMode`, 0=Simple, 1=Advanced)
-3. **ResultScreenController v1.0** — Win/Lose Panel, Retry, Main Menu
-4. **GameManager v1.2** — PlayerPrefs mode read in Start(), Spawn-Reset, ExitTrigger-Reset
-5. **PlayerController v1.9** — Fix walk-on-spawn: `_moveInput/_lookInput = Vector2.zero` on disable
-6. **ExitTrigger** — In Scene platziert (Point Light grün), `ResetTrigger()` bei Restart
+### Was Phase 9 gemacht hat:
+1. **backend/server.js v1.0** — Node.js + Express REST API (localhost:3000)
+   - POST `/api/game-session` — Session-Stats nach jedem Run speichern
+   - GET `/api/leaderboard?mode=simple|advanced` — Top 10 Wins (schnellste Zeit)
+   - GET `/api/player-stats` — Aggregierte Stats (COUNT, AVG, MIN, SUM)
+   - GET `/api/health` — Server Health Check
+2. **backend/database.js v1.0** — better-sqlite3, WAL-Mode, game_sessions Tabelle
+3. **backend/package.json** — express ^5, better-sqlite3 ^12
+4. **backend/.gitignore** — node_modules/, *.db, *.db-shm, *.db-wal
+5. **ApiManager.cs v1.0** — Unity Singleton, UnityWebRequest + Coroutines, fail-silent
+6. **GameManager.cs v1.3** — `SendSessionToBackend()` in EndGame() integriert
+7. **START_SERVER.bat** — Auto npm install + node server.js starten (für Dozenten)
+8. **README_DOZENTEN.txt** — Anleitung für Dozenten (Deutsch)
+
+### Evaluation-Flow (Dozenten bewerten vom Repository):
+```
+1. Repo klonen / öffnen
+2. backend/START_SERVER.bat doppelklicken → npm install + server startet
+3. Unity Projekt öffnen → Play drücken
+4. Spiel spielen → Session-Daten gehen automatisch an localhost:3000
+5. http://localhost:3000/api/player-stats zum Verifizieren
+```
 
 ### NÄCHSTER SCHRITT:
-- [ ] **Phase 9: Backend & Stats**
-  - POST `/api/game-session` — Session-Stats senden
-  - GET `/api/leaderboard` — Bestenliste anzeigen
-  - GET `/api/player-stats` — Aggregierte Stats
+- [ ] **Backend End-to-End Test:**
+  1. `backend/START_SERVER.bat` ausführen
+  2. Unity Play → Spiel spielen → Win oder Lose
+  3. Browser: `http://localhost:3000/api/player-stats` — Session muss erscheinen
+  4. Wenn OK: `feature/phase9-backend` → `main` mergen
+- [ ] **ApiManager-GameObject** in GameLevel Scene hinzufügen (falls noch nicht da)
+- [ ] **Phase 10: Audio** beginnen
 
 ### Offene Items (deferred):
 - CooldownOverlay FillOrigin → wenn Spell Icons erstellt werden
@@ -56,7 +73,7 @@ Vollständiger Game Loop läuft: MainMenu → GameLevel → Win/Lose → Retry/M
 |-------|-------------|--------|
 | 7 | Spell System (3 Tunes: Move, Daze, Shield) | ✅ DONE |
 | 8 | Menu & UI | ✅ DONE |
-| 9 | Backend & Stats | pending |
+| 9 | Backend & Stats | 🔄 IN PROGRESS (bereit für Test+Merge) |
 | 10 | Audio & Music | pending |
 | 11 | Polish & Juice | pending |
 | 12 | Testing & QA | pending |
@@ -77,7 +94,10 @@ Vollständiger Game Loop läuft: MainMenu → GameLevel → Win/Lose → Retry/M
 - Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
 - Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
 - Win Condition (ExitTrigger, ResetTrigger on Retry)
-- Full Game Loop (GameManager v1.2, MainMenuController, ResultScreenController)
+- Full Game Loop (GameManager v1.3, MainMenuController, ResultScreenController)
+- Backend REST API (Node.js + Express + SQLite) — localhost:3000
+- ApiManager.cs v1.0 (Unity → Backend, fail-silent)
+- START_SERVER.bat (Dozenten-Deployment)
 - MainMenu Scene (Simple/Advanced/Quit)
 - Pirate Character: Humanoid Avatar, 10 Animations, Bake Into Pose
 
@@ -107,10 +127,11 @@ Assets/_Project/
 ## GIT STATUS
 
 ```
-Branch: main
-Letzter Commit: 8fa265b (merge feature/phase8-menu-ui — Phase 8 complete)
+Branch: feature/phase9-backend
+Letzter Commit: eb1bf69 (feat: START_SERVER.bat + README_DOZENTEN)
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
-Working Tree: Clean
+Working Tree: Clean (Unity scenes auto-modified — nicht committed)
+Merge-Bereit: Nein — erst End-to-End Test
 ```
 
 ---
