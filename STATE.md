@@ -1,58 +1,57 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-25
+**Letzte Aktualisierung:** 2026-02-27
 
 ---
 
 ## QUICK START
 
-**Branch:** `feature/cave-rebuild`
-**Letzter Commit:** `fd68d8d` - "feat(spells): fix spell system — TuneConfigs, Entranced state, Shield coupling"
-**Working Tree:** Clean (nur Roboto-Bold SDF.asset auto-change)
+**Branch:** `main` (feature/spell-editor-setup gemergt + gelöscht)
+**Letzter Commit:** (nach Merge — siehe `git log --oneline -1`)
+**Working Tree:** Clean
 
 **Milestone:** v1.0 Submission Ready (Phases 7-13)
 **Aktuelle Phase:** 7 - Spell System
-**Fortschritt:** ~35% von v1.0
+**Fortschritt:** ~40% von v1.0
 
 ---
 
 ## WAS GERADE PASSIERT
 
-Spell-System wurde repariert. **Alles committed + pushed.** Nächster Schritt: Testing.
+feature/spell-editor-setup vollständig abgeschlossen und in main gemergt.
 
-### Was diese Session gemacht wurde:
-1. **TuneConfig ScriptableObjects korrigiert:**
-   - Tune2_Sleep → Tune2_Daze (umbenannt)
-   - Tune3_Shield neu erstellt (key=3, effect=Shield, duration=3s, zone=40-65%)
-   - Tune4_Freeze gelöscht
-   - Alle 3 Configs: Melody + SuccessSFX + FailSFX zugewiesen (im Unity Inspector)
+### Was Session 22+23 gemacht hat:
+1. **cave-rebuild** in main gemergt + branch gelöscht
+2. **feature/spell-editor-setup** neu von main erstellt (clean branch)
+3. **Asset Recovery** (root cause: `.gitignore: *.fbx`):
+   - Cave FBX: 7 binaries → `Cave/FBX/` (aus External_Assets/Caves Parts Set)
+   - Snake FBX: 16 binaries → `Snakes/FBX/` (aus External_Assets/Toon Snakes Pack)
+   - Pirate.FBX → `Pirate/Mesh/` (GUID: `619359b845787a443af41cf1ed1cfed0` ✓)
+   - Pirate Animations: alle 10 .meta aus git HEAD restauriert, 10/10 FBX vorhanden
+   - Cave Materials: von Standard-Shader auf URP/Lit (933532a4) zurückgesetzt
+4. **MC_Controller Cleanup:**
+   - `Spell_Fear` → `Spell_Shield` (Animation: Magic Spell Casting)
+   - `Spell_Attack` → **gelöscht**
+   - Parameter `SpellFear` → `SpellShield`, `SpellAttack` → **gelöscht**
+   - Parameter `IsDead` → `IsDazed`
+   - Alle 9 States haben Animationen zugewiesen
+5. Alles committed + gepusht + in main gemergt
 
-2. **TuneController v3.2:**
-   - `_unlockAllOnStart = true` — alle Spells sofort freigeschaltet (Debug, für Testing)
-   - Melody spielt NUR bei Success (nicht während Hold)
-   - Shield-Dauer = TuneConfig Melody Section Length (Single Source of Truth)
-   - Subscribes auf `OnShieldDeactivated` → Melody stoppt mit Shield
+### NÄCHSTER SCHRITT:
+- [ ] **Unity Play-Test** — 14-Punkt Checklist (Move/Daze/Shield Spells)
+- [ ] **ShieldComponent._borderGlowImage** = NULL → Inspector Fix
+- [ ] **CooldownOverlay FillOrigin** = Bottom → Top (Unity Inspector)
+- [ ] **"SpellInfos" UI-Panels** aus Scene entfernen (orphaned)
+- [ ] **3D Scrolls** in cave platzieren
+- [ ] **SnakeAI-Cleanup** (Dead state, SnakeType enum)
 
-3. **ShieldComponent v1.1:**
-   - `ActivateShield(float duration)` — Duration von TuneConfig, Fallback auf Inspector-Wert
-
-4. **SnakeAI v2.0 — Entranced-System:**
-   - Neuer State `Entranced` (3s, amber) → dann `Dazed` (8s, blau, Die-Animation)
-   - `CancelInvoke()` bei jedem Zustandswechsel
-   - `SetTrigger("Die")` + `SetBool("IsDazed", true)` im Dazed-Entry
-
-### NÄCHSTER SCHRITT — Testen (Play Mode):
-- [ ] **Daze (Taste 2):** Entranced (amber, 3s, Snake schaut Player an) → Die-Animation → Dazed (blau, 8s) → Idle
-- [ ] **Shield (Taste 3):** Dauer = 15s (endPoint 25 - startPoint 10), Melody stoppt bei Absorb/Expire
-- [ ] **Move (Taste 1):** Melody spielt bei Success, Snake bewegt sich zum MoveAwayTarget
-- [ ] **Daze-Fix testen:** `SetTrigger("Die")` war der letzte Fix — Snake sollte jetzt umfallen
-- [ ] Wenn Spells funktionieren → `feature/cave-rebuild` in `main` mergen
-
-### Bekannte Issues:
-- SpellScrollPickup + SpellUnlockSystem existieren als Scripts, sind aber NICHT in der Scene platziert
-  (Debug-Flag `_unlockAllOnStart` überbrückt das für Testing)
-- TuneSliderUI muss getestet werden (zeigt Slider-Fortschritt während Hold?)
-- Debug-Logs in SnakeAI sind noch aktiv (Entranced/Dazed transitions) — nach Testing entfernen
+### Bekannte Issues (aus Session 21):
+- SpellScrollPickup + SpellUnlockSystem NICHT in Scene (`_unlockAllOnStart = true` überbrückt)
+- ShieldComponent._borderGlowImage = NULL (Inspector Fix nötig)
+- CooldownOverlay FillOrigin = Bottom → Top (Unity Inspector)
+- "SpellInfos" orphaned UI-Panels aus Scene entfernen
+- 3D Scrolls noch nicht platziert
+- SnakeAI-Cleanup (Dead state, SnakeType enum) noch pending
 
 ---
 
@@ -120,8 +119,8 @@ Assets/_Project/
 ## GIT STATUS
 
 ```
-Branch: feature/cave-rebuild (pushed to origin)
-Letzter Commit: fd68d8d "feat(spells): fix spell system — TuneConfigs, Entranced state, Shield coupling"
+Branch: main
+Letzter Commit: (Merge von feature/spell-editor-setup)
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 Working Tree: Clean
 ```
