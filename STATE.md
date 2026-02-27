@@ -6,36 +6,34 @@
 
 ## QUICK START
 
-**Branch:** `feature/phase7-finalize` (offen — noch nicht in main gemergt)
-**Letzter Commit:** a4e846b (ShieldComponent v1.1 — ShieldText TMP)
+**Branch:** `main`
+**Letzter Commit:** 8fa265b (merge feature/phase8-menu-ui)
 **Working Tree:** Clean
 
 **Milestone:** v1.0 Submission Ready (Phases 7-13)
-**Aktuelle Phase:** 8 - Menu & UI
-**Fortschritt:** ~55% von v1.0
+**Aktuelle Phase:** 9 - Backend & Stats
+**Fortschritt:** ~65% von v1.0
 
 ---
 
 ## WAS GERADE PASSIERT
 
-Phase 7 (Spell System) vollständig abgeschlossen + Play-Test bestanden.
-Branch `feature/phase7-finalize` offen, bereit für Merge.
+Phase 8 (Menu & UI) vollständig abgeschlossen.
+Vollständiger Game Loop läuft: MainMenu → GameLevel → Win/Lose → Retry/MainMenu.
 
-### Was Session 24 gemacht hat:
-1. **SnakeAI v2.1** — `SnakeState.Dead` entfernt (war nie erreichbar)
-2. **ShieldComponent v1.1** — `TextMeshProUGUI _shieldText` hinzugefügt (show/hide mit Shield-State)
-3. **ShieldBorderGlow** — Im Inspector zugewiesen (user)
-4. **ShieldText** — Im Inspector zugewiesen (user)
-5. **Play-Test bestanden** — Move / Daze / Shield alle funktionieren ✓
-6. Scene sauber — keine orphaned Panels
+### Was Phase 8 gemacht hat:
+1. **MainMenuController v1.0** — Simple/Advanced/Quit Buttons, PlayerPrefs Handoff
+2. **GameModePrefs** — Static Helper (Key: `SnakeEnchanter_GameMode`, 0=Simple, 1=Advanced)
+3. **ResultScreenController v1.0** — Win/Lose Panel, Retry, Main Menu
+4. **GameManager v1.2** — PlayerPrefs mode read in Start(), Spawn-Reset, ExitTrigger-Reset
+5. **PlayerController v1.9** — Fix walk-on-spawn: `_moveInput/_lookInput = Vector2.zero` on disable
+6. **ExitTrigger** — In Scene platziert (Point Light grün), `ResetTrigger()` bei Restart
 
 ### NÄCHSTER SCHRITT:
-- [ ] **feature/phase7-finalize → main mergen** (branch löschen)
-- [ ] **Phase 8 starten: Menu & UI**
-  - MainMenu Scene aufbauen
-  - Simple / Advanced Modus-Auswahl
-  - Game Over / Win Screen polish
-  - OnGUI Debug-Overlays vor Release entfernen (Phase 12)
+- [ ] **Phase 9: Backend & Stats**
+  - POST `/api/game-session` — Session-Stats senden
+  - GET `/api/leaderboard` — Bestenliste anzeigen
+  - GET `/api/player-stats` — Aggregierte Stats
 
 ### Offene Items (deferred):
 - CooldownOverlay FillOrigin → wenn Spell Icons erstellt werden
@@ -57,7 +55,7 @@ Branch `feature/phase7-finalize` offen, bereit für Merge.
 | Phase | Beschreibung | Status |
 |-------|-------------|--------|
 | 7 | Spell System (3 Tunes: Move, Daze, Shield) | ✅ DONE |
-| 8 | Menu & UI | pending |
+| 8 | Menu & UI | ✅ DONE |
 | 9 | Backend & Stats | pending |
 | 10 | Audio & Music | pending |
 | 11 | Polish & Juice | pending |
@@ -68,7 +66,7 @@ Branch `feature/phase7-finalize` offen, bereit für Merge.
 
 ## WAS FUNKTIONIERT
 
-- Player Controller v1.8 (New Input System, Crouch, Cinemachine v3.x)
+- Player Controller v1.9 (New Input System, Crouch, Cinemachine v3.x, walk-on-spawn fix)
 - Health System v1.5 (Drain, Events, Death Animations, heal-on-charm, shield intercept)
 - Tune System (TuneController v3.2, 3-Tune Array, Debug Unlock, Cooldown, Charges)
 - Snake AI v2.1 (NavMesh, Entranced→Dazed two-phase, CancelInvoke safety, Dead state removed)
@@ -78,8 +76,9 @@ Branch `feature/phase7-finalize` offen, bereit für Merge.
 - Cave Map (Caves Parts Set + Dwarven Pack + ProBuilder/Polybrush)
 - Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
 - Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
-- Win Condition (ExitTrigger)
-- Game Loop (GameManager)
+- Win Condition (ExitTrigger, ResetTrigger on Retry)
+- Full Game Loop (GameManager v1.2, MainMenuController, ResultScreenController)
+- MainMenu Scene (Simple/Advanced/Quit)
 - Pirate Character: Humanoid Avatar, 10 Animations, Bake Into Pose
 
 ---
@@ -109,7 +108,7 @@ Assets/_Project/
 
 ```
 Branch: main
-Letzter Commit: (Merge von feature/spell-editor-setup)
+Letzter Commit: 8fa265b (merge feature/phase8-menu-ui — Phase 8 complete)
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
 Working Tree: Clean
 ```
