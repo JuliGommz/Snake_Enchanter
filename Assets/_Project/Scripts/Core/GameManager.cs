@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.2 - PlayerPrefs mode handoff from MainMenu
+* Version: 1.3 - Backend API integration (POST session on game end)
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -267,9 +267,7 @@ namespace SnakeEnchanter.Core
             Cursor.visible = true;
 
             LogSessionSummary(success);
-
-            // Phase 2: Show result screen
-            // Phase 2: Send data to backend API
+            SendSessionToBackend(success);
 
             Debug.Log($"GameManager: Game ended — {(success ? "VICTORY!" : "DEFEAT")} | Time: {SessionTime:F1}s");
         }
@@ -384,7 +382,7 @@ namespace SnakeEnchanter.Core
             _totalHPRestored += amount;
         }
 
-        /// <summary>Logs session summary to console. Phase 2: Send to backend.</summary>
+        /// <summary>Logs session summary to Unity console.</summary>
         private void LogSessionSummary(bool success)
         {
             int endingHP = _healthSystem != null ? Mathf.RoundToInt(_healthSystem.CurrentHealth) : 0;
@@ -400,6 +398,43 @@ namespace SnakeEnchanter.Core
             Debug.Log($"Total Damage: {_totalDamageTaken} | Total Healed: {_totalHPRestored}");
             Debug.Log("=====================================");
         }
+
+        /// <summary>
+        /// Sends session data to backend via ApiManager.
+        /// Fail-silent: if ApiManager is not found, logs warning only.
+        /// </summary>
+        private void SendSessionToBackend(bool success)
+        {
+            if (Data.ApiManager.Instance == null)
+            {
+                Debug.LogWarning("GameManager: ApiManager not found — session not sent to backend.");
+                return;
+            }
+
+            float endingHp = _healthSystem != null ? _healthSystem.CurrentHealth : 0f;
+
+            var sessionData = new Data.ApiManager.SessionData
+            {
+                sessionId             = System.Guid.NewGuid().ToString(),
+                modeType              = _gameMode == GameMode.Advanced ? "advanced" : "simple",
+                success               = success,
+                completionTime        = Mathf.RoundToInt(SessionTime),
+                startingHp            = _startingHP,
+                endingHp              = endingHp,
+                totalDamageTaken      = _totalDamageTaken,
+                totalHpRestored       = _totalHPRestored,
+                successfulTuneCasts   = _successfulTuneCasts,
+                failedTuneCasts       = _failedTuneCasts,
+                tooEarlyCount         = _tooEarlyCount,
+                tooLateCount          = _tooLateCount,
+                snakeBiteCount        = _snakeAttackCount,
+                fourthTuneUnlocked    = false,    // Phase 11: SpellUnlockSystem integration
+                heartsRemaining       = Mathf.RoundToInt(endingHp / 33.3f) // rough heart-equivalent
+            };
+
+            Data.ApiManager.Instance.PostSession(sessionData);
+        }
+
         #endregion
 
         #region Debug Helpers

@@ -1,0 +1,4 @@
+node_modules/
+snake_enchanter.db
+*.db-shm
+*.db-wal
