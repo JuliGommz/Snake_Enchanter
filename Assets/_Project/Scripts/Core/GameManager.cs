@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.1.1 - Fixed namespace + Unity 2023 API
+* Version: 1.2 - PlayerPrefs mode handoff from MainMenu
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -43,6 +43,7 @@
 * - v1.0: Initial — game states, mode switching, session tracking
 * - v1.1: Refactored to eliminate drain rate SerializeFields
 * - v1.1.1: Fixed namespace references + Unity 2023 API
+* - v1.2: Start() reads GameModePrefs (PlayerPrefs) from MainMenu
 ====================================================================
 */
 
@@ -164,8 +165,9 @@ namespace SnakeEnchanter.Core
 
         private void Start()
         {
-            // Phase 1: Auto-start game (no menu yet)
-            StartGame(_gameMode);
+            // Read mode chosen in MainMenu (PlayerPrefs), fallback to Inspector default
+            GameMode selectedMode = UI.GameModePrefs.Load();
+            StartGame(selectedMode);
         }
 
         private void OnEnable()
