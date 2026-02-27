@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-06
-* Version: 1.8 - SINGLE MOVE FIX
+* Version: 1.9 - Reset inputs on disable (fix walk-on-spawn)
 * 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -50,6 +50,8 @@
 * - v1.5: Camera position via Hierarchy only, script never overrides
 * - v1.6: Cinemachine compatibility - auto-finds Camera.main
 * - v1.7: Cinemachine final - pitch-only control, yaw via Cinemachine
+* - v1.8: Single Move() fix for correct CharacterController velocity
+* - v1.9: SetMovementEnabled resets _moveInput/_lookInput on disable (fix walk-on-spawn)
 ====================================================================
 */
 
@@ -486,10 +488,20 @@ namespace SnakeEnchanter.Player
 
         /// <summary>
         /// Aktiviert/Deaktiviert Bewegung und Input.
+        /// Beim Deaktivieren: _moveInput/_lookInput auf null setzen,
+        /// da New Input System keine canceled-Events bei action.Disable() feuert.
         /// </summary>
         public void SetMovementEnabled(bool enabled)
         {
             this.enabled = enabled;
+
+            if (!enabled)
+            {
+                // New Input System feuert KEIN canceled-Event auf action.Disable()
+                // → letzter Wert bleibt stecken → Player läuft nach Restart
+                _moveInput = Vector2.zero;
+                _lookInput = Vector2.zero;
+            }
         }
 
         /// <summary>
