@@ -5,8 +5,8 @@
 * Project: Snake Enchanter
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
-* Date: 2026-02-14
-* Version: 1.9 - Phase 7: fires SnakeCharmed event, removes Attack/Freeze dead code
+* Date: 2026-02-27
+* Version: 2.1 - Cleanup: remove unused SnakeState.Dead (never entered, Dazed handles defeat)
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -158,8 +158,7 @@ namespace SnakeEnchanter.Snakes
         Aggressive, // Attacks player on contact (after failed tune)
         MovedAway,  // Charmed with Move tune — cleared path
         Entranced,  // Listening to Daze melody — faces player, no attack, 3s then → Dazed
-        Dazed,      // Charmed with Daze tune — passive, stunned, no collision
-        Dead        // Killed (Phase 2+)
+        Dazed,      // Charmed with Daze tune — passive, stunned, plays Die animation for 8s then → Idle
     }
 
     /// <summary>
@@ -763,9 +762,6 @@ namespace SnakeEnchanter.Snakes
                     }
                     break;
 
-                case SnakeState.Dead:
-                    // Dead snakes do nothing
-                    break;
             }
         }
 
@@ -936,7 +932,6 @@ namespace SnakeEnchanter.Snakes
                 {
                     case SnakeState.Entranced:
                     case SnakeState.Dazed:
-                    case SnakeState.Dead:
                         // These states never resume agent movement — clear path
                         _agent.isStopped = true;
                         _agent.ResetPath();
@@ -1004,16 +999,6 @@ namespace SnakeEnchanter.Snakes
                     Debug.Log($"SnakeAI ({_snakeName}): Entering Dazed | Timer: {_stateTimer}s | Animator: {(_animator != null ? "OK" : "NULL")}");
                     break;
 
-                case SnakeState.Dead:
-                    SetVisualColor(Color.gray); // Grayed out visual
-                    EnableCollider(false); // No collision
-                    // Trigger death animation + Set IsDazed=true to stay in Die animation
-                    if (_animator != null)
-                    {
-                        _animator.SetTrigger("Die");
-                        _animator.SetBool("IsDazed", true); // Prevents Die → Idle transition
-                    }
-                    break;
             }
         }
         #endregion
