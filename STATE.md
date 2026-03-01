@@ -28,9 +28,14 @@ Phase 10 (Audio) DONE. General Improvements Session abgeschlossen.
 - ✅ Shield Bypass Fix (TakeSnakeAttackDamage in HealthSystem)
 - ✅ HealthBarUI Cleanup (_debuffText/_debuffMessage entfernt)
 
-### NÄCHSTER SCHRITT: Ending Story (Happy End)
+### NÄCHSTER SCHRITT: Sonstiges / Doku-Block
 - [x] Intro-Text / Story vor Game Start — StoryIntroController.cs v1.1 + GameManager _showIntroOnStart
-- [ ] Win-Screen Story Text einbauen (Task 2)
+- [x] Ending Story (Happy End) — EndingStoryController.cs v1.1 + ResultScreenController v1.1
+- [ ] Sonstiges (offene Kleinigkeiten) — Task 3
+- [ ] Arbeitsprotokoll .docx — Task 5
+- [ ] Abgleich PIP-3 — Task 6
+- [ ] GDD Update — Task 7
+- [ ] README Dozenten — Task 8
 - [ ] Noch im Branch `feature/general-improvements`
 
 ### Offene Items (deferred):

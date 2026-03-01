@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-03-01
-* Version: v1.0
+* Version: v1.1
 *
 * AUTHORSHIP CLASSIFICATION:
 * [AI-ASSISTED]
@@ -19,25 +19,25 @@
 * - GameEvents.cs (SnakeEnchanter.Core)
 * - ResultScreenController.cs (SnakeEnchanter.UI) — ShowWin()
 * - UnityEngine.InputSystem
-* - CanvasGroup component on EndingStoryPanel
+* - CanvasGroup component on EndingStoryPanel (added automatically if missing)
 *
 * UI HIERARCHY REQUIRED (GameLevel Scene):
-*   Canvas
-*     └── EndingStoryPanel         (Image — full-screen dark bg + CanvasGroup component!)
-*           ├── EndingText         (TextMeshProUGUI — ending story body)
-*           └── ContinueHint       (TextMeshProUGUI — "Drücke eine Taste")
+*   GameCanvas
+*     └── EndingStoryPanel     (Image — full-screen dark bg, CanvasGroup auto-added)
+*           ├── EndingText     (TextMeshProUGUI — ending story body)
+*           └── ContinueHint  (TextMeshProUGUI — "Press any key")
 *
-* SETUP:
-* 1. Create EndingStoryPanel with a CanvasGroup component attached
-* 2. Attach this script to a GameObject in the GameLevel scene
-* 3. Assign all references in Inspector
-* 4. ResultScreenController._waitForEndingStory must be true
+* INSPECTOR SETUP:
+* - Ending Panel  → drag EndingStoryPanel from Hierarchy
+* - Result Screen → drag GameCanvas from Hierarchy (ResultScreenController lives there)
 *
 * FLOW:
 * OnGameWin → FadeIn panel → player reads → any key → FadeOut → ResultScreen.ShowWin()
 *
 * VERSION HISTORY:
 * - v1.0: Initial — fade-in, any-key dismiss, fade-out, handoff to ResultScreenController
+* - v1.1: _endingPanel is now GameObject (consistent with _introPanel in StoryIntroController)
+*         CanvasGroup fetched internally via GetComponent — no manual component assignment needed
 ====================================================================
 */
 
@@ -56,10 +56,10 @@ namespace SnakeEnchanter.UI
     {
         #region Configuration
         [Header("UI References")]
-        [Tooltip("Root panel with CanvasGroup component — REQUIRED for fade effect.")]
-        [SerializeField] private CanvasGroup _endingPanelGroup;
+        [Tooltip("Drag EndingStoryPanel from the Hierarchy here.")]
+        [SerializeField] private GameObject _endingPanel;
 
-        [Tooltip("ResultScreenController to call ShowWin() on after dismiss.")]
+        [Tooltip("Drag GameCanvas here — ResultScreenController is attached to it.")]
         [SerializeField] private ResultScreenController _resultScreen;
 
         [Header("Fade Settings")]
@@ -75,20 +75,24 @@ namespace SnakeEnchanter.UI
         #endregion
 
         #region Private Fields
-        private bool _inputReady   = false;
-        private bool _dismissed    = false;
-        private bool _isActive     = false;
+        private CanvasGroup _canvasGroup;
+        private bool _inputReady = false;
+        private bool _dismissed  = false;
+        private bool _isActive   = false;
         #endregion
 
         #region Unity Lifecycle
         private void Awake()
         {
-            // Panel starts invisible and hidden
-            if (_endingPanelGroup != null)
-            {
-                _endingPanelGroup.alpha          = 0f;
-                _endingPanelGroup.gameObject.SetActive(false);
-            }
+            if (_endingPanel == null) return;
+
+            // Get or add CanvasGroup — no manual component setup needed in Inspector
+            _canvasGroup = _endingPanel.GetComponent<CanvasGroup>();
+            if (_canvasGroup == null)
+                _canvasGroup = _endingPanel.AddComponent<CanvasGroup>();
+
+            _canvasGroup.alpha = 0f;
+            _endingPanel.SetActive(false);
         }
 
         private void OnEnable()
@@ -128,19 +132,19 @@ namespace SnakeEnchanter.UI
         /// <summary>Fades the ending panel in, then enables key input after cooldown.</summary>
         private IEnumerator FadeIn()
         {
-            if (_endingPanelGroup == null) yield break;
+            if (_canvasGroup == null) yield break;
 
-            _endingPanelGroup.gameObject.SetActive(true);
-            _endingPanelGroup.alpha = 0f;
+            _endingPanel.SetActive(true);
+            _canvasGroup.alpha = 0f;
 
             float elapsed = 0f;
             while (elapsed < _fadeInDuration)
             {
                 elapsed += Time.deltaTime;
-                _endingPanelGroup.alpha = Mathf.Clamp01(elapsed / _fadeInDuration);
+                _canvasGroup.alpha = Mathf.Clamp01(elapsed / _fadeInDuration);
                 yield return null;
             }
-            _endingPanelGroup.alpha = 1f;
+            _canvasGroup.alpha = 1f;
 
             // Brief cooldown so the last keypress from gameplay doesn't skip immediately
             yield return new WaitForSeconds(_inputCooldown);
@@ -150,19 +154,19 @@ namespace SnakeEnchanter.UI
         /// <summary>Fades the ending panel out, then shows the result screen.</summary>
         private IEnumerator FadeOutAndShowResult()
         {
-            if (_endingPanelGroup == null) yield break;
+            if (_canvasGroup == null) yield break;
 
-            float startAlpha = _endingPanelGroup.alpha;
+            float startAlpha = _canvasGroup.alpha;
             float elapsed    = 0f;
 
             while (elapsed < _fadeOutDuration)
             {
                 elapsed += Time.deltaTime;
-                _endingPanelGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / _fadeOutDuration);
+                _canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / _fadeOutDuration);
                 yield return null;
             }
-            _endingPanelGroup.alpha = 0f;
-            _endingPanelGroup.gameObject.SetActive(false);
+            _canvasGroup.alpha = 0f;
+            _endingPanel.SetActive(false);
 
             // Hand off to ResultScreenController
             if (_resultScreen != null)
