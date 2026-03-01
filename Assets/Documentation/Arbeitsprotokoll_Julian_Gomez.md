@@ -627,7 +627,7 @@
 
 ---
 
-### 01.03.2026 (Sonntag) - Session: General Improvements & Bug Fixes
+### 01.03.2026 (Sonntag) - Session: General Improvements & Story Integration
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
 | Debug: Breath Attack (CancelInvoke Fix, _canSeePlayer Fix) | x | x | x |
@@ -637,6 +637,11 @@
 | Shield Damage Bypass Fix: TakeSnakeAttackDamage() in HealthSystem | x | x | x |
 | HealthBarUI: _debuffText / _debuffMessage entfernt (TMP = Single Source) | x | x | x |
 | Gelbes Licht (Skybox außerhalb Cave) | x | x | x |
+| StoryIntroController v1.1: Intro-Text vor Game Beginn (Sine-Pulse Blink) | x | x | x |
+| GameManager: _showIntroOnStart Flag + StartGameFromIntro() Methode | x | x | x |
+| EndingStoryController v1.1: Ending Story (Happy End) mit CanvasGroup Fade | x | x | x |
+| ResultScreenController v1.1: _waitForEndingStory Flag + public ShowWin() | x | x | x |
+| Unity Editor: StoryIntroPanel + EndingStoryPanel in GameLevel Scene eingebaut | x | x | x |
 
 **Screenshot:** `Media/Screenshots/2026-03-01_.png`
 
@@ -647,7 +652,10 @@
 - **Snake Behavior:** Basic Snakes haben kein Breath-Attack → verfolgen Spieler in Breath-Range statt zu warten. SnakeType-Check in `HandleIdlePlayerInteraction()`
 - **Shield Fix:** SnakeAI rief `TakeDamage()` direkt auf (bypassed Shield-Check). Neues `TakeSnakeAttackDamage(int amount)` in HealthSystem — prüft Shield vor jedem Snake-Angriff. Beide Damage-Pfade (OnTriggerEnter + DealScheduledDamage) aktualisiert
 - **HealthBarUI:** `_debuffText` + `_debuffMessage` SerializedFields entfernt. TMP-Child von ActiveEffectsWindow ist die einzige Text-Quelle
-- **Branch:** `feature/general-improvements`
+- **Story Intro:** StoryIntroController.cs — atmosphärischer Intro-Text vor Spielstart. GameManager hält Spielsysteme deaktiviert bis Spieler eine Taste drückt. Drain bleibt während Intro deaktiviert.
+- **Ending Story:** EndingStoryController.cs — CanvasGroup Fade-In/Out (1.2s/0.6s), Input-Cooldown 0.8s verhindert versehentliches Überspringen. ResultScreenController wartet auf Dismiss bevor Win-Screen erscheint.
+- **Blink Effect Fix:** Übergang von `Abs(Sin(timer*π))` auf `(Sin(Time.time*speed)+1)*0.5` — weichere Sinuskurve, kein akkumulierter Timer, Min-Alpha 0.2 damit Text immer lesbar bleibt
+- **Branch:** `feature/general-improvements` (Commits: a4974d8, 18b769e)
 
 ### 02.03.2026 (Montag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |
@@ -679,7 +687,7 @@
 
 | Phase | Ziel | Ergebnis |
 |-------|------|----------|
-| 1 - Spielbar | Kern-Loop funktioniert | |
-| 2 - Komplett | Alle Features | |
-| 3 - Schön | Polish & Juice | |
-| 4 - Fertig | Abgabe-Ready | |
+| 1 - Spielbar | Kern-Loop funktioniert | ✅ Abgeschlossen (09.02.2026) |
+| 2 - Komplett | Alle Features | ✅ Abgeschlossen (15.02.2026) |
+| 3 - Schön | Polish & Juice | ✅ NavMesh, Audio, Spell System |
+| 4 - Fertig | Abgabe-Ready | 🔄 In Arbeit (Story, Doku, Build) |

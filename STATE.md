@@ -7,18 +7,18 @@
 ## QUICK START
 
 **Branch:** `feature/general-improvements`
-**Letzter Commit:** e57cac3 (feat: restore MusicManager + add assets and screenshots)
-**Working Tree:** Dirty — Script-Fixes + Scenes uncommitted
+**Letzter Commit:** (aktuell — siehe git log)
+**Working Tree:** Clean nach Commit
 
 **Milestone:** v1.0 Submission Ready (Phases 7-13)
 **Aktuelle Phase:** General Improvements / Phase 11 Polish
-**Fortschritt:** ~85% von v1.0
+**Fortschritt:** ~90% von v1.0
 
 ---
 
 ## WAS GERADE PASSIERT
 
-Phase 10 (Audio) DONE. General Improvements Session abgeschlossen.
+Phase 11 Polish — aktive Session. Letzte Änderungen committed.
 
 ### IN DIESEM BRANCH (feature/general-improvements) gemacht:
 - ✅ Breath Attack Fix (CancelInvoke, _canSeePlayer)
@@ -27,10 +27,14 @@ Phase 10 (Audio) DONE. General Improvements Session abgeschlossen.
 - ✅ Snake Behavior Fix (Basic Snake FollowPlayer in Breath-Range)
 - ✅ Shield Bypass Fix (TakeSnakeAttackDamage in HealthSystem)
 - ✅ HealthBarUI Cleanup (_debuffText/_debuffMessage entfernt)
+- ✅ MusicManager v1.1 — Unity Recorder Audio-Fix (OnAudioConfigurationChanged Debounce)
+- ✅ StoryIntroController v1.2 — Fade In/Out (CanvasGroup, _inputReady, _inputCooldown)
+- ✅ ActiveEffectsController v1.0 — MOVE/DAZE Texte in ActiveEffectsWindow (OnSnakeCharmed)
 
 ### NÄCHSTER SCHRITT: Sonstiges / Doku-Block
-- [x] Intro-Text / Story vor Game Start — StoryIntroController.cs v1.1 + GameManager _showIntroOnStart
+- [x] Intro-Text / Story vor Game Start — StoryIntroController.cs v1.2 (Fade)
 - [x] Ending Story (Happy End) — EndingStoryController.cs v1.1 + ResultScreenController v1.1
+- [x] Active Effects MOVE/DAZE — ActiveEffectsController.cs v1.0
 - [ ] Sonstiges (offene Kleinigkeiten) — Task 3
 - [ ] Arbeitsprotokoll .docx — Task 5
 - [ ] Abgleich PIP-3 — Task 6
@@ -77,10 +81,10 @@ Phase 10 (Audio) DONE. General Improvements Session abgeschlossen.
 - SpellHUDController v1.1 (dynamic HUD, cooldown overlay, range indicator)
 - ShieldComponent v1.1 (duration from TuneConfig, blocks next attack)
 - HealthSystem v1.5 + TakeSnakeAttackDamage() — Shield-Routing korrekt für alle Snake-Damage-Pfade
-- MusicManager v1.0 (scene-based, gameplay alternation)
+- MusicManager v1.1 (scene-based, gameplay alternation, Unity Recorder audio-fix)
 - Controls Overlay (Keycap Images in-game)
 - Cave Map (Caves Parts Set + Dwarven Pack + ProBuilder/Polybrush)
-- Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
+- Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1 + ActiveEffectsController v1.0
 - Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
 - Win Condition (ExitTrigger, ResetTrigger on Retry)
 - Full Game Loop (GameManager v1.3, MainMenuController, ResultScreenController)
@@ -116,11 +120,10 @@ Assets/_Project/
 ## GIT STATUS
 
 ```
-Branch: feature/phase9-backend
-Letzter Commit: eb1bf69 (feat: START_SERVER.bat + README_DOZENTEN)
+Branch: feature/general-improvements
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
-Working Tree: Clean (Unity scenes auto-modified — nicht committed)
-Merge-Bereit: Nein — erst End-to-End Test
+Working Tree: Clean
+Merge-Bereit: Nein — erst End-to-End Test + Doku-Block fertig
 ```
 
 ---
