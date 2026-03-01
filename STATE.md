@@ -28,8 +28,9 @@ Phase 10 (Audio) DONE. General Improvements Session abgeschlossen.
 - ✅ Shield Bypass Fix (TakeSnakeAttackDamage in HealthSystem)
 - ✅ HealthBarUI Cleanup (_debuffText/_debuffMessage entfernt)
 
-### NÄCHSTER SCHRITT: Main Story Text
-- [ ] Intro-Text / Story vor Game Start einbauen
+### NÄCHSTER SCHRITT: Ending Story (Happy End)
+- [x] Intro-Text / Story vor Game Start — StoryIntroController.cs v1.1 + GameManager _showIntroOnStart
+- [ ] Win-Screen Story Text einbauen (Task 2)
 - [ ] Noch im Branch `feature/general-improvements`
 
 ### Offene Items (deferred):

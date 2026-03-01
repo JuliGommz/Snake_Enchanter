@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-27
-* Version: v1.0
+* Version: v1.1
 *
 * AUTHORSHIP CLASSIFICATION:
 * [AI-ASSISTED]
@@ -35,6 +35,7 @@
 *
 * VERSION HISTORY:
 * - v1.0: Initial — Win/Lose panel, Retry, Main Menu
+* - v1.1: Added _waitForEndingStory flag + public ShowWin() for EndingStoryController handoff
 ====================================================================
 */
 
@@ -80,6 +81,10 @@ namespace SnakeEnchanter.UI
 
         [Header("Scene Names")]
         [SerializeField] private string _mainMenuSceneName = "MainMenu";
+
+        [Header("Ending Story")]
+        [Tooltip("If true, Win result waits for EndingStoryController to call ShowWin(). Lose always shows immediately.")]
+        [SerializeField] private bool _waitForEndingStory = true;
         #endregion
 
         #region Unity Lifecycle
@@ -115,6 +120,18 @@ namespace SnakeEnchanter.UI
 
         #region Event Handlers
         private void HandleWin()
+        {
+            // If EndingStoryController is active, it will call ShowWin() after the story panel.
+            // Lose always shows immediately — only Win is delayed.
+            if (_waitForEndingStory) return;
+            ShowResult(win: true);
+        }
+
+        /// <summary>
+        /// Called by EndingStoryController after the ending story is dismissed.
+        /// Shows the Win result panel directly.
+        /// </summary>
+        public void ShowWin()
         {
             ShowResult(win: true);
         }
