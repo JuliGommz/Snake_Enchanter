@@ -6,21 +6,21 @@
 
 ## QUICK START
 
-**Branch:** `feature/general-improvements`
-**Letzter Commit:** (aktuell — siehe git log)
-**Working Tree:** Clean nach Commit
+**Branch:** `main`
+**Letzter Commit:** 7d7f56d (feat: merge feature/general-improvements — Phase 11 Polish complete)
+**Working Tree:** Clean
 
 **Milestone:** v1.0 Submission Ready (Phases 7-13)
-**Aktuelle Phase:** General Improvements / Phase 11 Polish
+**Aktuelle Phase:** Phase 12 Testing & QA — NÄCHSTE PHASE
 **Fortschritt:** ~90% von v1.0
 
 ---
 
 ## WAS GERADE PASSIERT
 
-Phase 11 Polish — aktive Session. Letzte Änderungen committed.
+Phase 11 Polish DONE. Gemergt in main. Session beendet.
 
-### IN DIESEM BRANCH (feature/general-improvements) gemacht:
+### ERLEDIGT (feature/general-improvements → main):
 - ✅ Breath Attack Fix (CancelInvoke, _canSeePlayer)
 - ✅ Advanced Mode Difficulty (+15% Damage, Drain 0.25f)
 - ✅ Charges System entfernt (TuneController v3.3)
@@ -31,16 +31,13 @@ Phase 11 Polish — aktive Session. Letzte Änderungen committed.
 - ✅ StoryIntroController v1.2 — Fade In/Out (CanvasGroup, _inputReady, _inputCooldown)
 - ✅ ActiveEffectsController v1.0 — MOVE/DAZE Texte in ActiveEffectsWindow (OnSnakeCharmed)
 
-### NÄCHSTER SCHRITT: Sonstiges / Doku-Block
-- [x] Intro-Text / Story vor Game Start — StoryIntroController.cs v1.2 (Fade)
-- [x] Ending Story (Happy End) — EndingStoryController.cs v1.1 + ResultScreenController v1.1
-- [x] Active Effects MOVE/DAZE — ActiveEffectsController.cs v1.0
+### NÄCHSTER SCHRITT: Doku-Block + Testing
 - [ ] Sonstiges (offene Kleinigkeiten) — Task 3
 - [ ] Arbeitsprotokoll .docx — Task 5
 - [ ] Abgleich PIP-3 — Task 6
 - [ ] GDD Update — Task 7
 - [ ] README Dozenten — Task 8
-- [ ] Noch im Branch `feature/general-improvements`
+- [ ] Phase 12: Testing & QA starten
 
 ### Offene Items (deferred):
 - CooldownOverlay FillOrigin → wenn Spell Icons erstellt werden
@@ -120,10 +117,11 @@ Assets/_Project/
 ## GIT STATUS
 
 ```
-Branch: feature/general-improvements
+Branch: main
+Letzter Commit: 7d7f56d (merge feature/general-improvements)
 Remote: https://github.com/JuliGommz/Snake_Enchanter.git
-Working Tree: Clean
-Merge-Bereit: Nein — erst End-to-End Test + Doku-Block fertig
+Working Tree: Clean (4 irrelevante untracked Metas — Build, Recordings)
+Merge-Bereit: Gemergt ✅
 ```
 
 ---
