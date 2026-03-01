@@ -606,17 +606,48 @@
 
 ---
 
-### 27.02.2026 (Donnerstag)
+### 27.02.2026 (Donnerstag) - Session: Phase 10 Audio & Music
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| MusicManager.cs v1.0 erstellen (scene-based, gameplay alternation) | x | x | x |
+| MusicManager in MainMenu + GameLevel Scenes einbinden | x | x | x |
+| Controls Overlay mit Keycap Images (UI) | x | x | x |
+| Screenshots für Dokumentation erstellen (4 Screenshots) | x | x | x |
+| feature/phase10-audio → main gemergt | x | x | x |
 
-**Screenshot:** `Media/Screenshots/2026-02-27_.png`
+**Screenshot:** `Media/Screenshots/Screenshot 2026-02-27 211040.png`
 
 **Notizen:**
+- **MusicManager v1.0:** Scene-basiertes Musik-System — MainMenu-Musik und Gameplay-Musik getrennt
+- **Gameplay Music Alternation:** Musik wechselt dynamisch während des Spiels
+- **Controls Overlay:** Keycap-Images zeigen Tastaturbelegung im Spiel
+- **Phase 10 COMPLETE:** Audio & Music vollständig integriert
+- **Git:** feature/phase10-audio Branch gemergt (Commits: 7b8addc, d8b187e, 20855d1, 386c937, e57cac3)
 
 
 ---
+
+### 01.03.2026 (Sonntag) - Session: General Improvements & Bug Fixes
+| Aufgabe | geplant | in Bearbeitung | erledigt |
+|---------|:-------:|:--------------:|:--------:|
+| Debug: Breath Attack (CancelInvoke Fix, _canSeePlayer Fix) | x | x | x |
+| Advanced Mode Difficulty (+15% Snake-Damage, Drain-Rate 0.25f) | x | x | x |
+| Charges-System aus TuneController entfernt (MVP Scope Reduction) | x | x | x |
+| Snake Behavior Fix: Basic Snake FollowPlayer in Breath-Range | x | x | x |
+| Shield Damage Bypass Fix: TakeSnakeAttackDamage() in HealthSystem | x | x | x |
+| HealthBarUI: _debuffText / _debuffMessage entfernt (TMP = Single Source) | x | x | x |
+| Gelbes Licht (Skybox außerhalb Cave) | x | x | x |
+
+**Screenshot:** `Media/Screenshots/2026-03-01_.png`
+
+**Notizen:**
+- **Breath Attack Fix:** `CancelInvoke(nameof(ResetBreathBool))` vor Invoke verhindert doppelten Reset. `_canSeePlayer = true` Bugfix in else-Branch von UpdateProximityDetection
+- **Advanced Difficulty:** Snake-Schaden ×1.15 wenn `_isAdvancedMode`, Drain von 0.115 auf 0.25 HP/sec
+- **Charges System entfernt:** TuneController v3.3 — kein Charge-Counter mehr. Im GDD als Future Feature dokumentiert
+- **Snake Behavior:** Basic Snakes haben kein Breath-Attack → verfolgen Spieler in Breath-Range statt zu warten. SnakeType-Check in `HandleIdlePlayerInteraction()`
+- **Shield Fix:** SnakeAI rief `TakeDamage()` direkt auf (bypassed Shield-Check). Neues `TakeSnakeAttackDamage(int amount)` in HealthSystem — prüft Shield vor jedem Snake-Angriff. Beide Damage-Pfade (OnTriggerEnter + DealScheduledDamage) aktualisiert
+- **HealthBarUI:** `_debuffText` + `_debuffMessage` SerializedFields entfernt. TMP-Child von ActiveEffectsWindow ist die einzige Text-Quelle
+- **Branch:** `feature/general-improvements`
 
 ### 02.03.2026 (Montag)
 | Aufgabe | geplant | in Bearbeitung | erledigt |

@@ -73,8 +73,8 @@ namespace SnakeEnchanter.Player
         [Tooltip("Simple Mode drain rate (0.1 HP/sec = 5 min survival from 30 HP)")]
         [SerializeField] private float _simpleDrainRate = 0.1f;
 
-        [Tooltip("Advanced Mode drain rate (15% faster than Simple)")]
-        [SerializeField] private float _advancedDrainRate = 0.115f;
+        [Tooltip("Advanced Mode drain rate (150% faster than Simple = 2.5x)")]
+        [SerializeField] private float _advancedDrainRate = 0.25f;
 
         [Tooltip("Enable passive drain (disable for testing/development)")]
         [SerializeField] private bool _enablePassiveDrain = false;
@@ -220,6 +220,20 @@ namespace SnakeEnchanter.Player
                 return; // Attack absorbed by shield!
             }
             TakeDamage(_snakeAttackDamage);
+        }
+
+        /// <summary>
+        /// Snake attack with custom damage amount. Checks shield before applying damage.
+        /// Use this instead of TakeDamage() for all snake-originated damage so shield works.
+        /// </summary>
+        public void TakeSnakeAttackDamage(int amount)
+        {
+            // Shield intercept — check before applying damage
+            if (_shieldComponent != null && _shieldComponent.TryAbsorbAttack())
+            {
+                return; // Attack absorbed by shield!
+            }
+            TakeDamage(amount);
         }
         #endregion
 

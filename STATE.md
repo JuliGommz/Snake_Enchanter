@@ -1,36 +1,41 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-02-27
+**Letzte Aktualisierung:** 2026-03-01
 
 ---
 
 ## QUICK START
 
-**Branch:** `main`
-**Letzter Commit:** 77a924b (merge feature/phase9-backend — Phase 9 complete)
-**Working Tree:** Clean
+**Branch:** `feature/general-improvements`
+**Letzter Commit:** e57cac3 (feat: restore MusicManager + add assets and screenshots)
+**Working Tree:** Dirty — Script-Fixes + Scenes uncommitted
 
 **Milestone:** v1.0 Submission Ready (Phases 7-13)
-**Aktuelle Phase:** 10 - Audio & Music
-**Fortschritt:** ~75% von v1.0
+**Aktuelle Phase:** General Improvements / Phase 11 Polish
+**Fortschritt:** ~85% von v1.0
 
 ---
 
 ## WAS GERADE PASSIERT
 
-Phase 9 DONE — E2E bestätigt. Unity → MySQL Daten fließen korrekt.
+Phase 10 (Audio) DONE. General Improvements Session abgeschlossen.
 
-### NÄCHSTER SCHRITT: Phase 10 — Audio & Music
-- [ ] Flötenmelodien für 3 Tunes (Move, Daze, Shield) einbinden
-- [ ] AudioSource auf TuneController/Player
-- [ ] AudioClips in TuneConfig ScriptableObjects
-- [ ] Ambient-Sound (Cave Atmosphäre)
-- Feature-Branch: `feature/phase10-audio`
+### IN DIESEM BRANCH (feature/general-improvements) gemacht:
+- ✅ Breath Attack Fix (CancelInvoke, _canSeePlayer)
+- ✅ Advanced Mode Difficulty (+15% Damage, Drain 0.25f)
+- ✅ Charges System entfernt (TuneController v3.3)
+- ✅ Snake Behavior Fix (Basic Snake FollowPlayer in Breath-Range)
+- ✅ Shield Bypass Fix (TakeSnakeAttackDamage in HealthSystem)
+- ✅ HealthBarUI Cleanup (_debuffText/_debuffMessage entfernt)
+
+### NÄCHSTER SCHRITT: Main Story Text
+- [ ] Intro-Text / Story vor Game Start einbauen
+- [ ] Noch im Branch `feature/general-improvements`
 
 ### Offene Items (deferred):
 - CooldownOverlay FillOrigin → wenn Spell Icons erstellt werden
-- SpellScrollPickup + SpellUnlockSystem in Scene (`_unlockAllOnStart = true` überbrückt bis Phase 11)
-- 3D Scrolls in Cave platzieren (Phase 11 Polish)
+- SpellScrollPickup + SpellUnlockSystem in Scene (`_unlockAllOnStart = true` überbrückt)
+- 3D Scrolls in Cave platzieren
 
 ---
 
@@ -49,8 +54,8 @@ Phase 9 DONE — E2E bestätigt. Unity → MySQL Daten fließen korrekt.
 | 7 | Spell System (3 Tunes: Move, Daze, Shield) | ✅ DONE |
 | 8 | Menu & UI | ✅ DONE |
 | 9 | Backend & Stats | ✅ DONE |
-| 10 | Audio & Music | pending |
-| 11 | Polish & Juice | pending |
+| 10 | Audio & Music | ✅ DONE |
+| 11 | Polish & Juice | 🔄 in progress |
 | 12 | Testing & QA | pending |
 | 13 | Build & Submission | pending |
 
@@ -60,11 +65,14 @@ Phase 9 DONE — E2E bestätigt. Unity → MySQL Daten fließen korrekt.
 
 - Player Controller v1.9 (New Input System, Crouch, Cinemachine v3.x, walk-on-spawn fix)
 - Health System v1.5 (Drain, Events, Death Animations, heal-on-charm, shield intercept)
-- Tune System (TuneController v3.2, 3-Tune Array, Debug Unlock, Cooldown, Charges)
+- Tune System (TuneController v3.3, 3-Tune Array, Debug Unlock, Cooldown — Charges entfernt MVP)
 - Snake AI v2.1 (NavMesh, Entranced→Dazed two-phase, CancelInvoke safety, Dead state removed)
 - SpellScrollPickup + SpellUnlockSystem (code ready, NOT in scene)
 - SpellHUDController v1.1 (dynamic HUD, cooldown overlay, range indicator)
 - ShieldComponent v1.1 (duration from TuneConfig, blocks next attack)
+- HealthSystem v1.5 + TakeSnakeAttackDamage() — Shield-Routing korrekt für alle Snake-Damage-Pfade
+- MusicManager v1.0 (scene-based, gameplay alternation)
+- Controls Overlay (Keycap Images in-game)
 - Cave Map (Caves Parts Set + Dwarven Pack + ProBuilder/Polybrush)
 - Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1
 - Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)

@@ -122,13 +122,6 @@ namespace SnakeEnchanter.UI
         [Tooltip("Fill color at high health (75-100%)")]
         [SerializeField] private Color _highHealthColor = new Color(0.2f, 0.8f, 0.2f, 1f);
 
-        [Header("Debuff Indicator")]
-        [Tooltip("TextMeshPro element showing debuff status")]
-        [SerializeField] private TextMeshProUGUI _debuffText;
-
-        [Tooltip("Debuff message text (configurable in Inspector)")]
-        [SerializeField] private string _debuffMessage = "\u2620 Giftiger Nebel \u2014 HP sinkt";
-
         [Header("Pulsing Effect")]
         [Tooltip("Base pulse speed (oscillations per second)")]
         [SerializeField] private float _pulseSpeed = 2f;
@@ -197,11 +190,6 @@ namespace SnakeEnchanter.UI
                 _healthSlider.interactable = false; // Display only
             }
 
-            // Initialize debuff text
-            if (_debuffText != null)
-            {
-                _debuffText.text = _debuffMessage;
-            }
         }
 
         private void OnEnable()
