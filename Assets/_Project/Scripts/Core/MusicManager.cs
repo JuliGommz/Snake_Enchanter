@@ -101,7 +101,9 @@ namespace SnakeEnchanter.Core
 
         private AudioSource _audioSource;
         private Coroutine   _playlistCoroutine;
-        private bool        _playingTrack1 = true;
+        private bool        _playingTrack1     = true;
+        private bool        _isPaused          = false;
+        private bool        _audioRestartPending = false;
 
         // Scene names — must match exactly (Build Settings)
         private const string SCENE_MENU  = "MainMenu";
@@ -120,11 +122,36 @@ namespace SnakeEnchanter.Core
         private void OnEnable()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
+            AudioSettings.OnAudioConfigurationChanged += OnAudioConfigChanged;
         }
 
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigChanged;
+        }
+
+        // [AI-ASSISTED] Unity Recorder fires OnAudioConfigurationChanged multiple times rapidly
+        // when starting/stopping audio capture. The debounce flag (_audioRestartPending) prevents
+        // a restart loop where each event call would kill the previous restart coroutine.
+        private void OnAudioConfigChanged(bool deviceWasChanged)
+        {
+            if (_audioRestartPending) return;
+            _audioRestartPending = true;
+            StartCoroutine(RestartAfterAudioReset());
+        }
+
+        private IEnumerator RestartAfterAudioReset()
+        {
+            // 0.5s gives Recorder time to finish all its audio-init events before we restart
+            yield return new WaitForSeconds(0.5f);
+            _audioRestartPending = false;
+
+            if (!_audioSource.isPlaying && !_isPaused)
+            {
+                HandleSceneChange(SceneManager.GetActiveScene().name);
+                Debug.Log("[MusicManager] Audio restarted after Recorder config change.");
+            }
         }
 
         #endregion
@@ -223,6 +250,7 @@ namespace SnakeEnchanter.Core
         /// <summary>Pause/Resume music (e.g. for Pause screen).</summary>
         public void SetPaused(bool paused)
         {
+            _isPaused = paused;
             if (paused) _audioSource.Pause();
             else        _audioSource.UnPause();
         }

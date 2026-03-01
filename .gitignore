@@ -127,7 +127,7 @@ CLAUDE.md
 *.hdr
 
 # Large 3D Assets
-*.fbx
+# *.fbx  # FBX needed for Unity project (Pirate, Snakes, Cave)
 *.blend
 *.blend1
 *.max

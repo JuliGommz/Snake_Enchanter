@@ -48,8 +48,9 @@
 *          unlocked via scroll collection via OnTuneUnlocked event;
 *          Tune4/Freeze removed; Tune3 = Shield (SpellShield trigger)
 * - v3.1: Spell casting rules: range check (Move/Daze), cooldown (all spells),
-*          Advanced mode charges, Shield activation + no-recast-while-active,
+*          Shield activation + no-recast-while-active,
 *          TuneSuccessWithId only fires for snake-targeting tunes (1 and 2)
+* - v3.3: Charges system removed from MVP (deferred to GDD future features)
 ====================================================================
 */
 
@@ -75,7 +76,7 @@ namespace SnakeEnchanter.Tunes
     /// Manages Genshin-style Hold & Release timing mechanic.
     /// Player holds keys 1-3, slider moves, release in triggerzone = success.
     /// Tunes are locked by default — unlocked via scroll collection (OnTuneUnlocked event).
-    /// Spell casting rules enforced: range gating (Move/Daze), cooldown (all), charges (Advanced),
+    /// Spell casting rules enforced: range gating (Move/Daze), cooldown (all),
     /// Shield activation + no-recast-while-active, TuneSuccessWithId only for snake-targeting tunes.
     /// Uses New Input System exclusively.
     /// </summary>
@@ -106,9 +107,6 @@ namespace SnakeEnchanter.Tunes
 
         [Tooltip("Cooldown duration per tune (seconds): [0]=Move, [1]=Daze, [2]=Shield")]
         [SerializeField] private float[] _cooldownDurations = { 3f, 5f, 8f };
-
-        [Tooltip("Max charges per spell in Advanced mode (placeholder — Phase 13 balancing): [0]=Move, [1]=Daze, [2]=Shield")]
-        [SerializeField] private int[] _spellCharges = { 5, 5, 3 };
 
         [Tooltip("Layer mask for snake range check (leave default for all layers)")]
         [SerializeField] private LayerMask _snakeLayerMask;
@@ -152,9 +150,6 @@ namespace SnakeEnchanter.Tunes
 
         // Cooldown timers — remaining time per tune (seconds), 0 = ready
         private float[] _cooldownTimers = new float[3];
-
-        // Remaining charges per tune (Advanced mode only)
-        private int[] _remainingCharges = new int[3];
 
         // Last known range state for debounce
         private bool _lastSnakeInRange = false;
@@ -242,12 +237,6 @@ namespace SnakeEnchanter.Tunes
             if (_shieldComponent == null)
             {
                 _shieldComponent = GetComponentInParent<ShieldComponent>();
-            }
-
-            // Initialize Advanced mode charges (Simple mode has unlimited)
-            if (!_isSimpleMode)
-            {
-                _remainingCharges = (int[])_spellCharges.Clone();
             }
 
             // Cache delegates to enable proper unsubscription (B-001 fix)
@@ -400,9 +389,6 @@ namespace SnakeEnchanter.Tunes
             // Cooldown guard — silently blocked while on cooldown
             if (_cooldownTimers[idx] > 0f) return;
 
-            // Charge guard — Advanced mode only, silently blocked when charges depleted
-            if (!_isSimpleMode && _remainingCharges[idx] <= 0) return;
-
             // Range guard for Move/Daze (tunes 1 and 2) — silently blocked if no snake in range
             if (tuneNumber <= 2 && !HasSnakeInRange(_spellCastRange)) return;
 
@@ -434,11 +420,6 @@ namespace SnakeEnchanter.Tunes
             if (idx >= 0 && idx < _tuneUnlocked.Length)
             {
                 _tuneUnlocked[idx] = true;
-                // Initialize charges for this tune in Advanced mode
-                if (!_isSimpleMode)
-                {
-                    _remainingCharges[idx] = _spellCharges[idx];
-                }
                 Debug.Log($"TuneController: Tune {tuneNumber} unlocked!");
             }
         }
@@ -572,7 +553,7 @@ namespace SnakeEnchanter.Tunes
                     break;
 
                 case TuneResult.Success:
-                    // Success — start cooldown and consume charge
+                    // Success — start cooldown
                     GameEvents.TuneSuccess();
 
                     // Start cooldown for this tune
@@ -581,12 +562,6 @@ namespace SnakeEnchanter.Tunes
                     {
                         _cooldownTimers[idx] = _cooldownDurations[idx];
                         GameEvents.TuneCooldownStarted(tuneNumber, _cooldownDurations[idx]);
-
-                        // Consume charge in Advanced mode
-                        if (!_isSimpleMode)
-                        {
-                            _remainingCharges[idx]--;
-                        }
                     }
 
                     // Only Move and Daze (tunes 1 and 2) fire TuneSuccessWithId — snakes react to these.
@@ -792,11 +767,6 @@ namespace SnakeEnchanter.Tunes
         public void SetSimpleMode(bool isSimple)
         {
             _isSimpleMode = isSimple;
-            // Re-initialize charges when switching to Advanced mode
-            if (!isSimple)
-            {
-                _remainingCharges = (int[])_spellCharges.Clone();
-            }
             Debug.Log($"TuneController: Mode set to {(isSimple ? "Simple" : "Advanced")}");
         }
 
@@ -840,10 +810,6 @@ namespace SnakeEnchanter.Tunes
             GUILayout.Label($"Tune 1 (Move) Unlocked: {_tuneUnlocked[0]} | CD: {_cooldownTimers[0]:F1}s");
             GUILayout.Label($"Tune 2 (Daze) Unlocked: {_tuneUnlocked[1]} | CD: {_cooldownTimers[1]:F1}s");
             GUILayout.Label($"Tune 3 (Shield) Unlocked: {_tuneUnlocked[2]} | CD: {_cooldownTimers[2]:F1}s");
-            if (!_isSimpleMode)
-            {
-                GUILayout.Label($"Charges: Move={_remainingCharges[0]}, Daze={_remainingCharges[1]}, Shield={_remainingCharges[2]}");
-            }
 
             GUILayout.Space(10);
             GUILayout.Label($"<b>Active Zone:</b> {_activeZoneStart:F2} - {_activeZoneEnd:F2}", headerStyle);

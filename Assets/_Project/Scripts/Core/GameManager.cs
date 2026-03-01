@@ -111,6 +111,10 @@ namespace SnakeEnchanter.Core
         [SerializeField] private Player.HealthSystem _healthSystem;
         [SerializeField] private Player.PlayerController _playerController;
         [SerializeField] private Tunes.TuneController _tuneController;
+
+        [Header("Intro")]
+        [Tooltip("Show story intro panel before gameplay starts. Disable for quick testing.")]
+        [SerializeField] private bool _showIntroOnStart = true;
         #endregion
 
         #region Private Fields
@@ -180,7 +184,19 @@ namespace SnakeEnchanter.Core
             // Key: "SnakeEnchanter_GameMode" — 0 = Simple, 1 = Advanced, default = Simple
             int modeValue = PlayerPrefs.GetInt("SnakeEnchanter_GameMode", 0);
             GameMode selectedMode = (modeValue == 1) ? GameMode.Advanced : GameMode.Simple;
-            StartGame(selectedMode);
+
+            if (_showIntroOnStart)
+            {
+                // Store mode — StoryIntroController will call StartGameFromIntro() on dismiss
+                _gameMode = selectedMode;
+                if (_healthSystem != null) _healthSystem.SetPassiveDrainEnabled(false);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                StartGame(selectedMode);
+            }
         }
 
         private void OnEnable()
@@ -233,6 +249,12 @@ namespace SnakeEnchanter.Core
             Cursor.visible = false;
 
             Debug.Log($"GameManager: Game started — Mode: {mode}");
+        }
+
+        /// <summary>Called by StoryIntroController when the intro is dismissed.</summary>
+        public void StartGameFromIntro()
+        {
+            StartGame(_gameMode);
         }
 
         /// <summary>Handles win condition.</summary>

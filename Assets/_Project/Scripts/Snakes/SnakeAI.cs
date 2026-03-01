@@ -513,11 +513,11 @@ namespace SnakeEnchanter.Snakes
             if (_currentState != SnakeState.Aggressive) return;
             if (!other.CompareTag("Player")) return;
 
-            // Deal contact damage
+            // Deal contact damage (via TakeSnakeAttackDamage so shield is checked)
             var healthSystem = other.GetComponent<Player.HealthSystem>();
             if (healthSystem != null)
             {
-                healthSystem.TakeDamage(_contactDamage);
+                healthSystem.TakeSnakeAttackDamage(_contactDamage);
             }
         }
         #endregion
@@ -557,7 +557,8 @@ namespace SnakeEnchanter.Snakes
             }
             else
             {
-                _canSeePlayer = false;
+                // Nothing blocking the ray — clear line of sight to player
+                _canSeePlayer = true;
             }
         }
         #endregion
@@ -800,33 +801,36 @@ namespace SnakeEnchanter.Snakes
             else if (_playerDistance >= _breathRangeMin && _playerDistance <= _breathRangeMax)
             {
                 // Breath Attack range (4-7 units)
-                // Attack is handled in CheckAndTriggerAttack()
-                // Just look at player
-                LookAtPlayer();
+                // Cobra (Advanced): wait in breath range — breath attack fires via CheckAndTriggerAttack()
+                // Basic: no breath attack — continue approaching for bite
+                if (_snakeType == SnakeType.Advanced)
+                    LookAtPlayer();
+                else
+                    FollowPlayer();
             }
             else if (_playerDistance > _breathRangeMax && _playerDistance < _projectileRange)
             {
-                // Gap range (7-8 units) - approach for projectile (or look if Simple mode)
-                if (_isAdvancedMode)
-                {
-                    FollowPlayer(); // Close gap to projectile range
-                }
+                // Gap range (7-8 units)
+                // Basic snake always pursues (no ranged attack, needs to close in)
+                // Cobra Advanced: pursue to close gap for projectile
+                if (_isAdvancedMode || _snakeType == SnakeType.Basic)
+                    FollowPlayer();
                 else
-                {
-                    LookAtPlayer(); // Simple mode: no projectile, just watch
-                }
+                    LookAtPlayer();
             }
             else if (_playerDistance >= _projectileRange && _isAdvancedMode)
             {
-                // Projectile range (8+ units, Advanced only)
+                // Projectile range (8+ units, Advanced Cobra only)
                 // Attack is handled in CheckAndTriggerAttack()
-                // Just look at player
                 LookAtPlayer();
             }
             else
             {
-                // Default: Look at player (covers any edge cases)
-                LookAtPlayer();
+                // Default (8+ units, non-Advanced): Basic snake still pursues within detection range
+                if (_snakeType == SnakeType.Basic && _playerDistance <= _detectionRange)
+                    FollowPlayer();
+                else
+                    LookAtPlayer();
             }
         }
 
@@ -1175,6 +1179,7 @@ namespace SnakeEnchanter.Snakes
                     case AttackType.Breath:
                         // Breath Attack is a BOOL (Type 4) in Animator Controller
                         _animator.SetBool("Breath Attack", true);
+                        CancelInvoke(nameof(ResetBreathBool)); // Prevent stacking
                         Invoke(nameof(ResetBreathBool), 2f); // Reset after animation
                         break;
                     case AttackType.Projectile:
@@ -1191,6 +1196,10 @@ namespace SnakeEnchanter.Snakes
                 AttackType.Projectile => _projectileDamage,
                 _ => 0
             };
+
+            // Advanced mode: +15% damage
+            if (_isAdvancedMode)
+                damage = Mathf.RoundToInt(damage * 1.15f);
 
             // Animation delays (approximate)
             float damageDelay = attackType switch
@@ -1295,7 +1304,7 @@ namespace SnakeEnchanter.Snakes
                     var healthSystem = hit.collider.GetComponent<Player.HealthSystem>();
                     if (healthSystem != null)
                     {
-                        healthSystem.TakeDamage(_scheduledDamage);
+                        healthSystem.TakeSnakeAttackDamage(_scheduledDamage);
                     }
                 }
             }
