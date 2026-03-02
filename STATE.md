@@ -1,166 +1,170 @@
 # PROJECT STATE - Snake Enchanter
 
-**Letzte Aktualisierung:** 2026-03-01
+**Letzte Aktualisierung:** 2026-03-03
 
 ---
 
 ## QUICK START
 
 **Branch:** `main`
-**Letzter Commit:** 7d7f56d (feat: merge feature/general-improvements — Phase 11 Polish complete)
-**Working Tree:** Clean
+**Letzter Commit:** `b98d476` — chore: Unity reimport — new meta files + project settings update
+**Remote:** https://github.com/JuliGommz/Snake_Enchanter.git — ✅ Pushed (up to date)
+**Working Tree:** 1 modified (ProjectSettings.asset — Unity-intern, harmlos), build-Dateien untracked (gitignored)
 
-**Milestone:** v1.0 Submission Ready (Phases 7-13)
-**Aktuelle Phase:** Phase 12 Testing & QA — NÄCHSTE PHASE
-**Fortschritt:** ~90% von v1.0
-
----
-
-## WAS GERADE PASSIERT
-
-Phase 11 Polish DONE. Gemergt in main. Session beendet.
-
-### ERLEDIGT (feature/general-improvements → main):
-- ✅ Breath Attack Fix (CancelInvoke, _canSeePlayer)
-- ✅ Advanced Mode Difficulty (+15% Damage, Drain 0.25f)
-- ✅ Charges System entfernt (TuneController v3.3)
-- ✅ Snake Behavior Fix (Basic Snake FollowPlayer in Breath-Range)
-- ✅ Shield Bypass Fix (TakeSnakeAttackDamage in HealthSystem)
-- ✅ HealthBarUI Cleanup (_debuffText/_debuffMessage entfernt)
-- ✅ MusicManager v1.1 — Unity Recorder Audio-Fix (OnAudioConfigurationChanged Debounce)
-- ✅ StoryIntroController v1.2 — Fade In/Out (CanvasGroup, _inputReady, _inputCooldown)
-- ✅ ActiveEffectsController v1.0 — MOVE/DAZE Texte in ActiveEffectsWindow (OnSnakeCharmed)
-
-### NÄCHSTER SCHRITT: Doku-Block + Testing
-- [ ] Sonstiges (offene Kleinigkeiten) — Task 3
-- [ ] Arbeitsprotokoll .docx — Task 5
-- [ ] Abgleich PIP-3 — Task 6
-- [ ] GDD Update — Task 7
-- [ ] README Dozenten — Task 8
-- [ ] Phase 12: Testing & QA starten
-
-### Offene Items (deferred):
-- CooldownOverlay FillOrigin → wenn Spell Icons erstellt werden
-- SpellScrollPickup + SpellUnlockSystem in Scene (`_unlockAllOnStart = true` überbrückt)
-- 3D Scrolls in Cave platzieren
+**Milestone:** v1.0 Submission Ready
+**Status:** Phase 12 ✅ + Phase 13 ✅ — ABGABE-STRUKTUR FERTIG
 
 ---
 
-## ABGESCHLOSSENE MILESTONES
+## WAS HEUTE GEMACHT WURDE (2026-03-03)
 
-| Milestone | Status | Shipped |
-|-----------|--------|---------|
-| v0.1 SPIELBAR | DONE | 2026-02-09 |
-| v0.2 KOMPLETT | DONE | 2026-02-15 |
-| v0.3 Bug Fixes & Stability | DONE | 2026-02-18 |
+### Phase 13: Repo-Abgabe-Struktur — COMPLETE ✅
+- Unity-Projekt nach `Arbeitsdateien/GME_Julian_Gomez/` verschoben (Python-Copy + git)
+- `Konzeption/GDD_v1.8_SnakeEnchanter.pdf` → git-tracked ✅
+- `Projektplan.pdf` → Root, git-tracked ✅
+- `Arbeitsprotokoll_Julian_Gomez.pdf` → Root, git-tracked ✅
+- `Anwendung/ReadMe.txt` → git-tracked ✅
+- `Trailer/` → Placeholder erstellt ✅
+- `.gitignore` angepasst (root-anchored `/Assets/` etc.)
 
-## v1.0 PHASEN-ÜBERSICHT
+### Bug Fixes (committed)
+- `fix: Escape releases cursor in Editor, quits only in build` (90a75dc)
+  - QuitController: `EditorApplication.isPlaying = false` entfernt
+  - Editor: Escape = nur Cursor freigeben, Play Mode läuft weiter
+  - Build: Escape = Application.Quit() wie gewollt
+- `fix: _escapeToMainMenu false in GameLevel scene` (9ba4a50)
+  - War auf `true` gesetzt → Escape ging zu Main Menu statt zu beenden
+- `fix: CS0414 — _sliderHeight entfernt aus TuneSliderUI` (226e456)
+  - Feld war [SerializeField] aber nie gelesen
 
-| Phase | Beschreibung | Status |
-|-------|-------------|--------|
-| 7 | Spell System (3 Tunes: Move, Daze, Shield) | ✅ DONE |
-| 8 | Menu & UI | ✅ DONE |
-| 9 | Backend & Stats | ✅ DONE |
-| 10 | Audio & Music | ✅ DONE |
-| 11 | Polish & Juice | 🔄 in progress |
-| 12 | Testing & QA | pending |
-| 13 | Build & Submission | pending |
+### Post-Restructuring Fixes
+- Große gitignorierte Assets (mp3, tif, psd, hdr) von root `Assets/` nach
+  `Arbeitsdateien/GME_Julian_Gomez/Assets/` kopiert (59 Dateien)
+- Gelöschte .meta Dateien aus git wiederhergestellt (GUIDs erhalten)
+- PDFs in Arbeitsdateien/Documentation/ jetzt auch git-tracked
+
+---
+
+## NÄCHSTER SCHRITT (morgen direkt starten)
+
+### 1. NEUEN BUILD ERSTELLEN ⚠️ PFLICHT
+Der aktuelle Build in `Anwendung/` ist veraltet:
+- Escape-Bug war noch aktiv (ging zu Main Menu)
+- `_escapeToMainMenu` Fix ist nur im Quellcode, noch nicht im Build
+
+**Vorgehen:**
+1. Unity öffnen von `Arbeitsdateien/GME_Julian_Gomez/`
+2. File → Build Settings → Build
+3. Ziel: `Anwendung/Snake_Enchanter.exe` (direkt in Anwendung/ bauen)
+4. Build testen: Starten → spielen → Escape → muss Fenster schließen
+
+### 2. TRAILER ⏳
+- `Trailer/Trailer.mlt` existiert → Kdenlive-Projekt angelegt
+- MP4 exportieren: mind. 1920×1080, Dateiname `SnakeEnchanter_Trailer.mp4`
+- In `Trailer/` ablegen (gitignore-Exception bereits vorhanden)
+
+### 3. GDD Illustrationen prüfen
+- `Konzeption/GDD_v1.8_SnakeEnchanter.pdf` öffnen
+- Enthält es Screenshots/Bilder? (Projektauftrag fordert "illustrierte Konzepte")
+- Falls nicht: Screenshots in DOCX einfügen → PDF neu exportieren
+
+---
+
+## ABGABE-CHECKLISTE
+
+```
+- [x] GDD v1.8 als PDF (Konzeption/)
+- [ ] GDD v1.8 illustriert (Screenshots drin?)
+- [x] Projektplan.pdf (Root)
+- [x] Arbeitsprotokoll.pdf (Root)
+- [x] Unity-Projekt in Arbeitsdateien/GME_Julian_Gomez/
+- [x] Backend in Arbeitsdateien/GME_Julian_Gomez/backend/
+- [x] ReadMe.txt in Anwendung/
+- [x] Build in Anwendung/ (liegt lokal, gitignored)
+- [ ] Neuer Build (Escape-Fix!)
+- [ ] Build startet fehlerfrei + Escape beendet .exe
+- [ ] Trailer (Trailer/SnakeEnchanter_Trailer.mp4)
+- [x] Alle 4 HTTP-Methoden (GET/POST/PUT/DELETE)
+- [x] GitHub up to date
+```
+
+---
+
+## UNITY ÖFFNEN
+
+**Projekt-Pfad (Unity Hub):**
+`C:\Users\Teilnehmer\Desktop\Schule\PRG\Unity_Projects\Snake_Enchanter\Arbeitsdateien\GME_Julian_Gomez\`
+
+Falls nicht in Unity Hub: Remove → Re-Add mit obigem Pfad.
+
+---
+
+## REPO-STRUKTUR (Abgabe-konform)
+
+```
+Snake_Enchanter/                        ← Repo-Root
+├── Konzeption/
+│   └── GDD_v1.8_SnakeEnchanter.pdf    ✅ git-tracked
+├── Arbeitsdateien/GME_Julian_Gomez/
+│   ├── Assets/                         ✅ Unity-Projekt
+│   ├── ProjectSettings/               ✅
+│   ├── Packages/                      ✅
+│   └── backend/                       ✅ Node.js REST API
+├── Anwendung/
+│   ├── ReadMe.txt                     ✅ git-tracked
+│   ├── Snake_Enchanter.exe            ⚠️  lokal vorhanden, VERALTET → neu bauen
+│   └── [Build-Dateien]                gitignored, lokal vorhanden
+├── Trailer/
+│   ├── .gitkeep                       ✅
+│   └── Trailer.mlt                    ⏳ Kdenlive-Projekt (MP4 noch exportieren)
+├── Projektplan.pdf                    ✅ git-tracked
+└── Arbeitsprotokoll_Julian_Gomez.pdf  ✅ git-tracked
+```
+
+---
+
+## GIT STATUS (aktuell)
+
+```
+Branch: main
+Letzter Commit: b98d476
+Remote: GitHub — vollständig gepusht ✅
+Unstaged: ProjectSettings.asset (Unity-intern, kein Handlungsbedarf)
+Untracked: Anwendung/[Build-Dateien] (gitignored — korrekt)
+           Trailer/Trailer.mlt (neues Kdenlive-Projekt)
+           GDD_v1.7_SnakeEnchanter.txt.meta (altes Meta, unwichtig)
+```
+
+---
+
+## BEKANNTE WARNINGS (harmlos)
+
+- `Color primaries 0 unknown` — MP4-Aufnahmen in Documentation/Media/Recordings/
+  → Nicht-Spiel-Assets, Unity-Import-Warning, kein Einfluss auf Build
+- `UDP port 56906 VS/Unity messaging` — VS Integration Port-Konflikt
+  → Harmlos, anderer Prozess hält den Port
 
 ---
 
 ## WAS FUNKTIONIERT
 
-- Player Controller v1.9 (New Input System, Crouch, Cinemachine v3.x, walk-on-spawn fix)
+- Player Controller v1.9 (New Input System, Crouch, Cinemachine v3.x)
 - Health System v1.5 (Drain, Events, Death Animations, heal-on-charm, shield intercept)
-- Tune System (TuneController v3.3, 3-Tune Array, Debug Unlock, Cooldown — Charges entfernt MVP)
-- Snake AI v2.1 (NavMesh, Entranced→Dazed two-phase, CancelInvoke safety, Dead state removed)
-- SpellScrollPickup + SpellUnlockSystem (code ready, NOT in scene)
+- Tune System (TuneController v3.3 — 3-Tune Array, Cooldown)
+- Snake AI v2.1 (NavMesh, Entranced→Dazed, CancelInvoke)
 - SpellHUDController v1.1 (dynamic HUD, cooldown overlay, range indicator)
 - ShieldComponent v1.1 (duration from TuneConfig, blocks next attack)
-- HealthSystem v1.5 + TakeSnakeAttackDamage() — Shield-Routing korrekt für alle Snake-Damage-Pfade
-- MusicManager v1.1 (scene-based, gameplay alternation, Unity Recorder audio-fix)
-- Controls Overlay (Keycap Images in-game)
-- Cave Map (Caves Parts Set + Dwarven Pack + ProBuilder/Polybrush)
-- Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.1 + ActiveEffectsController v1.0
-- Cinemachine v3.x (CM_PlayerCamera, CinemachineBrain)
-- Win Condition (ExitTrigger, ResetTrigger on Retry)
-- Full Game Loop (GameManager v1.3, MainMenuController, ResultScreenController)
+- MusicManager v1.1 (scene-based, gameplay alternation)
+- Canvas UI: HealthBarUI v3.1 + TuneSliderUI v2.2 + ActiveEffectsController v1.0
+- Win Condition (ExitTrigger) + Full Game Loop (GameManager v1.5)
 - Backend REST API (Node.js + Express + MySQL) — localhost:3000
-- ApiManager.cs v1.0 (Unity → Backend, fail-silent)
-- START_SERVER.bat (Dozenten-Deployment)
-- MainMenu Scene (Simple/Advanced/Quit)
-- Pirate Character: Humanoid Avatar, 10 Animations, Bake Into Pose
-
----
-
-## FOLDER STRUCTURE
-
-```
-Assets/_Project/
-  Art-Visuals/
-    Images/              # UI Textures (teastain)
-    Prefabs-FBX-Materials-Animations/
-      Cave/              # FBX/, Materials/, Prefabs/ (Sample.prefab), Textures/
-      Pirate/            # Mesh/, Animations/, Materials/, Prefabs/, Textures/, MC_Controller
-      Props/             # Dungeon Props (Dwarven Pack)
-      Snakes/            # Controllers/, FBX/, Materials/, Prefabs/, Textures/
-  Scripts/               # Core, Player, Snakes, TuneSystem, UI, Data, Level, Editor
-  ScriptableObjects/     # TuneConfigs: Tune1_Move, Tune2_Daze, Tune3_Shield
-  Scenes/                # MainMenu, GameLevel
-  Data/                  # Input Actions
-  Design/
-  Media/                 # Audio/Music, Audio/SFX, Audio/Tunes
-```
-
----
-
-## GIT STATUS
-
-```
-Branch: main
-Letzter Commit: 7d7f56d (merge feature/general-improvements)
-Remote: https://github.com/JuliGommz/Snake_Enchanter.git
-Working Tree: Clean (4 irrelevante untracked Metas — Build, Recordings)
-Merge-Bereit: Gemergt ✅
-```
+- MainMenu Scene (Simple/Advanced/Quit) + ResultScreen
+- QuitController: Escape = Cursor freigeben (Editor) / Quit (Build)
 
 ---
 
 ## REGELN (NICHT VERHANDELBAR)
 
-### Input System
-AUSSCHLIESSLICH Unity New Input System! NIEMALS `UnityEngine.Input` (Legacy).
-
-### Kamera-System (Cinemachine v3.x)
-- Cinemachine besitzt Kamera-Position. NIEMALS per Script überschreiben.
-- PlayerController steuert NUR Pitch (Mouse Y) + Body Yaw (Mouse X)
-
-### Animation
-- Humanoid Rig (Pirate.FBX + alle Animations)
-- Bake Into Pose: Rotation (Body Orientation), Y (Feet), XZ (Center of Mass)
-- Root Motion OFF (CharacterController steuert Movement)
-
-### Git Workflow
-- Feature Branches: `feature/<name>` from main
-- Ein Feature = Ein Branch
-- Nach Merge: Branch löschen
-
-### Spell System (Phase 7)
-- 3 Tunes: Move (1), Daze (2), Shield (3)
-- Daze = zweiphasig: Entranced (3s, amber) → Dazed (8s, blau, Die-Anim)
-- Melody spielt nur bei Success (nicht während Hold)
-- Shield Duration = Melody Section Length (TuneConfig = Single Source)
-- Debug: `_unlockAllOnStart = true` (für Testing, vor Release auf false setzen)
-- HP heals only on successful charm (Move/Daze), not Shield
-- Cooldown + Charges (Advanced mode)
-
-### Wichtige Dateien für Spell-System
-| Datei | Beschreibung |
-|-------|-------------|
-| `Scripts/TuneSystem/TuneController.cs` | v3.2 — Slider, Melody, Shield-Kopplung |
-| `Scripts/Snakes/SnakeAI.cs` | v2.1 — Entranced State, CancelInvoke, Dead removed |
-| `Scripts/Player/ShieldComponent.cs` | v1.1 — Duration + ShieldText TMP |
-| `Scripts/TuneSystem/TuneConfig.cs` | ScriptableObject Definition |
-| `ScriptableObjects/TuneConfigs/Tune1_Move.asset` | Move Config (melody 0-12s) |
-| `ScriptableObjects/TuneConfigs/Tune2_Daze.asset` | Daze Config |
-| `ScriptableObjects/TuneConfigs/Tune3_Shield.asset` | Shield Config (melody 10-25s = 15s shield) |
+- Input System: NUR New Input System (`UnityEngine.InputSystem`) — KEIN Legacy Input
+- Kamera: Cinemachine besitzt Position — NIEMALS per Script überschreiben
+- Git: Feature Branches `feature/<name>` — Ein Feature = Ein Branch — nach Merge löschen
