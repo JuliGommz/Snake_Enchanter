@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.4 - Code quality: M1 magic number + D3 placeholder comment
+* Version: 1.5 - Two-phase session lifecycle: POST on start, PUT on end
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -46,9 +46,11 @@
 * - v1.2: Start() reads GameModePrefs (PlayerPrefs) from MainMenu
 * - v1.3: Backend API integration (POST session on game end)
 * - v1.4: M1 — replaced magic 33.3f with HeartsPerHealthUnit constant; D3 — fourthTuneUnlocked comment added
+* - v1.5: Two-phase session lifecycle — POST pending session on game start, PUT final stats on game end
 ====================================================================
 */
 
+using System;
 using UnityEngine;
 
 // Enums defined OUTSIDE namespace to prevent circular dependencies
@@ -130,6 +132,9 @@ namespace SnakeEnchanter.Core
         // Player spawn position — captured once at Start(), restored on RestartGame()
         private Vector3    _playerSpawnPosition;
         private Quaternion _playerSpawnRotation;
+
+        // Session ID — generated once at game start, reused for POST + PUT
+        private string _sessionId;
 
         // Session tracking (GDD Section 7.2)
         private int _successfulTuneCasts = 0;
@@ -236,6 +241,9 @@ namespace SnakeEnchanter.Core
             ResetSessionData();
             _sessionStartTime = Time.time;
 
+            // Generate session ID once per run — reused in POST and PUT
+            _sessionId = Guid.NewGuid().ToString();
+
             // Apply mode settings to all systems
             ApplyModeSettings(mode);
 
@@ -252,6 +260,9 @@ namespace SnakeEnchanter.Core
             // Lock cursor
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+
+            // POST pending session to backend — creates the DB record, captures id for PUT
+            PostPendingSessionToBackend();
 
             Debug.Log($"GameManager: Game started — Mode: {mode}");
         }
@@ -294,7 +305,7 @@ namespace SnakeEnchanter.Core
             Cursor.visible = true;
 
             LogSessionSummary(success);
-            SendSessionToBackend(success);
+            UpdateSessionInBackend(success);
 
             Debug.Log($"GameManager: Game ended — {(success ? "VICTORY!" : "DEFEAT")} | Time: {SessionTime:F1}s");
         }
@@ -427,22 +438,59 @@ namespace SnakeEnchanter.Core
         }
 
         /// <summary>
-        /// Sends session data to backend via ApiManager.
+        /// POST a pending session to backend at game start.
+        /// Creates the DB record and stores the returned id for PUT/DELETE.
         /// Fail-silent: if ApiManager is not found, logs warning only.
         /// </summary>
-        private void SendSessionToBackend(bool success)
+        private void PostPendingSessionToBackend()
         {
             if (Data.ApiManager.Instance == null)
             {
-                Debug.LogWarning("GameManager: ApiManager not found — session not sent to backend.");
+                Debug.LogWarning("GameManager: ApiManager not found — pending session not posted.");
+                return;
+            }
+
+            var pendingData = new Data.ApiManager.SessionData
+            {
+                sessionId           = _sessionId,
+                modeType            = _gameMode == GameMode.Advanced ? "advanced" : "simple",
+                success             = false,
+                completionTime      = 0,
+                startingHp          = _startingHP,
+                endingHp            = 0,
+                totalDamageTaken    = 0,
+                totalHpRestored     = 0,
+                successfulTuneCasts = 0,
+                failedTuneCasts     = 0,
+                tooEarlyCount       = 0,
+                tooLateCount        = 0,
+                snakeBiteCount      = 0,
+                // PLACEHOLDER: Tune 4 (Freeze) was cut from scope. Field kept for potential post-submission expansion.
+                fourthTuneUnlocked  = false,
+                heartsRemaining     = 0
+            };
+
+            Data.ApiManager.Instance.PostSession(pendingData);
+        }
+
+        /// <summary>
+        /// PUT final session stats to backend at game end.
+        /// Updates the DB record created by PostPendingSessionToBackend.
+        /// Fail-silent: if ApiManager is not found, logs warning only.
+        /// </summary>
+        private void UpdateSessionInBackend(bool success)
+        {
+            if (Data.ApiManager.Instance == null)
+            {
+                Debug.LogWarning("GameManager: ApiManager not found — session not updated in backend.");
                 return;
             }
 
             float endingHp = _healthSystem != null ? _healthSystem.CurrentHealth : 0f;
 
-            var sessionData = new Data.ApiManager.SessionData
+            var finalData = new Data.ApiManager.SessionData
             {
-                sessionId             = System.Guid.NewGuid().ToString(),
+                sessionId             = _sessionId,
                 modeType              = _gameMode == GameMode.Advanced ? "advanced" : "simple",
                 success               = success,
                 completionTime        = Mathf.RoundToInt(SessionTime),
@@ -460,7 +508,7 @@ namespace SnakeEnchanter.Core
                 heartsRemaining       = Mathf.RoundToInt(endingHp / HeartsPerHealthUnit)
             };
 
-            Data.ApiManager.Instance.PostSession(sessionData);
+            Data.ApiManager.Instance.PutSession(finalData);
         }
 
         #endregion

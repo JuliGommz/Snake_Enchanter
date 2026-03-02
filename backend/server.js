@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-27
-* Version: 2.0
+* Version: 3.0
 *
 * AUTHORSHIP CLASSIFICATION:
 * [AI-ASSISTED]
@@ -15,10 +15,12 @@
 * Human reviewed and approved.
 *
 * ENDPOINTS:
-* POST /api/game-session         - Store session stats after a run
-* GET  /api/leaderboard          - Top sessions (?mode=simple|advanced)
-* GET  /api/player-stats         - Aggregated stats across all sessions
-* GET  /api/health               - Server health check
+* POST   /api/game-session       - Create pending session at game start
+* PUT    /api/game-session/:id   - Update session with final stats at game end
+* DELETE /api/game-session/:id   - Delete a session (result screen "don't save")
+* GET    /api/leaderboard        - Top sessions (?mode=simple|advanced)
+* GET    /api/player-stats       - Aggregated stats across all sessions
+* GET    /api/health             - Server health check
 ====================================================================
 */
 
@@ -34,7 +36,7 @@ app.use(express.json());
 // CORS: Allow Unity (localhost) to connect
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin',  '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
@@ -112,6 +114,113 @@ app.post('/api/game-session', async (req, res) => {
 
     } catch (err) {
         console.error('[POST] game-session error:', err.message);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// ── PUT /api/game-session/:id ─────────────────────────────────────
+// Update a session with final stats at game end
+app.put('/api/game-session/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'Invalid session id' });
+    }
+
+    const {
+        sessionId,
+        modeType,
+        success,
+        completionTime,
+        startingHp,
+        endingHp,
+        totalDamageTaken,
+        totalHpRestored,
+        successfulTuneCasts,
+        failedTuneCasts,
+        tooEarlyCount,
+        tooLateCount,
+        snakeBiteCount,
+        fourthTuneUnlocked,
+        heartsRemaining
+    } = req.body;
+
+    try {
+        const [result] = await db.execute(
+            `UPDATE game_sessions SET
+                session_id            = ?,
+                mode_type             = ?,
+                success               = ?,
+                completion_time       = ?,
+                starting_hp           = ?,
+                ending_hp             = ?,
+                total_damage_taken    = ?,
+                total_hp_restored     = ?,
+                successful_tune_casts = ?,
+                failed_tune_casts     = ?,
+                too_early_count       = ?,
+                too_late_count        = ?,
+                snake_bite_count      = ?,
+                fourth_tune_unlocked  = ?,
+                hearts_remaining      = ?
+            WHERE id = ?`,
+            [
+                sessionId,
+                modeType,
+                success             ? 1 : 0,
+                completionTime      ?? 0,
+                startingHp          ?? 30,
+                endingHp            ?? 0,
+                totalDamageTaken    ?? 0,
+                totalHpRestored     ?? 0,
+                successfulTuneCasts ?? 0,
+                failedTuneCasts     ?? 0,
+                tooEarlyCount       ?? 0,
+                tooLateCount        ?? 0,
+                snakeBiteCount      ?? 0,
+                fourthTuneUnlocked  ? 1 : 0,
+                heartsRemaining     ?? 0,
+                id
+            ]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+
+        console.log(`[PUT] Session updated: id=${id} | Mode: ${modeType} | Success: ${success}`);
+
+        res.json({ message: 'Session updated', id });
+
+    } catch (err) {
+        console.error('[PUT] game-session error:', err.message);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// ── DELETE /api/game-session/:id ──────────────────────────────────
+// Delete a session — triggered from result screen "don't save this run"
+app.delete('/api/game-session/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'Invalid session id' });
+    }
+
+    try {
+        const [result] = await db.execute(
+            'DELETE FROM game_sessions WHERE id = ?',
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+
+        console.log(`[DELETE] Session removed: id=${id}`);
+
+        res.json({ message: 'Session deleted', id });
+
+    } catch (err) {
+        console.error('[DELETE] game-session error:', err.message);
         res.status(500).json({ error: 'Database error' });
     }
 });

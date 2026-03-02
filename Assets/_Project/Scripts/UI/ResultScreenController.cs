@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-27
-* Version: v1.1
+* Version: v1.2
 *
 * AUTHORSHIP CLASSIFICATION:
 * [AI-ASSISTED]
@@ -31,11 +31,13 @@
 *     ├── ResultText       (TextMeshProUGUI — "VICTORY!" / "GAME OVER")
 *     ├── SubtitleText     (TextMeshProUGUI — session time, optional)
 *     ├── RetryButton      (Button)
-*     └── MainMenuButton   (Button)
+*     ├── MainMenuButton   (Button)
+*     └── DeleteRunButton  (Button — optional, calls DELETE /api/game-session/:id)
 *
 * VERSION HISTORY:
 * - v1.0: Initial — Win/Lose panel, Retry, Main Menu
 * - v1.1: Added _waitForEndingStory flag + public ShowWin() for EndingStoryController handoff
+* - v1.2: Added Delete Run button — calls ApiManager.DeleteSession() to remove last session
 ====================================================================
 */
 
@@ -44,6 +46,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using SnakeEnchanter.Core;
+using SnakeEnchanter.Data;
 
 namespace SnakeEnchanter.UI
 {
@@ -72,6 +75,9 @@ namespace SnakeEnchanter.UI
 
         [Tooltip("Main Menu button — loads the MainMenu scene.")]
         [SerializeField] private Button _mainMenuButton;
+
+        [Tooltip("Delete Run button — removes this session from the backend. Optional.")]
+        [SerializeField] private Button _deleteRunButton;
 
         [Header("Text Content")]
         [SerializeField] private string _winText    = "VICTORY!";
@@ -115,6 +121,9 @@ namespace SnakeEnchanter.UI
 
             if (_mainMenuButton != null)
                 _mainMenuButton.onClick.AddListener(OnMainMenuClicked);
+
+            if (_deleteRunButton != null)
+                _deleteRunButton.onClick.AddListener(OnDeleteRunClicked);
         }
         #endregion
 
@@ -190,6 +199,24 @@ namespace SnakeEnchanter.UI
         {
             GameEvents.ClearAllEvents();
             SceneManager.LoadScene(_mainMenuSceneName);
+        }
+
+        /// <summary>
+        /// Delete Run — sends DELETE /api/game-session/:id to remove this session.
+        /// Button is disabled after click to prevent double-delete.
+        /// </summary>
+        private void OnDeleteRunClicked()
+        {
+            if (ApiManager.Instance == null) return;
+
+            // Disable button immediately to prevent double-click
+            if (_deleteRunButton != null) _deleteRunButton.interactable = false;
+
+            ApiManager.Instance.DeleteSession(success =>
+            {
+                if (_deleteRunButton != null)
+                    _deleteRunButton.interactable = !success; // re-enable only if failed
+            });
         }
         #endregion
     }

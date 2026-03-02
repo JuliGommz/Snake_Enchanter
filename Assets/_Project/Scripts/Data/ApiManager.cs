@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-27
-* Version: 1.0
+* Version: 1.1
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -24,9 +24,12 @@
 * - Node.js backend running on localhost:3000
 *
 * USAGE:
-* ApiManager.Instance.PostSession(data);
+* ApiManager.Instance.PostSession(data);        // game start — creates pending session
+* ApiManager.Instance.PutSession(data);         // game end   — updates with final stats
+* ApiManager.Instance.DeleteSession(onComplete);// result screen — removes last session
 * ApiManager.Instance.GetLeaderboard("simple", OnResult);
 * ApiManager.Instance.GetPlayerStats(OnResult);
+* ApiManager.Instance.LastSessionDbId;          // DB id of the last POSTed session
 *
 * DESIGN:
 * Singleton — one instance per game session.
@@ -35,6 +38,7 @@
 *
 * VERSION HISTORY:
 * - v1.0: Initial implementation (POST session, GET leaderboard, GET stats)
+* - v1.1: Two-phase session lifecycle — POST on start, PUT on end, DELETE from result screen
 ====================================================================
 */
 
@@ -70,6 +74,17 @@ namespace SnakeEnchanter.Data
 
         #endregion
 
+        #region State
+
+        /// <summary>
+        /// DB id returned by the last successful POST.
+        /// Used by PutSession and DeleteSession to target the correct record.
+        /// -1 means no session has been posted yet this run.
+        /// </summary>
+        public int LastSessionDbId { get; private set; } = -1;
+
+        #endregion
+
         #region Config
 
         [Header("API Config")]
@@ -84,7 +99,7 @@ namespace SnakeEnchanter.Data
         #region Data Models
 
         /// <summary>
-        /// Session data sent to POST /api/game-session after each run.
+        /// Session data sent to POST (pending) and PUT (final stats).
         /// Field names match the backend JSON schema exactly.
         /// </summary>
         [Serializable]
@@ -107,18 +122,53 @@ namespace SnakeEnchanter.Data
             public int    heartsRemaining;
         }
 
+        // Internal: parse DB id from POST response
+        [Serializable]
+        private class PostResponse { public int id; }
+
         #endregion
 
         #region Public API
 
         /// <summary>
-        /// POST /api/game-session — sends session stats to backend.
-        /// Called after Win or Lose screen appears.
+        /// POST /api/game-session — creates a pending session at game start.
+        /// Stores the returned DB id in LastSessionDbId for PUT/DELETE.
         /// Fail-silent: if backend is unavailable, game continues normally.
         /// </summary>
         public void PostSession(SessionData data)
         {
             StartCoroutine(PostSessionCoroutine(data));
+        }
+
+        /// <summary>
+        /// PUT /api/game-session/{LastSessionDbId} — updates the pending session
+        /// with final stats at game end. Requires PostSession to have been called first.
+        /// Fail-silent: if backend is unavailable, game continues normally.
+        /// </summary>
+        public void PutSession(SessionData data)
+        {
+            if (LastSessionDbId < 0)
+            {
+                Debug.LogWarning("[ApiManager] PutSession called but no session id — POST may have failed.");
+                return;
+            }
+            StartCoroutine(PutSessionCoroutine(LastSessionDbId, data));
+        }
+
+        /// <summary>
+        /// DELETE /api/game-session/{LastSessionDbId} — deletes the last session.
+        /// Called from result screen "don't save this run".
+        /// onComplete(true) on success, onComplete(false) on failure or no id.
+        /// </summary>
+        public void DeleteSession(Action<bool> onComplete)
+        {
+            if (LastSessionDbId < 0)
+            {
+                Debug.LogWarning("[ApiManager] DeleteSession called but no session id — nothing to delete.");
+                onComplete?.Invoke(false);
+                return;
+            }
+            StartCoroutine(DeleteSessionCoroutine(LastSessionDbId, onComplete));
         }
 
         /// <summary>
@@ -146,10 +196,9 @@ namespace SnakeEnchanter.Data
 
         private IEnumerator PostSessionCoroutine(SessionData data)
         {
-            string json = JsonUtility.ToJson(data);
+            string json      = JsonUtility.ToJson(data);
             byte[] bodyBytes = Encoding.UTF8.GetBytes(json);
-
-            string url = $"{_baseUrl}/api/game-session";
+            string url       = $"{_baseUrl}/api/game-session";
 
             using UnityWebRequest request = new UnityWebRequest(url, "POST");
             request.uploadHandler   = new UploadHandlerRaw(bodyBytes);
@@ -161,12 +210,61 @@ namespace SnakeEnchanter.Data
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log($"[ApiManager] Session posted: {request.downloadHandler.text}");
+                // Capture returned DB id so PutSession / DeleteSession can target this record
+                var response = JsonUtility.FromJson<PostResponse>(request.downloadHandler.text);
+                LastSessionDbId = response.id;
+                Debug.Log($"[ApiManager] Session created: id={LastSessionDbId}");
             }
             else
             {
-                // Fail-silent: log but don't crash the game
                 Debug.LogWarning($"[ApiManager] POST failed: {request.error} — backend offline?");
+            }
+        }
+
+        private IEnumerator PutSessionCoroutine(int dbId, SessionData data)
+        {
+            string json      = JsonUtility.ToJson(data);
+            byte[] bodyBytes = Encoding.UTF8.GetBytes(json);
+            string url       = $"{_baseUrl}/api/game-session/{dbId}";
+
+            using UnityWebRequest request = new UnityWebRequest(url, "PUT");
+            request.uploadHandler   = new UploadHandlerRaw(bodyBytes);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.timeout = _timeoutSeconds;
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"[ApiManager] Session updated: id={dbId}");
+            }
+            else
+            {
+                Debug.LogWarning($"[ApiManager] PUT failed: {request.error} — backend offline?");
+            }
+        }
+
+        private IEnumerator DeleteSessionCoroutine(int dbId, Action<bool> onComplete)
+        {
+            string url = $"{_baseUrl}/api/game-session/{dbId}";
+
+            using UnityWebRequest request = UnityWebRequest.Delete(url);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.timeout = _timeoutSeconds;
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"[ApiManager] Session deleted: id={dbId}");
+                LastSessionDbId = -1;
+                onComplete?.Invoke(true);
+            }
+            else
+            {
+                Debug.LogWarning($"[ApiManager] DELETE failed: {request.error}");
+                onComplete?.Invoke(false);
             }
         }
 
