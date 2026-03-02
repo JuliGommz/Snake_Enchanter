@@ -30,6 +30,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using SnakeEnchanter.Core;
 
 namespace SnakeEnchanter.UI
 {
