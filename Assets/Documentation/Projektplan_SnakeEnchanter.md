@@ -17,8 +17,8 @@
 | GDD v2 + Making-of | 17.02 | 21.02.2026 | ✅ GDD v1.6 |
 | **Phase 3: Schön** | 21.02 | 27.02.2026 | ✅ Erledigt |
 | Fortschritts-Präsentation 2 | 24.02 | 24.02.2026 | ✅ Erledigt |
-| **Phase 4: Fertig** | 03.03 | laufend | 🔄 In Arbeit |
-| Finale Abgabe | 03.03.2026 | — | ⏳ |
+| **Phase 4: Fertig** | 03.03 | 03.03.2026 | ✅ Erledigt |
+| Finale Abgabe | 03.03.2026 | — | ⏳ Ausstehend |
 
 ---
 
@@ -57,7 +57,7 @@
 | 2.8 | Simple + Advanced Mode | ✅ Wählbar, differenzierte Schwierigkeit |
 | 2.9 | Tune 4 (Freeze) | ⚠️ Gestrichen — Shield als Ersatz implementiert |
 | 2.10 | Backend Setup + API | ✅ Node.js + MySQL (Phase 9) |
-| 2.11 | Session-Stats senden | ✅ ApiManager.cs v1.0 |
+| 2.11 | Session-Stats senden | ✅ ApiManager.cs v1.1 — POST + PUT + DELETE + 2× GET |
 
 **Done when:** Core Features Complete ✅
 **Completion Date:** 15.02.2026
@@ -93,10 +93,10 @@
 | 3.4 | Hintergrundmusik (MainMenu + Gameplay) | ✅ MusicManager v1.1 |
 | 3.5 | Visual Feedback — Story Fade In/Out | ✅ StoryIntro + EndingStory |
 | 3.6 | Health Bar Polish (Gradient, Puls) | ✅ HealthBarUI v3.1 |
-| 3.7 | Timing Meter Polish | ✅ TuneSliderUI v2.1 |
+| 3.7 | Timing Meter Polish | ✅ TuneSliderUI v2.2 |
 | 3.8 | Level Polish (Lighting, Props, Cave) | ✅ Caves Parts Set + Dwarven Pack |
 | 3.9 | Spell HUD (dynamisch, Cooldown, Range) | ✅ SpellHUDController v1.1 |
-| 3.10 | Active Effects Anzeige (MOVE/DAZE/SHIELD) | ✅ ActiveEffectsController v1.0 |
+| 3.10 | Active Effects Anzeige (MOVE/DAZE/SHIELD) | ✅ ActiveEffectsController v1.1 |
 | 3.11 | Story Intro + Ending (CanvasGroup Fade) | ✅ StoryIntroController v1.2 + EndingStoryController v1.1 |
 | 3.12 | Pirate Character + 10 Animationen | ✅ Humanoid Rig, Mixamo |
 
@@ -110,17 +110,18 @@
 
 | Nr | Aufgabe | Status |
 |----|---------|--------|
-| 4.1 | Bug Fixing | ✅ Laufend (Breath Attack, Shield, NavMesh) |
+| 4.1 | Bug Fixing | ✅ Breath Attack, Shield, NavMesh, Code Review (Phase 12) |
 | 4.2 | Balancing (HP, Timing, Drain) | ✅ Simple/Advanced kalibriert |
 | 4.3 | Test auf Schul-Laptops | ⏳ |
 | 4.4 | **Trailer produzieren** (1920×1080, MP4) | ⏳ |
-| 4.5 | GDD finalisieren (v1.6 → PDF) | 🔄 v1.6 vorhanden |
-| 4.6 | Final Build (Windows x64) | ⏳ |
-| 4.7 | ZIP-Abgabe packen | ⏳ |
-| 4.8 | Präsentation vorbereiten (15 min) | ⏳ |
-| 4.9 | Arbeitsprotokoll + Projektplan als PDF | ⏳ |
+| 4.5 | GDD finalisieren → PDF | ✅ GDD v1.8 fertig |
+| 4.6 | Final Build (Windows x64) | ✅ Builds/Snake_Enchanter.exe |
+| 4.7 | API — alle 4 HTTP-Methoden | ✅ GET + POST + PUT + DELETE implementiert |
+| 4.8 | Repo-Struktur nach Abgabevorgabe | 🔄 In Arbeit |
+| 4.9 | Arbeitsprotokoll + Projektplan als PDF | 🔄 In Arbeit |
+| 4.10 | Präsentation vorbereiten (15 min) | ⏳ |
 
-**Done when:** Alles abgabebereit
+**Done when:** Trailer + Präsentation abgeschlossen
 
 ---
 
@@ -130,9 +131,9 @@
 |----------|----------|------------|
 | Tune 3: Attack (Schlange greift Feind an) | → Shield (Spieler blockt nächsten Angriff) | Attack benötigt vollständiges Creature-System; Shield bietet mehr taktischen Mehrwert |
 | Tune 4: Freeze (Advanced) | Gestrichen | Überlappt funktional mit Daze; Shield ersetzt strategische Tiefe |
-| Spell Scroll Unlock-System im Level | `_unlockAllOnStart = true` (Debug-Modus) | Scrolls noch nicht in Cave platziert; Mechanik ist implementiert |
+| Spell Scroll Unlock-System im Level | `_unlockAllOnStart = false` — Code fertig, Pickup nicht platziert | Scrolls in Cave platzieren war nicht MVP-kritisch |
 | 3 Areas (Tutorial → Mitte → Finale) | 1 offenes Level | Zeitdruck; Kernmechanik funktioniert ohne strikte Zonen-Trennung |
-| API: GET + POST + DELETE + UPDATE | GET + POST implementiert | DELETE + UPDATE kein spielrelevanter Use-Case für Session-Stats |
+| API: GET + POST + PUT + DELETE | Alle 4 implementiert | Zwei-Phasen-Lifecycle: POST (Start) → PUT (Ende) → DELETE (Result Screen) |
 
 ---
 
