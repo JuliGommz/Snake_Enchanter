@@ -1,83 +1,90 @@
 # Abgabe-Export Anleitung
 
-Letzter Stand: 02.03.2026
+Letzter Stand: 03.03.2026
+
+## Repo-Struktur (entspricht Projektauftrag Seite 18)
+
+```
+Snake_Enchanter/                    ← Repo-Root = Abgabe-Verzeichnis
+├── Konzeption/
+│   └── GDD_v1.8_SnakeEnchanter.pdf        ✓ in git
+├── Arbeitsdateien/
+│   └── GME_Julian_Gomez/
+│       ├── Assets/                         ✓ Unity-Projekt (Scripts, Scenes, Art)
+│       ├── ProjectSettings/               ✓
+│       ├── Packages/                      ✓
+│       └── backend/                       ✓ Node.js REST API
+├── Anwendung/
+│   ├── ReadMe.txt                         ✓ in git
+│   ├── Snake_Enchanter.exe                ⏳ manuell einfügen (aus Builds/)
+│   ├── Snake_Enchanter_Data/              ⏳ manuell einfügen
+│   ├── UnityPlayer.dll                    ⏳ manuell einfügen
+│   ├── MonoBleedingEdge/                  ⏳ manuell einfügen
+│   └── D3D12/                             ⏳ manuell einfügen
+├── Trailer/
+│   └── SnakeEnchanter_Trailer.mp4         ⏳ noch aufnehmen
+├── Projektplan.pdf                        ✓ in git
+└── Arbeitsprotokoll_Julian_Gomez.pdf      ✓ in git
+```
+
+---
 
 ## Status-Übersicht
 
-| Schritt | Status | Notiz |
-|---------|--------|-------|
-| GDD v1.8 (PDF) | ⚠️ Ausstehend | .txt ist v1.8 — .docx öffnen, anpassen, PDF exportieren |
-| Projektplan (PDF) | ⚠️ Ausstehend | Projektplan_SnakeEnchanter.md → Word öffnen → PDF speichern |
-| Arbeitsprotokoll (PDF) | ⚠️ Ausstehend | Arbeitsprotokoll_Julian_Gomez.docx → Als PDF speichern |
-| Build | ✓ Fertig | Builds/ enthält Snake_Enchanter.exe + Data |
-| ReadMe.txt | ✓ Fertig | Liegt in Builds/ReadMe.txt |
-| Trailer | ❌ Fehlt | Muss noch aufgenommen/geschnitten werden (MP4, 1920x1080) |
-| Backend | ✓ Fertig | Alle 4 HTTP-Methoden implementiert (GET/POST/PUT/DELETE) |
+| Element | Status | Pfad im Repo |
+|---------|--------|--------------|
+| GDD v1.8 (PDF) | ✓ Fertig | `Konzeption/GDD_v1.8_SnakeEnchanter.pdf` |
+| Projektplan (PDF) | ✓ Fertig | `Projektplan.pdf` |
+| Arbeitsprotokoll (PDF) | ✓ Fertig | `Arbeitsprotokoll_Julian_Gomez.pdf` |
+| Unity-Projekt (Assets) | ✓ Fertig | `Arbeitsdateien/GME_Julian_Gomez/Assets/` |
+| Backend | ✓ Fertig | `Arbeitsdateien/GME_Julian_Gomez/backend/` |
+| ReadMe.txt | ✓ Fertig | `Anwendung/ReadMe.txt` |
+| Build (.exe + Data) | ⏳ Manuell | Aus `Builds/` in `Anwendung/` kopieren |
+| Trailer | ❌ Fehlt | `Trailer/SnakeEnchanter_Trailer.mp4` — noch aufnehmen |
 
 ---
 
-## Schritt-für-Schritt am Abgabetag
+## Ausstehende Schritte
 
-### 1. PDFs erstellen (manuell in Word / LibreOffice)
+### 1. Build-Dateien nach Anwendung/ kopieren
+```
+Builds/Snake_Enchanter.exe        → Anwendung/Snake_Enchanter.exe
+Builds/Snake_Enchanter_Data/      → Anwendung/Snake_Enchanter_Data/
+Builds/UnityPlayer.dll            → Anwendung/UnityPlayer.dll
+Builds/MonoBleedingEdge/          → Anwendung/MonoBleedingEdge/
+Builds/D3D12/                     → Anwendung/D3D12/
+```
+⚠️ Build-Binaries sind gitignored (zu groß) — müssen MANUELL kopiert werden.
 
-**GDD (v1.8):**
-- `Assets/Documentation/GDD/GDD_v1.7_SnakeEnchanter.docx` öffnen
-- Inhalt mit `GDD_v1.7_SnakeEnchanter.txt` (v1.8) abgleichen und aktualisieren
-- Als PDF speichern → `GDD_v1.8_SnakeEnchanter.pdf`
+### 2. Unity Hub neu konfigurieren
+Nach Repo-Umstrukturierung muss Unity Hub neu zeigen:
+- Projekt entfernen → Re-Add von: `Arbeitsdateien/GME_Julian_Gomez/`
+- Unity öffnet dann aus dem neuen Pfad (Assets/ ist dort)
 
-**Projektplan:**
-- `Assets/Documentation/Projektplan_SnakeEnchanter.md` in Word/LibreOffice öffnen
-- Als PDF speichern → `Projektplan.pdf`
-
-**Arbeitsprotokoll:**
-- `Assets/Documentation/Arbeitsprotokoll_Julian_Gomez.docx` öffnen
-- Als PDF speichern → `Arbeitsprotokoll_Julian_Gomez.pdf`
-
-### 2. Build prüfen
-- `Builds/Snake_Enchanter.exe` starten und Spielstart bestätigen
-- Build ist bereits vorhanden — ggf. neuen Build machen:
-  Unity → File → Build Settings → Windows → Build
-
-### 3. Trailer aufnehmen
-- MP4, mind. 1920x1080
+### 3. Trailer produzieren
+- MP4, mind. 1920×1080
 - Dateiname: `SnakeEnchanter_Trailer.mp4`
+- Ablegen in: `Trailer/`
+- Hinweis: `*.mp4` ist normalerweise gitignored → Exception für `Trailer/SnakeEnchanter_Trailer.mp4` ist bereits in `.gitignore`
 
-### 4. ZIP-Paket erstellen
-
-Ordnerstruktur des ZIP:
-
-```
-GruppenNr_Gomez/
-├── Konzeption/
-│   └── GDD_v1.8_SnakeEnchanter.pdf
-├── Arbeitsdateien/
-│   └── GME_Julian_Gomez/
-│       └── [Gesamtes Assets/ Verzeichnis]
-├── Anwendung/
-│   ├── Snake_Enchanter.exe
-│   ├── Snake_Enchanter_Data/
-│   ├── UnityPlayer.dll
-│   ├── MonoBleedingEdge/
-│   ├── D3D12/
-│   └── ReadMe.txt          ← liegt in Builds/ReadMe.txt
-├── Trailer/
-│   └── SnakeEnchanter_Trailer.mp4
-├── Projektplan.pdf
-└── Arbeitsprotokoll_Julian_Gomez.pdf
-```
-
-ZIP-Dateiname: `GruppenNr_Gomez.zip`
-→ GruppenNr durch tatsächliche Gruppennummer ersetzen!
+### 4. GDD auf Illustrationen prüfen
+- Projektauftrag fordert "vollständige, **illustrierte** Konzepte"
+- `GDD_v1.8_SnakeEnchanter.pdf` prüfen: enthält Bilder/Screenshots?
+- Falls nicht: Screenshots manuell ins DOCX einfügen → PDF neu exportieren
 
 ---
 
-### 5. Checkliste vor Abgabe
+## Checkliste vor Abgabe
 
-- [ ] GDD v1.8 als PDF vorhanden und illustriert
-- [ ] Projektplan als PDF vollständig ausgefüllt
-- [ ] Arbeitsprotokoll als PDF — alle Tage dokumentiert
-- [ ] Build startet fehlerfrei (Snake_Enchanter.exe testen)
-- [ ] ReadMe.txt mit Steuerung und Backend-Setup enthalten
-- [ ] Trailer vorhanden (MP4, mind. 1920x1080)
-- [ ] backend/START_SERVER.bat im Arbeitsdateien-Ordner enthalten
-- [ ] ZIP-Dateiname korrekt: `GruppenNr_Gomez.zip`
+- [x] GDD v1.8 als PDF vorhanden (`Konzeption/`)
+- [ ] GDD v1.8 illustriert (Screenshots/Bilder drin?)
+- [x] Projektplan als PDF (`Projektplan.pdf`)
+- [x] Arbeitsprotokoll als PDF (`Arbeitsprotokoll_Julian_Gomez.pdf`)
+- [x] Unity-Projekt in `Arbeitsdateien/GME_Julian_Gomez/`
+- [x] Backend in `Arbeitsdateien/GME_Julian_Gomez/backend/`
+- [x] ReadMe.txt in `Anwendung/`
+- [ ] Build-Dateien in `Anwendung/` (manuell kopieren)
+- [ ] Build startet fehlerfrei
+- [ ] Trailer `Trailer/SnakeEnchanter_Trailer.mp4` vorhanden
+- [x] Alle 4 HTTP-Methoden implementiert (GET/POST/PUT/DELETE)
+- [x] Git-Historie nachvollziehbar (Commits täglich)
