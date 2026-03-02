@@ -38,11 +38,13 @@ Das Spiel speichert Spielsessions automatisch in einer MySQL-Datenbank über ein
 
 ### Schritt 2: Spiel starten
 
+> **Hinweis:** Der Build (`Snake_Enchanter.exe`) ist nicht im Git-Repository enthalten (Dateigröße ~500 MB). Der Build wurde separat zur Verfügung gestellt und befindet sich im Ordner `Anwendung\`.
+
 ```
-Anwendung\Snake_Enchanter.exe
+Anwendung\Snake_Enchanter.exe  ← Doppelklick
 ```
 
-Doppelklick auf `Snake_Enchanter.exe` im Ordner `Anwendung\`. Kein Installer nötig. Das Spiel startet direkt im Hauptmenü.
+Kein Installer nötig. Das Spiel startet direkt im Hauptmenü.
 
 **Systemanforderungen:** Windows 10/11 (64-bit), DirectX 12-kompatible GPU, Tastatur + Maus, 1920×1080
 
