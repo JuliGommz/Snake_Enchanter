@@ -38,7 +38,7 @@ Das Spiel speichert Spielsessions automatisch in einer MySQL-Datenbank über ein
 
 ### Schritt 2: Spiel starten
 
-> **Hinweis:** Der Build (`Snake_Enchanter.exe`) ist nicht im Git-Repository enthalten (Dateigröße ~500 MB). Der Build wurde separat zur Verfügung gestellt und befindet sich im Ordner `Anwendung\`.
+> **Hinweis:** Der Build (`Snake_Enchanter.exe`) ist nicht im Git-Repository enthalten, da die Dateigröße (~500 MB) das GitHub-Limit überschreitet. Der Build wird auf Anfrage separat eingereicht (USB / Download-Link) und befindet sich dann im Ordner `Anwendung\`.
 
 ```
 Anwendung\Snake_Enchanter.exe  ← Doppelklick
