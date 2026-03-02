@@ -82,6 +82,25 @@ Plans:
 
 ---
 
+### Phase 13: Repo-Abgabe-Struktur
+**Goal**: Repo matches the PIP-3 submission layout exactly — Konzeption/, Arbeitsdateien/GME_Julian_Gomez/, Anwendung/, Trailer/, root PDFs
+**Depends on**: Phase 12 complete
+**Success Criteria** (what must be TRUE):
+  1. `Konzeption/GDD_v1.8_SnakeEnchanter.pdf` exists and is git-tracked
+  2. `Projektplan.pdf` exists at repo root and is git-tracked
+  3. `Arbeitsprotokoll_Julian_Gomez.pdf` exists at repo root and is git-tracked
+  4. `Arbeitsdateien/GME_Julian_Gomez/` exists with ASSETS_AT_ROOT.md pointer
+  5. `Anwendung/ReadMe.txt` exists (build binaries placed manually, gitignored)
+  6. `Trailer/` folder exists (MP4 added last)
+  7. Unity project at repo root is completely unaffected
+**Plans**: 2 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Konzeption/ + root PDFs (GDD, Projektplan, Arbeitsprotokoll)
+- [ ] 13-02-PLAN.md — Arbeitsdateien/ + Anwendung/ + Trailer/ + ABGABE_EXPORT update
+
+---
+
 ## Progress
 
 **Execution Order:** 7 → 8 → 9 → 10 → 11 | 12 (standalone, any time)
@@ -100,3 +119,4 @@ Plans:
 | 10. Backend API | v1.0 | - | Complete (outside GSD) | 2026-03-02 |
 | 11. Balancing & Build | v1.0 | - | Complete (outside GSD) | 2026-03-02 |
 | 12. Code Review Fixes | v1.0 | 2/2 | Complete | 2026-03-02 |
+| 13. Repo-Abgabe-Struktur | v1.0 | 0/2 | Pending | — |
