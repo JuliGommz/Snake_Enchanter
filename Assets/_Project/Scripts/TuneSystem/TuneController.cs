@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 3.2 - Audio section playback with fade in/out
+* Version: 3.3 - Fix K2: _unlockAllOnStart default set to false
 
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -51,6 +51,7 @@
 *          Shield activation + no-recast-while-active,
 *          TuneSuccessWithId only fires for snake-targeting tunes (1 and 2)
 * - v3.3: Charges system removed from MVP (deferred to GDD future features)
+* - v3.3: Fix K2 — _unlockAllOnStart default set to false (was debug=true, shipped by accident)
 ====================================================================
 */
 
@@ -120,8 +121,8 @@ namespace SnakeEnchanter.Tunes
         [SerializeField] private InputActionAsset _inputActions;
 
         [Header("Debug")]
-        [Tooltip("Unlock all tunes at start (skip scroll collection). Disable for release!")]
-        [SerializeField] private bool _unlockAllOnStart = true;
+        [Tooltip("DEBUG ONLY — set false in production. If true, bypasses scroll unlock system and unlocks all tunes at start.")]
+        [SerializeField] private bool _unlockAllOnStart = false;
         #endregion
 
         #region Private Fields
