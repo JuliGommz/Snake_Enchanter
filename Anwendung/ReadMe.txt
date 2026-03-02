@@ -33,14 +33,14 @@ Voraussetzungen:
 
 Backend starten:
   1. XAMPP Control Panel öffnen → MySQL starten
-  2. Doppelklick auf:  backend\START_SERVER.bat
+  2. Doppelklick auf:  Arbeitsdateien\GME_Julian_Gomez\backend\START_SERVER.bat
   3. Fenster offen lassen während das Spiel läuft
   4. Prüfen: http://localhost:3000/api/health → {"status":"ok"}
 
 Datenbankschema importieren (einmalig):
   1. phpMyAdmin öffnen: http://localhost/phpmyadmin
   2. Neue Datenbank erstellen: snake_enchanter
-  3. backend\schema.sql importieren
+  3. Arbeitsdateien\GME_Julian_Gomez\backend\schema.sql importieren
 
 API-Endpunkte (implementiert):
   POST   /api/game-session         – Session anlegen (Spielstart)
@@ -66,6 +66,7 @@ STEUERUNG
   Tune 3 – Shield: Taste 3 halten, in Triggerzone loslassen
                   → Schutzschild (8 Sek., blockt nächsten Angriff)
   Screens weiter: Beliebige Taste (Story-Intro, Ending Story)
+  Beenden:        Escape
 
 SPIELMODI
 ---------
