@@ -38,13 +38,19 @@ Das Spiel speichert Spielsessions automatisch in einer MySQL-Datenbank über ein
 
 ### Schritt 2: Spiel starten
 
-> **Hinweis:** Der Build (`Snake_Enchanter.exe`) ist nicht im Git-Repository enthalten, da die Dateigröße (~500 MB) das GitHub-Limit überschreitet. Der Build wird auf Anfrage separat eingereicht (USB / Download-Link) und befindet sich dann im Ordner `Anwendung\`.
+> **Hinweis:** Der Build (`Snake_Enchanter.exe`) ist nicht im Git-Repository enthalten, da die Dateigröße (~500 MB) das GitHub-Limit überschreitet. Der Build wird auf Anfrage separat eingereicht (USB / Download-Link).
 
+**Option A – Build wurde separat geliefert:**
 ```
 Anwendung\Snake_Enchanter.exe  ← Doppelklick
 ```
-
 Kein Installer nötig. Das Spiel startet direkt im Hauptmenü.
+
+**Option B – Selbst bauen (Unity erforderlich):**
+1. Unity Hub öffnen → Projekt hinzufügen: `Arbeitsdateien\GME_Julian_Gomez\`
+2. Unity 6000.0.62f1 öffnen (ggf. Version installieren)
+3. **File → Build Settings → Build** → Ziel: `Anwendung\Snake_Enchanter.exe`
+4. `Anwendung\Snake_Enchanter.exe` starten
 
 **Systemanforderungen:** Windows 10/11 (64-bit), DirectX 12-kompatible GPU, Tastatur + Maus, 1920×1080
 
