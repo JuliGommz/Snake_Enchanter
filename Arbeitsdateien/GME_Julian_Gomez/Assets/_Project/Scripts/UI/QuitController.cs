@@ -17,8 +17,8 @@
 *
 * USAGE:
 * Attach to any persistent GameObject in MainMenu AND GameLevel.
-* Escape key quits the application at any time.
-* In-Editor: Escape stops play mode instead of quitting.
+* Escape key quits the application (build) at any time.
+* In-Editor: Escape releases cursor lock only — Play Mode keeps running.
 *
 * DESIGN RATIONALE:
 * - Single responsibility: only handles application exit.
@@ -69,9 +69,7 @@ namespace SnakeEnchanter.UI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible   = true;
 
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
+#if !UNITY_EDITOR
             Application.Quit();
 #endif
         }
