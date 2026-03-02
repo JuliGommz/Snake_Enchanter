@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-18
-* Version: v1.1
+* Version: v1.2
 *
 * AUTHORSHIP CLASSIFICATION:
 * [AI-ASSISTED]
@@ -36,6 +36,7 @@
 * VERSION HISTORY:
 * - v1.0: Initial implementation — full shield lifecycle
 * - v1.1: Added ShieldText (TextMeshProUGUI) support — shown/hidden with shield state
+* - v1.2: M2 — replaced magic 0.15f with FlashDuration constant
 ====================================================================
 */
 
@@ -75,6 +76,9 @@ namespace SnakeEnchanter.Player
         #endregion
 
         #region Private Fields
+        // Duration of the absorb flash visual effect (seconds)
+        private const float FlashDuration = 0.15f;
+
         private bool _isShieldActive = false;
         private Coroutine _shieldTimerCoroutine = null;
         #endregion
@@ -219,7 +223,7 @@ namespace SnakeEnchanter.Player
             {
                 // Flash white to signal absorption
                 _borderGlowImage.color = _shieldAbsorbFlashColor;
-                yield return new WaitForSeconds(0.15f);
+                yield return new WaitForSeconds(FlashDuration);
 
                 // Hide glow after flash
                 _borderGlowImage.gameObject.SetActive(false);

@@ -657,14 +657,27 @@
 - **Blink Effect Fix:** Übergang von `Abs(Sin(timer*π))` auf `(Sin(Time.time*speed)+1)*0.5` — weichere Sinuskurve, kein akkumulierter Timer, Min-Alpha 0.2 damit Text immer lesbar bleibt
 - **Branch:** `feature/general-improvements` (Commits: a4974d8, 18b769e)
 
-### 02.03.2026 (Montag)
+### 02.03.2026 (Montag) - Session: Polish Phase 11 + Projektabschluss-Vorbereitung
 | Aufgabe | geplant | in Bearbeitung | erledigt |
 |---------|:-------:|:--------------:|:--------:|
-|  |  |  |  |
+| MusicManager v1.1: Unity Recorder Audio-Fix (OnAudioConfigurationChanged Debounce) | x | x | x |
+| StoryIntroController v1.2: CanvasGroup Fade In/Out, _inputReady Flag, _inputCooldown | x | x | x |
+| ActiveEffectsController v1.0: MOVE/DAZE Text-Anzeige via GameEvents.OnSnakeCharmed | x | x | x |
+| feature/general-improvements in main gemergt (--no-ff) | x | x | x |
+| STATE.md aktualisiert (Phase 11 DONE, Phase 12 next) | x | x | x |
+| Projektabgleich mit Projektauftrag_PIP-3 (Pflichtinhalte, Wahlinhalt, Besondere Anforderungen) | x | x | x |
+| Projektplan aktualisiert (Ist-Datum-Spalte, Scope-Änderungen, Risiken-Status) | x | x | x |
+| Arbeitsprotokoll vorbereitet (02.03 Eintrag, Zusammenfassung aktualisiert) | x | x | x |
 
 **Screenshot:** `Media/Screenshots/2026-03-02_.png`
 
 **Notizen:**
+- **MusicManager Recorder-Fix:** `OnAudioConfigurationChanged` wird mehrfach gefeuert wenn Unity Recorder startet/stoppt → Debounce-Flag `_audioRestartPending` verhindert Re-Entrancy. `WaitForSeconds(0.5f)` wartet bis alle Recorder-Events durchgelaufen sind bevor Musik neu startet
+- **StoryIntroController v1.2:** CanvasGroup-Fade (1.2s FadeIn, 0.6s FadeOut) wie EndingStoryController. `_inputReady`-Flag blockiert Input während Fade + 0.8s Cooldown — verhindert versehentliches Überspringen durch letzten Tastendruck aus der Vorscene
+- **ActiveEffectsController v1.0:** Subscribed auf `GameEvents.OnSnakeCharmed(int)`. Tune 1 → MoveText (3s), Tune 2 → DazeText (11s = 3s Entranced + 8s Dazed). Recast setzt Timer zurück (Stop + Start Coroutine). Shield bewusst NICHT hier — ShieldComponent managed ShieldText direkt
+- **Merge:** feature/general-improvements → main, Branch lokal + remote gelöscht (Commits: a4974d8, 18b769e, ef72c43, 7d7f56d)
+- **Projektabgleich Ergebnis:** Pflichtinhalte ✅, Wahlinhalt (Simple+Advanced) ✅, Backend GET+POST ✅. **KRITISCH OFFEN:** Trailer (20 Punkte Note 2), HTTP DELETE+UPDATE fehlt, Build fehlt, ZIP fehlt, PDF-Exporte fehlen
+- **Git:** ba4d6d6 (STATE.md Session-End), Working Tree Clean, Branch: main
 
 
 ---
@@ -689,5 +702,6 @@
 |-------|------|----------|
 | 1 - Spielbar | Kern-Loop funktioniert | ✅ Abgeschlossen (09.02.2026) |
 | 2 - Komplett | Alle Features | ✅ Abgeschlossen (15.02.2026) |
-| 3 - Schön | Polish & Juice | ✅ NavMesh, Audio, Spell System |
-| 4 - Fertig | Abgabe-Ready | 🔄 In Arbeit (Story, Doku, Build) |
+| v0.3 - Stability | NavMesh, Bug Fixes | ✅ Abgeschlossen (01.03.2026) |
+| 3 - Schön | Polish & Juice | ✅ Abgeschlossen (~01.03.2026) |
+| 4 - Fertig | Abgabe-Ready | 🔄 In Arbeit — Trailer, Build, ZIP offen |

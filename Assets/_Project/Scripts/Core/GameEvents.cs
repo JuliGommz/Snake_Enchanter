@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-03
-* Version: 1.2 - Added Phase 7 Spell System events
+* Version: 1.3 - C1: WHY comment added to invokers region
 *
 * AUTHORSHIP CLASSIFICATION:
 *
@@ -24,6 +24,7 @@
 * - v1.0: Initial event hub (health, tune, game state)
 * - v1.1: Added OnTuneSuccessWithId for per-snake tune targeting
 * - v1.2: Added Phase 7 spell system events (scroll, shield, cooldown, range)
+* - v1.3: C1 — added WHY comment to invokers region explaining null-safe pattern
 ====================================================================
 */
 
@@ -161,6 +162,11 @@ namespace SnakeEnchanter.Core
         #endregion
 
         #region Invokers
+        // WHY static invokers?
+        // Static methods centralize null-safe event invocation (?. operator guards against zero subscribers).
+        // Callers never need to check if an event has subscribers — just call the invoker.
+        // Example: GameEvents.HealthChanged(90) instead of OnHealthChanged?.Invoke(90) everywhere.
+
         // Health
         public static void HealthChanged(int newHealth) => OnHealthChanged?.Invoke(newHealth);
         public static void PlayerDamaged(int damage) => OnPlayerDamaged?.Invoke(damage);

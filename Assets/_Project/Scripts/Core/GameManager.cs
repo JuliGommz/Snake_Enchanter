@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.3 - Backend API integration (POST session on game end)
+* Version: 1.4 - Code quality: M1 magic number + D3 placeholder comment
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -44,6 +44,8 @@
 * - v1.1: Refactored to eliminate drain rate SerializeFields
 * - v1.1.1: Fixed namespace references + Unity 2023 API
 * - v1.2: Start() reads GameModePrefs (PlayerPrefs) from MainMenu
+* - v1.3: Backend API integration (POST session on game end)
+* - v1.4: M1 — replaced magic 33.3f with HeartsPerHealthUnit constant; D3 — fourthTuneUnlocked comment added
 ====================================================================
 */
 
@@ -118,6 +120,9 @@ namespace SnakeEnchanter.Core
         #endregion
 
         #region Private Fields
+        // 100 HP / 3 hearts = 33.3 HP per heart (GDD Section 4.1)
+        private const float HeartsPerHealthUnit = 33.3f;
+
         private GameState _currentState = GameState.MainMenu;
         private float _sessionStartTime;
         private float _sessionEndTime;
@@ -450,8 +455,9 @@ namespace SnakeEnchanter.Core
                 tooEarlyCount         = _tooEarlyCount,
                 tooLateCount          = _tooLateCount,
                 snakeBiteCount        = _snakeAttackCount,
-                fourthTuneUnlocked    = false,    // Phase 11: SpellUnlockSystem integration
-                heartsRemaining       = Mathf.RoundToInt(endingHp / 33.3f) // rough heart-equivalent
+                // PLACEHOLDER: Tune 4 (Freeze) was cut from scope. Field kept for potential post-submission expansion.
+                fourthTuneUnlocked    = false,
+                heartsRemaining       = Mathf.RoundToInt(endingHp / HeartsPerHealthUnit)
             };
 
             Data.ApiManager.Instance.PostSession(sessionData);

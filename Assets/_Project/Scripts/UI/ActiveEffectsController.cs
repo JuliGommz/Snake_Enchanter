@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-03-01
-* Version: v1.0
+* Version: v1.1
 *
 * AUTHORSHIP CLASSIFICATION:
 * [AI-ASSISTED]
@@ -34,6 +34,7 @@
 *
 * VERSION HISTORY:
 * - v1.0: Initial — Move + Daze text shown/hidden via OnSnakeCharmed
+* - v1.1: D4 — unused Coroutine parameter documented with comment
 ====================================================================
 */
 
@@ -135,7 +136,7 @@ namespace SnakeEnchanter.UI
         }
 
         /// <summary>Waits for the effect duration, then hides the label.</summary>
-        private IEnumerator HideAfterDuration(Coroutine _, TextMeshProUGUI label, float duration)
+        private IEnumerator HideAfterDuration(Coroutine _ /* unused, kept for call-site clarity */, TextMeshProUGUI label, float duration)
         {
             yield return new WaitForSeconds(duration);
             if (label != null)

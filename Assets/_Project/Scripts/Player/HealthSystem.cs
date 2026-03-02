@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-05
-* Version: 1.5 - Heal-on-charm: only heals when snake is actually charmed
+* Version: 1.6 - C2: WHY comment added to OnSnakeCharmedHealing
 *
 * ⚠️ WICHTIG: KOMMENTIERUNG NICHT LÖSCHEN! ⚠️
 * Diese detaillierte Authorship-Dokumentation ist für die akademische
@@ -45,6 +45,7 @@
 * - v1.5: Heal-on-charm: subscribes to OnSnakeCharmed instead of OnTuneSuccess.
 *          HP heals ONLY when a snake is actually charmed by Move or Daze.
 *          Shield casts and empty casts produce no healing.
+* - v1.6: C2 — WHY comment added to OnSnakeCharmedHealing
 ====================================================================
 */
 
@@ -255,6 +256,11 @@ namespace SnakeEnchanter.Player
             GameEvents.PlayerHealed(amount);
             GameEvents.HealthChanged(Mathf.RoundToInt(_currentHealth));
         }
+
+        // WHY heal on charm?
+        // GDD Section 4.2: Successful charm = player mastery reward. HP restoration incentivizes
+        // using spells offensively rather than defensively hoarding them. Healing only on Move/Daze
+        // (not Shield) keeps Shield as a pure defensive tool.
 
         /// <summary>
         /// Event handler for snake charmed events.

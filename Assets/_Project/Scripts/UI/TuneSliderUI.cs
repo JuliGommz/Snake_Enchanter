@@ -47,7 +47,7 @@
 * - v1.0: Initial - Unity Slider, solid fill, zone overlay
 * - v2.0: Segmented blocks, marker sprite, frame image, zone colors
 * - v2.1: Fix marker size apply, frame sprite Sliced, OnValidate live update, keep aspect ratio
-* - v2.2: Fix K1 — Tune 3 label corrected to "Shield", removed obsolete Tune 4 "Freeze" case
+* - v2.2: K1 fix + P2 — DestroyImmediate replaced with Destroy in BuildSegments()
 ====================================================================
 */
 
@@ -286,7 +286,7 @@ namespace SnakeEnchanter.UI
             // Clear any existing children
             for (int i = _segmentContainer.childCount - 1; i >= 0; i--)
             {
-                DestroyImmediate(_segmentContainer.GetChild(i).gameObject);
+                Destroy(_segmentContainer.GetChild(i).gameObject);
             }
 
             _segments = new Image[_segmentCount];
