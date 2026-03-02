@@ -148,21 +148,26 @@ CLAUDE.md
 *.unitypackage
 
 # ============================================
-# Documentation - Large Files
+# Documentation - see Arbeitsdateien/.gitignore
 # ============================================
-# Keep text-based docs, ignore large binaries
-Assets/Documentation/**/*.pdf
-Assets/Documentation/**/*.docx
-Assets/Documentation/**/*.doc
-Assets/Documentation/**/*.pptx
+# PDF/DOCX rules now live in Arbeitsdateien/GME_Julian_Gomez/.gitignore
 
-# Submission files - force-include despite rules above
-!Assets/Documentation/GDD/GDD_v1.8_SnakeEnchanter.pdf
-!Assets/Documentation/GDD/GDD_v1.8_SnakeEnchanter.docx
-!Assets/Documentation/Projektplan_SnakeEnchanter.pdf
-!Assets/Documentation/Projektplan_SnakeEnchanter.docx
-!Assets/Documentation/Arbeitsprotokoll_Julian_Gomez.pdf
-!Assets/Documentation/Arbeitsprotokoll_Julian_Gomez.docx
+# ============================================
+# Abgabe-Struktur root-level PDFs (tracked)
+# ============================================
+!Konzeption/GDD_v1.8_SnakeEnchanter.pdf
+!Projektplan.pdf
+!Arbeitsprotokoll_Julian_Gomez.pdf
+!Trailer/SnakeEnchanter_Trailer.mp4
+
+# ============================================
+# Old project root folders (moved to Arbeitsdateien/)
+# Physical copies remain locally for Unity — git ignores them here
+# ============================================
+/Assets/
+/ProjectSettings/
+/Packages/
+/backend/
 
 # ============================================
 # Optional: Uncomment if needed

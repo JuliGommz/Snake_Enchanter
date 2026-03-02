@@ -1,0 +1,18 @@
+# ============================================
+# Unity Project - Local .gitignore
+# (relative to Arbeitsdateien/GME_Julian_Gomez/)
+# ============================================
+
+# Documentation large files — keep text, ignore binaries
+Assets/Documentation/**/*.pdf
+Assets/Documentation/**/*.docx
+Assets/Documentation/**/*.doc
+Assets/Documentation/**/*.pptx
+
+# Submission PDFs (tracked — override above rules)
+!Assets/Documentation/GDD/GDD_v1.8_SnakeEnchanter.pdf
+!Assets/Documentation/GDD/GDD_v1.8_SnakeEnchanter.docx
+!Assets/Documentation/Projektplan_SnakeEnchanter.pdf
+!Assets/Documentation/Projektplan_SnakeEnchanter.docx
+!Assets/Documentation/Arbeitsprotokoll_Julian_Gomez.pdf
+!Assets/Documentation/Arbeitsprotokoll_Julian_Gomez.docx
