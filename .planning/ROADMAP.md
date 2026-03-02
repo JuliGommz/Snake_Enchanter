@@ -120,11 +120,26 @@ Plans:
 - [ ] 11-01-PLAN.md — Balancing pass: HP drain rates, timing windows, trigger zones tested in both modes and adjusted
 - [ ] 11-02-PLAN.md — Windows build + ZIP packaging + smoke test on school hardware
 
+### Phase 12: Code Review Fixes
+**Goal**: All critical bugs and code-quality issues from the expert review are resolved before academic submission
+**Depends on**: All code complete (standalone phase — independent of Phases 7-11)
+**Success Criteria** (what must be TRUE):
+  1. TuneSliderUI shows "Shield" (not "Attack") for Tune 3 — the wrong label is corrected
+  2. TuneController._unlockAllOnStart is false — scroll unlock system is not bypassed in production
+  3. No bare magic numbers 33.3f or 0.15f — named constants used instead
+  4. GameEvents.cs and HealthSystem.cs have WHY comments on key design decisions
+  5. TuneSliderUI.BuildSegments() uses Destroy() not DestroyImmediate() at runtime
+**Plans**: 2 plans
+
+Plans:
+- [x] 12-01-PLAN.md — Critical bugs: K1 (wrong tune label "Attack"→"Shield") + K2 (debug flag _unlockAllOnStart false)
+- [ ] 12-02-PLAN.md — Code quality: M1/M2 (magic number constants), D3/D4 (dead code comments), C1/C2 (WHY comments), P2 (Destroy fix)
+
 ---
 
 ## Progress
 
-**Execution Order:** 7 → 8 → 9 → 10 → 11
+**Execution Order:** 7 → 8 → 9 → 10 → 11 | 12 (standalone, any time)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -139,3 +154,4 @@ Plans:
 | 9. Menu & Win Screen | v1.0 | 0/2 | Not started | - |
 | 10. Backend API | v1.0 | 0/2 | Not started | - |
 | 11. Balancing & Build | v1.0 | 0/2 | Not started | - |
+| 12. Code Review Fixes | v1.0 | 1/2 | In progress | - |

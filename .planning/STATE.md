@@ -5,16 +5,16 @@
 See: `.planning/PROJECT.md` (updated 2026-02-24)
 
 **Core value:** Precise timing gameplay that feels rewarding when mastered and punishing when failed
-**Current focus:** Phase 7 — Cave Rebuild
+**Current focus:** Phase 12 — Code Review Fixes
 
 ## Current Position
 
-Phase: 7 of 11 (Cave Rebuild)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-02-24 — v1.0 roadmap created (Phases 7-11, 5 phases, 21 requirements mapped)
+Phase: 12 of 12 (Code Review Fixes)
+Plan: 1 of 1 complete
+Status: Phase 12 complete — ready for submission
+Last activity: 2026-03-02 — 12-01 executed: K1 (TuneSliderUI Shield label) + K2 (debug flag disabled)
 
-Progress: [##░░░░░░░░] 55% (6/11 phases complete — v0.3 done, v1.0 starting)
+Progress: [##########] 100% (12/12 phases complete — academic submission ready)
 
 ## Performance Metrics
 
@@ -26,6 +26,8 @@ Progress: [##░░░░░░░░] 55% (6/11 phases complete — v0.3 done, 
 
 ### Decisions
 
+- **K1 fixed (12-01)**: TuneSliderUI Tune 3 label corrected to "Shield"; Tune 4 "Freeze" case removed — UI now matches 3-tune design
+- **K2 fixed (12-01)**: TuneController._unlockAllOnStart = false; scroll unlock system no longer bypassed in production builds
 - **3 tunes (not 4)**: Move, Daze, Shield. Attack removed (needs creature system), Freeze removed (overlaps Daze)
 - **Cave rebuild from scratch**: Old layout too complex/broken, simplified for MVP
 - **Spell system code complete**: SpellScrollPickup, SpellUnlockSystem, SpellHUDController, ShieldComponent — committed. Only editor wiring needed.
@@ -42,11 +44,11 @@ Progress: [##░░░░░░░░] 55% (6/11 phases complete — v0.3 done, 
 
 ### Blockers/Concerns
 
-- 211 uncommitted changes on `feature/cave-rebuild` — commit or clean up before starting Phase 7 plan
+None — all production bugs resolved. Ready for academic submission.
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Roadmap created — Phase 7 ready to plan
+Last session: 2026-03-02
+Stopped at: Phase 12 Plan 01 complete — K1 + K2 production bugs fixed
 Resume file: None
-Git: `feature/cave-rebuild` branch (211 uncommitted changes)
+Git: `main` branch — commits 1a59327, 87b582d
