@@ -88,9 +88,6 @@ namespace SnakeEnchanter.UI
         [Tooltip("Total width of the slider area in pixels")]
         [SerializeField] private float _sliderWidth = 460f;
 
-        [Tooltip("Total height of the slider area in pixels")]
-        [SerializeField] private float _sliderHeight = 30f;
-
         [Tooltip("Number of visual segments")]
         [SerializeField, Range(10, 20)] private int _segmentCount = 15;
 
