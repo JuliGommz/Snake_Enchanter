@@ -1,5 +1,5 @@
 Snake Enchanter – Game Design Document
-Version: 1.7
+Version: 1.8
 Date: 02.03.2026
 Author: Julian Gomez
 Project: PIP-3 Theme B – Solo Game Development Project
@@ -309,7 +309,7 @@ Health Bar:
 • Pulse animation activates below 30% HP.
 • No numeric HP display (visual only).
 
-Tune Slider UI (TuneSliderUI v2.1):
+Tune Slider UI (TuneSliderUI v2.2):
 • Location: Center-bottom of screen, visible during tune cast only.
 • Visual: Segmented horizontal bar, moving marker.
 • Yellow = Safe (before zone). Orange = Trigger Zone (success). Gray = Danger (after zone).
@@ -319,9 +319,9 @@ Spell HUD (SpellHUDController v1.1):
 • Dynamic slot display per unlocked tune.
 • Shows cooldown overlay per slot.
 • Range indicator when no snake in range.
-• Debug: _unlockAllOnStart = true (all tunes visible from start; for release set to false).
+• _unlockAllOnStart = false (all tunes visible from start — debug unlock disabled for production).
 
-Active Effects Window (ActiveEffectsController v1.0):
+Active Effects Window (ActiveEffectsController v1.1):
 • Displays text labels for active effects in screen corner.
 • "MOVE": shows for 3 seconds after successful Move cast.
 • "DAZE": shows for 11 seconds (3s Entranced + 8s Dazed) after successful Daze cast.
@@ -385,14 +385,14 @@ Snake Types:
 7.3 Architecture & Scripts
 
 Core namespace: SnakeEnchanter.Core
-  GameManager.cs v1.3   — Game state, mode, intro/ending flags, StartGameFromIntro()
+  GameManager.cs v1.5   — Game state, mode, intro/ending flags, StartGameFromIntro(), two-phase API lifecycle
   GameEvents.cs          — Static event bus (OnSnakeCharmed, OnHealthChanged, etc.)
   GameState.cs           — Enum (MainMenu, Playing, Paused, Win, Lose)
 
 Player namespace: SnakeEnchanter.Player
   PlayerController.cs v1.9  — WASD + Mouse, Crouch, New Input System, Cinemachine-compatible
-  HealthSystem.cs v1.5       — Drain, Events, Death, TakeSnakeAttackDamage() (shield intercept)
-  ShieldComponent.cs v1.1    — 8s shield, absorbs next snake attack, ShieldText TMP
+  HealthSystem.cs v1.6       — Drain, Events, Death, TakeSnakeAttackDamage() (shield intercept)
+  ShieldComponent.cs v1.2    — 8s shield, absorbs next snake attack, ShieldText TMP
 
 Tunes namespace: SnakeEnchanter.Tunes
   TuneController.cs v3.3    — 3-tune array, slider logic, cooldown, range check, melody trigger
@@ -403,12 +403,12 @@ Snakes namespace: SnakeEnchanter.Snakes
 
 UI namespace: SnakeEnchanter.UI
   HealthBarUI.cs v3.1        — Gradient, pulse below 30%, CanvasGroup
-  TuneSliderUI.cs v2.1       — Segmented bar, moving marker, zone colors
+  TuneSliderUI.cs v2.2       — Segmented bar, moving marker, zone colors
   SpellHUDController.cs v1.1 — Dynamic slots, cooldown overlay, range indicator
-  ActiveEffectsController.cs v1.0 — MOVE/DAZE text timers via OnSnakeCharmed
+  ActiveEffectsController.cs v1.1 — MOVE/DAZE text timers via OnSnakeCharmed
   StoryIntroController.cs v1.2    — CanvasGroup fade, input cooldown, blink hint
   EndingStoryController.cs v1.1   — CanvasGroup fade, input cooldown
-  ResultScreenController.cs v1.1  — Waits for ending story dismiss on win
+  ResultScreenController.cs v1.2  — Waits for ending story dismiss on win; Delete Run button
   MainMenuController.cs           — Mode selection, scene loading
 
 Audio namespace:
@@ -416,7 +416,7 @@ Audio namespace:
     (OnAudioConfigurationChanged debounce: _audioRestartPending flag + 0.5s wait)
 
 Data namespace: SnakeEnchanter.Data
-  ApiManager.cs v1.0        — Unity → Backend REST API, fail-silent on error
+  ApiManager.cs v1.1        — Unity → Backend REST API, fail-silent on error; LastSessionDbId, PutSession, DeleteSession
   SessionData.cs             — Session stats struct
 
 7.4 Data & Backend Requirements
@@ -424,12 +424,15 @@ Data namespace: SnakeEnchanter.Data
 Backend: Node.js + Express + MySQL (localhost:3000)
 Deployment: START_SERVER.bat for teacher/evaluator setup.
 
-API Endpoints (IMPLEMENTED):
-  POST /api/game-session    — Store session stats after each run.
-  GET  /api/leaderboard?mode=simple/advanced — Top results per mode.
-  GET  /api/player-stats    — Aggregate stats for result screen display.
+API Endpoints (IMPLEMENTED — all 4 HTTP methods):
+  POST   /api/game-session         — Create pending session at game start.
+  PUT    /api/game-session/:id     — Update session with final stats at game end.
+  DELETE /api/game-session/:id     — Remove session from result screen ("don't save this run").
+  GET    /api/leaderboard?mode=simple/advanced — Top results per mode.
+  GET    /api/player-stats         — Aggregate stats for result screen display.
 
-  NOTE: HTTP DELETE and HTTP UPDATE endpoints are not implemented in v1.0.
+  Two-phase lifecycle: POST on game start (pending record) → PUT on game end (final stats).
+  PIP-3 Special Requirement fulfilled: GET + POST + PUT + DELETE all implemented over HTTP/JSON.
 
 Session Data per Run:
   sessionId, modeType, success, completionTime, startingHP, endingHP,
@@ -506,8 +509,8 @@ Status: No HP on too-early; must succeed to heal. Mitigation holds.
 Slider precision: RESOLVED — Time.deltaTime based slider, tested.
 NavMesh Patrol animation jump: RESOLVED — In Place clips, applyRootMotion=false, LateUpdate sync.
 Unity Recorder audio: RESOLVED — Debounce flag in MusicManager v1.1.
-HTTP DELETE/UPDATE: DEFERRED — Not in v1.0 scope.
-Spell Scroll in Scene: DEFERRED — _unlockAllOnStart=true bridges this.
+HTTP DELETE/UPDATE: RESOLVED — All 4 HTTP methods implemented (v1.8). See Section 7.4.
+Spell Scroll in Scene: DEFERRED — SpellUnlockSystem code complete; in-scene pickup not wired for MVP.
 
 ====================================================================
 
@@ -551,12 +554,12 @@ Theme B Requirements:
 ✓ Independent game with a clear core mechanic (slider-based tune control).
 ✓ Complete gameplay loop (Menu → Intro → Play → Story/Result → Retry/Menu).
 ✓ Clear win & lose conditions (window exit or HP ≤ 0).
-✓ Database-backed statistics (POST + 2× GET API, Node.js + MySQL backend).
+✓ Database-backed statistics (POST + PUT + DELETE + 2× GET, Node.js + MySQL backend — all 4 HTTP methods).
 ✓ Structured code & clean project organization (namespaces, SRP, ScriptableObjects).
 ✓ Elective Content fulfilled: 2 modes (Simple vs. Advanced, different drain + damage multipliers).
 
 Open Items for v1.0 Submission:
-○ HTTP DELETE + UPDATE endpoints (Special Requirements — currently missing).
+✓ HTTP DELETE + PUT (UPDATE) endpoints (Special Requirements — all 4 methods implemented).
 ○ Windows Build.
 ○ Game Trailer (Special Requirements — 20 points).
 ○ README for teacher/evaluator.
@@ -608,10 +611,21 @@ Version 1.7 (02.03.2026) — CURRENT:
 • ActiveEffectsController v1.0: MOVE/DAZE text via OnSnakeCharmed events.
 • Advanced Mode: drain ×2.17, Snake damage ×1.15.
 • Charges system: removed from TuneController (MVP scope reduction).
-• Backend: Node.js + Express + MySQL (POST + 2× GET implemented).
+• Backend: Node.js + Express + MySQL (POST + 2× GET implemented at this point — PUT + DELETE added in v1.8).
 • Animator: Spell_Attack→Spell_Shield, IsDead→IsDazed. 9 active states.
 • Level: single area MVP (3-area design deferred to future).
 • Player animations: Spell_Shield (was Spell_Attack), Spell_Fear removed.
+
+Version 1.8 (02.03.2026) — CURRENT:
+• API: All 4 HTTP methods implemented — POST (pending at game start), PUT (final stats at game end),
+  DELETE (result screen "don't save this run"), 2× GET (leaderboard + player-stats).
+• Two-phase session lifecycle: ApiManager.LastSessionDbId tracks DB id between POST and PUT/DELETE.
+• ResultScreenController v1.2: Delete Run button wired to ApiManager.DeleteSession().
+• Script version corrections: TuneSliderUI v2.2, GameManager v1.5, HealthSystem v1.6,
+  ShieldComponent v1.2, ActiveEffectsController v1.1, ApiManager v1.1.
+• Section 6.2: _unlockAllOnStart corrected to false (production state, K2 fix from Phase 12).
+• Section 9.2: Spell Scroll bridge note corrected — SpellUnlockSystem code complete, pickup deferred.
+• PIP-3 Special Requirement: Datenkommunikation über HTTP/JSON — all 4 methods fulfilled.
 
 ====================================================================
 
@@ -627,11 +641,11 @@ This section documents intentional deviations from the original design.
 | 3-Area level (Tutorial → Escalation → Finale) | Single area level | Time constraint; single area fully playable |
 | Advanced Mode: Scroll unlocks Tune 4 | Not implemented | Tune 4 removed from scope |
 | Trigger zones wider in Simple mode | Same zones both modes (v1.0) | Simplification; balancing via drain rate instead |
-| HTTP DELETE + UPDATE endpoints | Missing in v1.0 | Deferred; POST + 2x GET sufficient for session tracking |
+| HTTP DELETE + UPDATE endpoints | Implemented in v1.8 | POST (start) + PUT (end) + DELETE (result screen) + 2x GET |
 | Spell Charges (Advanced mode) | Removed (TuneController v3.3) | Added complexity without core gameplay value |
 | Dynamic collapse timer (Advanced) | Not implemented | Drain rate difference sufficient for difficulty |
 
 ====================================================================
 
 END OF DOCUMENT
-GDD v1.7 — Snake Enchanter — Julian Gomez — 02.03.2026
+GDD v1.8 — Snake Enchanter — Julian Gomez — 02.03.2026
