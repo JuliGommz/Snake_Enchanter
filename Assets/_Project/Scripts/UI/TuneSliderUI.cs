@@ -6,7 +6,7 @@
 * Course: PIP-3 Theme B - SRH Fachschulen
 * Developer: Julian Gomez
 * Date: 2026-02-06
-* Version: 2.1
+* Version: 2.2
 
 * WICHTIG: KOMMENTIERUNG NICHT LOSCHEN!
 * Diese detaillierte Authorship-Dokumentation ist fuer die akademische
@@ -47,6 +47,7 @@
 * - v1.0: Initial - Unity Slider, solid fill, zone overlay
 * - v2.0: Segmented blocks, marker sprite, frame image, zone colors
 * - v2.1: Fix marker size apply, frame sprite Sliced, OnValidate live update, keep aspect ratio
+* - v2.2: Fix K1 — Tune 3 label corrected to "Shield", removed obsolete Tune 4 "Freeze" case
 ====================================================================
 */
 
@@ -483,8 +484,7 @@ namespace SnakeEnchanter.UI
                 {
                     1 => "Move",
                     2 => "Daze",
-                    3 => "Attack",
-                    4 => "Freeze",
+                    3 => "Shield",
                     _ => $"Tune {tuneNumber}"
                 };
                 _tuneLabel.text = $"[{tuneNumber}] {tuneName}";
