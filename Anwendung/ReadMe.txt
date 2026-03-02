@@ -37,10 +37,8 @@ Backend starten:
   3. Fenster offen lassen während das Spiel läuft
   4. Prüfen: http://localhost:3000/api/health → {"status":"ok"}
 
-Datenbankschema importieren (einmalig):
-  1. phpMyAdmin öffnen: http://localhost/phpmyadmin
-  2. Neue Datenbank erstellen: snake_enchanter
-  3. Arbeitsdateien\GME_Julian_Gomez\backend\schema.sql importieren
+  Hinweis: Datenbank wird beim ersten Start automatisch angelegt.
+           Kein phpMyAdmin, kein manueller Import nötig.
 
 API-Endpunkte (implementiert):
   POST   /api/game-session         – Session anlegen (Spielstart)

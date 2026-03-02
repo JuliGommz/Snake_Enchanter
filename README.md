@@ -26,17 +26,13 @@ Das Spiel speichert Spielsessions automatisch in einer MySQL-Datenbank über ein
 - XAMPP: https://www.apachefriends.org (Apache + MySQL)
 - Node.js v18+: https://nodejs.org
 
-**Datenbank einrichten (einmalig):**
-1. XAMPP Control Panel öffnen → **MySQL starten**
-2. phpMyAdmin öffnen: http://localhost/phpmyadmin
-3. Neue Datenbank erstellen: `snake_enchanter`
-4. Importieren: `Arbeitsdateien\GME_Julian_Gomez\backend\schema.sql`
-
 **Backend starten (vor jedem Spielstart):**
-1. XAMPP Control Panel → **MySQL starten**
+1. XAMPP Control Panel öffnen → **MySQL starten**
 2. Doppelklick: `Arbeitsdateien\GME_Julian_Gomez\backend\START_SERVER.bat`
 3. Fenster offen lassen während das Spiel läuft
 4. Verbindung prüfen: http://localhost:3000/api/health → `{"status":"ok"}`
+
+> **Datenbank wird automatisch angelegt** — kein phpMyAdmin, kein manueller Import nötig.
 
 ---
 
