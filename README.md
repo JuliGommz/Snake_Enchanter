@@ -164,7 +164,8 @@ backend/
 ```
 Snake_Enchanter/                          ← Repo-Root (= Abgabe-Verzeichnis)
 ├── Konzeption/
-│   └── GDD_v1.8_SnakeEnchanter.pdf      ← Game Design Document
+│   ├── GDD_v1.8_SnakeEnchanter.pdf      ← Game Design Document
+│   └── praesi_Enchanter_Gomez.pdf       ← Präsentation
 ├── Arbeitsdateien/GME_Julian_Gomez/
 │   ├── Assets/_Project/                 ← Unity Scripts, Scenes, Art
 │   └── backend/                         ← Node.js REST API
