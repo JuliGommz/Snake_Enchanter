@@ -8,6 +8,12 @@
 
 ---
 
+## Trailer
+
+**Vimeo:** https://vimeo.com/1169985720
+
+---
+
 ## Kurzbeschreibung
 
 Snake Enchanter ist ein First-Person-Präzisionsspiel. Der Spieler ist ein verwundeter Krieger in einer verfallenen Ruine und muss den einzigen Ausweg – ein Fenster am Ende des Levels – erreichen. Da er zu geschwächt zum Kämpfen ist, nutzt er magische Melodien, um Schlangen zu kommandieren.
@@ -166,7 +172,8 @@ Snake_Enchanter/                          ← Repo-Root (= Abgabe-Verzeichnis)
 │   ├── Snake_Enchanter.exe              ← Spielstart hier
 │   └── ReadMe.txt                       ← Spieler-Manual
 ├── Trailer/
-│   └── SnakeEnchanter_Trailer.mp4
+│   ├── TRAILER.md                       ← Vimeo-Link (https://vimeo.com/1169985720)
+│   └── SnakeEnchanter_Trailer.mp4       ← lokal, nicht im Repo (Dateigröße)
 ├── Projektplan.pdf
 └── Arbeitsprotokoll_Julian_Gomez.pdf
 ```
